@@ -4,8 +4,9 @@
   # Publish directory - Netlify will serve files from here
   publish = "."
   
-  # No build command needed - this is a static site
-  # No npm install needed - dependencies are only for local development checks
+  # Skip npm install - this is a static site with no build step
+  # Dependencies in package.json are only for local development checks
+  command = "echo 'Static site - no build required'"
 
 # Redirect rules
 # No SPA redirects needed - we use actual HTML pages
