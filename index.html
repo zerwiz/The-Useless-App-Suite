@@ -15,6 +15,28 @@
         body {
             animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .app-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .app-grid > * {
+            flex: 0 0 calc(33.333% - 1.5rem);
+            max-width: 320px;
+        }
+        @media (max-width: 1023px) {
+            .app-grid > * {
+                flex: 0 0 calc(50% - 1rem);
+            }
+        }
+        @media (max-width: 640px) {
+            .app-grid > * {
+                flex: 0 0 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -33,36 +55,36 @@
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-20">
-                <a href="frontend/progress.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline">
+            <div class="app-grid mb-20">
+                <a href="frontend/progress.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-blue-500/10 text-blue-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-12 group-hover:scale-110 transition-all duration-300">⌛</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Progress Sim</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">Master patience with infinite 99% loops and fake breakthroughs.</p>
                     <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/currency.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline">
+                <a href="frontend/currency.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-indigo-500/10 text-indigo-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:-rotate-12 group-hover:scale-110 transition-all duration-300">🌯</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Useless Cash</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">Convert savings into digital burritos and rubber ducks.</p>
                     <span class="text-indigo-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/hold.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline">
+                <a href="frontend/hold.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-rose-500/10 text-rose-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:scale-125 transition-all duration-300">🔘</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Hold On</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">Compete globally for the record of holding a blue button.</p>
                     <span class="text-rose-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/weather.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline">
+                <a href="frontend/weather.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-slate-500/10 text-slate-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">🌫️</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Nihilist Weather</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">Quantifying the void with terminal-style existential forecasts.</p>
                     <span class="text-slate-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/clock.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline">
+                <a href="frontend/clock.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-amber-500/10 text-amber-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-180 group-hover:scale-110 transition-all duration-300">🕐</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Manual Clock</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">A clock that doesn't sync with time. Drag the hands yourself.</p>

@@ -9,9 +9,11 @@
     <link rel="stylesheet" href="shared.css">
     <style>
         body {
+            display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            flex-direction: column;
         }
         .simulator-card {
             background: rgba(30, 41, 59, 0.7);
@@ -49,7 +51,7 @@
     <div class="bg-glow"></div>
     <a href="../index.html" class="back-btn">← Back to Hub</a>
 
-    <div class="simulator-card">
+    <div class="simulator-card mx-auto">
         <h1 class="text-2xl font-bold mb-2 font-['Space_Grotesk']" id="prog-title">System Optimization</h1>
         <span id="prog-status" class="text-slate-400 text-sm mb-10 block h-5 italic">Checking integrity...</span>
         <div class="bg-slate-900/50 h-4 w-full rounded-full overflow-hidden mb-6 border border-white/5">

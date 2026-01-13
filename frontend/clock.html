@@ -9,9 +9,11 @@
     <link rel="stylesheet" href="shared.css">
     <style>
         body {
+            display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            flex-direction: column;
         }
         .clock-container {
             position: relative;
@@ -109,7 +111,7 @@
     <div class="bg-glow"></div>
     <a href="../index.html" class="back-btn">← Back to Hub</a>
 
-    <div class="clock-card">
+    <div class="clock-card mx-auto">
         <h1 class="text-3xl font-bold mb-2 font-['Space_Grotesk']">Manual Clock</h1>
         <p class="text-slate-400 text-sm mb-8">Drag the hands to set the time. It never moves on its own.</p>
         
