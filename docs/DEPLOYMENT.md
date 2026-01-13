@@ -7,7 +7,7 @@ The Useless App Suite is configured for easy deployment on Netlify.
 ### Prerequisites
 
 1. A Netlify account (free tier works)
-2. A Git repository: [https://github.com/zerwiz/Random-Currency-Converter](https://github.com/zerwiz/Random-Currency-Converter)
+2. A Git repository: [https://github.com/zerwiz/The-Useless-App-Suite](https://github.com/zerwiz/The-Useless-App-Suite)
 3. Firebase project (for Hold On leaderboard functionality)
 
 ### Deployment Steps

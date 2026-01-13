@@ -2,7 +2,7 @@
 
 This directory contains all project documentation for The Useless App Suite.
 
-**Repository:** [https://github.com/zerwiz/Random-Currency-Converter](https://github.com/zerwiz/Random-Currency-Converter)
+**Repository:** [https://github.com/zerwiz/The-Useless-App-Suite](https://github.com/zerwiz/The-Useless-App-Suite)
 
 ## Documentation Files
 

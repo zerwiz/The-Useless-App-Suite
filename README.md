@@ -2,7 +2,7 @@
 
 A curated collection of digital artifacts designed to do absolutely nothing useful.
 
-**Repository:** [https://github.com/zerwiz/Random-Currency-Converter](https://github.com/zerwiz/Random-Currency-Converter)
+**Repository:** [https://github.com/zerwiz/The-Useless-App-Suite](https://github.com/zerwiz/The-Useless-App-Suite)
 
 ## Overview
 
@@ -104,7 +104,7 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 ## Repository
 
 The source code for this project is available on GitHub:
-- **GitHub:** [https://github.com/zerwiz/Random-Currency-Converter](https://github.com/zerwiz/Random-Currency-Converter)
+- **GitHub:** [https://github.com/zerwiz/The-Useless-App-Suite](https://github.com/zerwiz/The-Useless-App-Suite)
 
 ## License
 
