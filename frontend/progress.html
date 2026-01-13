@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Progress Sim - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .simulator-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+            animation: shine 2s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="simulator-card">
+        <h1 class="text-2xl font-bold mb-2 font-['Space_Grotesk']" id="prog-title">System Optimization</h1>
+        <span id="prog-status" class="text-slate-400 text-sm mb-10 block h-5 italic">Checking integrity...</span>
+        <div class="bg-slate-900/50 h-4 w-full rounded-full overflow-hidden mb-6 border border-white/5">
+            <div id="prog-fill" class="progress-fill"></div>
+        </div>
+        <div class="text-blue-400 font-extrabold text-4xl mb-8 font-mono tracking-tighter"><span id="prog-percent">0</span>%</div>
+        <div class="flex gap-4 justify-center">
+            <button class="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 px-6 py-2.5 rounded-xl text-sm font-bold transition-all" onclick="toggleProgPause()" id="prog-pause-btn">Pause</button>
+            <button class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-2.5 rounded-xl text-sm font-bold transition-all" onclick="resetProgSim()">Reset</button>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const progFill = document.getElementById('prog-fill');
+        const progPercent = document.getElementById('prog-percent');
+        const progStatus = document.getElementById('prog-status');
+        const progPauseBtn = document.getElementById('prog-pause-btn');
+        const progTitle = document.getElementById('prog-title');
+
+        let progressValue = 0;
+        let isProgPaused = false;
+        let progWaiting = false;
+        let inExcitementPhase = false;
+
+        const progMessages = [
+            "Reticulating splines...", "Optimizing latency loops...", "Injecting artificial lag...",
+            "Consulting the oracle...", "Polishing empty space...", "Feeding the server cats...",
+            "Ignoring common sense...", "Stalling for effect...", "Pre-calculating the reveal..."
+        ];
+
+        const excitementMessages = [
+            "Syncing with the void...", "PREPARING GRAND REVEAL...", "DE-CRYSTALLIZING AWESOMENESS...",
+            "UNLEASHING THE UNKNOWN...", "CALIBRATING EUPHORIA...", "FINALIZING THE MIRACLE...",
+            "ALMOST BEHOLDING...", "INITIATING THE IMPOSSIBLE..."
+        ];
+
+        window.toggleProgPause = () => {
+            isProgPaused = !isProgPaused;
+            progPauseBtn.textContent = isProgPaused ? 'Resume' : 'Pause';
+            if (!isProgPaused) runProgStep();
+        };
+
+        window.resetProgSim = () => {
+            progressValue = 0;
+            progWaiting = false;
+            inExcitementPhase = false;
+            isProgPaused = false;
+            progPauseBtn.textContent = 'Pause';
+            progTitle.textContent = "System Optimization";
+            progTitle.classList.remove('text-pink-500', 'animate-pulse');
+            Storage.remove('progress');
+            updateProgUI();
+            runProgStep();
+        };
+
+        function updateProgUI() {
+            if (!progFill) return;
+            progFill.style.width = `${progressValue}%`;
+            progPercent.textContent = inExcitementPhase ? progressValue.toFixed(3) : Math.floor(progressValue);
+            Storage.set('progress', {
+                value: progressValue,
+                inExcitementPhase: inExcitementPhase,
+                timestamp: Date.now()
+            });
+        }
+
+        function loadProgressState() {
+            const saved = Storage.get('progress');
+            if (saved && saved.value !== undefined) {
+                const age = Date.now() - (saved.timestamp || 0);
+                if (age < 3600000) {
+                    progressValue = saved.value;
+                    inExcitementPhase = saved.inExcitementPhase || false;
+                    if (inExcitementPhase && progTitle) {
+                        progTitle.textContent = "CRITICAL BREAKTHROUGH";
+                        progTitle.classList.add('text-pink-500', 'animate-pulse');
+                    }
+                    updateProgUI();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function runProgStep() {
+            if (isProgPaused || progWaiting) return;
+
+            if (!inExcitementPhase) {
+                let inc = Math.random() * 1.5;
+                if (progressValue > 80) inc *= 0.3;
+                if (progressValue > 95) inc *= 0.1;
+                progressValue += inc;
+
+                if (progressValue >= 99) {
+                    progressValue = 99;
+                    inExcitementPhase = true;
+                    progTitle.textContent = "CRITICAL BREAKTHROUGH";
+                    progTitle.classList.add('text-pink-500', 'animate-pulse');
+                    updateProgUI();
+                    triggerExcitementPhase();
+                    return;
+                }
+            }
+
+            if (!inExcitementPhase) {
+                updateProgUI();
+                if (Math.random() > 0.96) {
+                    progStatus.textContent = progMessages[Math.floor(Math.random() * progMessages.length)];
+                }
+                setTimeout(runProgStep, 40 + Math.random() * 150);
+            }
+        }
+
+        function triggerExcitementPhase() {
+            if (isProgPaused || progWaiting) return;
+
+            progressValue += 0.001 + (Math.random() * 0.005);
+            updateProgUI();
+
+            if (Math.random() > 0.92) {
+                progStatus.textContent = excitementMessages[Math.floor(Math.random() * excitementMessages.length)];
+            }
+
+            if (progressValue >= 99.99) {
+                progStatus.textContent = "VOID SYNC ERROR: TOO MUCH AWESOMENESS DETECTED.";
+                progTitle.textContent = "REBOOTING REALITY";
+                progWaiting = true;
+                setTimeout(() => { resetProgSim(); }, 3000);
+            } else {
+                setTimeout(triggerExcitementPhase, 50 + Math.random() * 200);
+            }
+        }
+
+        // Initialize
+        if (!loadProgressState()) {
+            resetProgSim();
+        } else {
+            if (!isProgPaused) {
+                runProgStep();
+            }
+        }
+    </script>
+</body>
+</html>

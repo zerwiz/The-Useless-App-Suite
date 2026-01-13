@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Useless Cash - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .glass-card-currency {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="glass-card-currency p-10">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-2 font-['Space_Grotesk']">Random Currency</h1>
+            <p class="text-gray-500 text-sm font-medium">Modern financial tracking for weirdos.</p>
+        </header>
+        <div class="space-y-8">
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Amount in USD ($)</label>
+                <div class="relative">
+                    <span class="absolute left-5 top-1/2 -translate-y-1/2 text-indigo-500 text-xl font-bold">$</span>
+                    <input type="number" id="usd-input" value="20" class="w-full pl-10 pr-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-bold text-gray-800 outline-none focus:border-indigo-500 transition-all">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Target Asset</label>
+                <select id="currency-select" class="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-gray-800 font-bold cursor-pointer appearance-none transition-all hover:bg-gray-100">
+                    <option value="burritos">🌯 Burritos ($13.50/ea)</option>
+                    <option value="paperclips">📎 Paperclips ($0.004/ea)</option>
+                    <option value="pizza">🍕 Pizza Slices ($4.00/ea)</option>
+                    <option value="lattes">☕ Fancy Lattes ($6.50/ea)</option>
+                    <option value="rubber_ducks">🦆 Rubber Ducks ($1.50/ea)</option>
+                    <option value="bananas">🍌 Bananas ($0.30/ea)</option>
+                    <option value="tacos">🌮 Crunchy Tacos ($1.90/ea)</option>
+                    <option value="magic_8">🎱 Magic 8-Balls ($8.00/ea)</option>
+                    <option value="skins">🎮 Rare Game Skins ($15.00/ea)</option>
+                    <option value="cloud_storage">☁️ GB Cloud Space ($0.10/ea)</option>
+                </select>
+            </div>
+            <div id="curr-result-container" class="bg-indigo-50/50 rounded-3xl p-8 text-center border-2 border-indigo-100 transition-all duration-500">
+                <div id="curr-icon" class="text-6xl mb-4 drop-shadow-lg">🌯</div>
+                <div id="curr-value" class="text-5xl font-black text-indigo-600 mb-2 tracking-tight">1.48</div>
+                <div id="curr-label" class="text-indigo-400 font-black uppercase tracking-[0.2em] text-[10px]">Net Asset Valuation</div>
+            </div>
+            <div class="p-5 rounded-2xl bg-gray-50 border border-gray-100 italic text-gray-500 text-xs text-center min-h-[70px] flex items-center justify-center leading-relaxed" id="curr-fact">
+                "A solid cylinder of happiness."
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const usdInput = document.getElementById('usd-input');
+        const currencySelect = document.getElementById('currency-select');
+        const currValue = document.getElementById('curr-value');
+        const currLabel = document.getElementById('curr-label');
+        const currIcon = document.getElementById('curr-icon');
+        const currFact = document.getElementById('curr-fact');
+
+        const rates = {
+            burritos: { price: 13.5, label: 'Standard Burritos', icon: '🌯', facts: ["The gold standard of edible cylinders.", "Highly volatile depending on salsa."] },
+            paperclips: { price: 0.004, label: 'Precision Clips', icon: '📎', facts: ["The secret currency of administrative hell.", "Strongest in low-paper environments."] },
+            pizza: { price: 4.0, label: 'Triangular Units', icon: '🍕', facts: ["Optimized for coding performance.", "Crust value varies by locale."] },
+            lattes: { price: 6.5, label: 'Caffeinated Liquidity', icon: '☕', facts: ["A sophisticated way to burn capital.", "Steam pressure affects valuation."] },
+            rubber_ducks: { price: 1.5, label: 'Debugging Totems', icon: '🦆', facts: ["The silent auditors of broken logic.", "Floating assets only."] },
+            bananas: { price: 0.3, label: 'Potassium Bonds', icon: '🍌', facts: ["Nature's unit of scale.", "B-appeal rating: Triple A."] },
+            tacos: { price: 1.9, label: 'Tuesday Futures', icon: '🌮', facts: ["Crunchy shells signify market risk.", "Watch for lettuce spills."] },
+            magic_8: { price: 8.0, label: 'Predictive Orbs', icon: '🎱', facts: ["Better returns than most ETFs.", "Shake for dividends."] },
+            skins: { price: 15.0, label: 'Digital Swag', icon: '🎮', facts: ["Purely cosmetic. Purely essential.", "Rare pixels, rare gains."] },
+            cloud_storage: { price: 0.1, label: 'Virtual Voids', icon: '☁️', facts: ["Invisible buckets for invisible data.", "Safe in the sky."] }
+        };
+
+        function updateConversion() {
+            if (!usdInput || !currencySelect) return;
+            const amount = parseFloat(usdInput.value) || 0;
+            const item = rates[currencySelect.value];
+            const result = amount / item.price;
+            currValue.innerText = result.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            currLabel.innerText = item.label;
+            currIcon.innerText = item.icon;
+            currFact.innerText = `"${item.facts[Math.floor(Math.random() * item.facts.length)]}"`;
+            
+            Storage.set('currency', {
+                amount: amount,
+                currency: currencySelect.value
+            });
+            
+            const container = document.getElementById('curr-result-container');
+            container.classList.remove('scale-105');
+            void container.offsetWidth;
+            container.classList.add('scale-105');
+            setTimeout(() => container.classList.remove('scale-105'), 300);
+        }
+
+        function loadCurrencyState() {
+            const saved = Storage.get('currency');
+            if (saved) {
+                if (usdInput && saved.amount !== undefined) {
+                    usdInput.value = saved.amount;
+                }
+                if (currencySelect && saved.currency) {
+                    currencySelect.value = saved.currency;
+                }
+            }
+        }
+
+        if (usdInput) usdInput.oninput = updateConversion;
+        if (currencySelect) currencySelect.onchange = updateConversion;
+        loadCurrencyState();
+        updateConversion();
+    </script>
+</body>
+</html>

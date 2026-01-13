@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manual Clock - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .clock-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 2rem auto;
+        }
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .clock-number {
+            position: absolute;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            transform: translate(-50%, -50%);
+        }
+        .clock-hand {
+            position: absolute;
+            transform-origin: bottom center;
+            cursor: grab;
+            transition: transform 0.1s ease;
+        }
+        .clock-hand:active {
+            cursor: grabbing;
+        }
+        .hour-hand {
+            width: 6px;
+            height: 120px;
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+            border-radius: 3px 3px 0 0;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            z-index: 2;
+        }
+        .minute-hand {
+            width: 4px;
+            height: 160px;
+            background: linear-gradient(to top, #a78bfa, #c4b5fd);
+            border-radius: 2px 2px 0 0;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+            z-index: 3;
+        }
+        .clock-center {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        .clock-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .time-display {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-top: 2rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .instruction {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="clock-card">
+        <h1 class="text-3xl font-bold mb-2 font-['Space_Grotesk']">Manual Clock</h1>
+        <p class="text-slate-400 text-sm mb-8">Drag the hands to set the time. It never moves on its own.</p>
+        
+        <div class="clock-container">
+            <div class="clock-face" id="clockFace">
+                <!-- Clock numbers -->
+                <div class="clock-number" style="top: 5%; left: 50%;">12</div>
+                <div class="clock-number" style="top: 50%; right: 5%;">3</div>
+                <div class="clock-number" style="bottom: 5%; left: 50%;">6</div>
+                <div class="clock-number" style="top: 50%; left: 5%;">9</div>
+                
+                <!-- Hour markers -->
+                <div style="position: absolute; top: 2%; left: 50%; width: 2px; height: 15px; background: rgba(255,255,255,0.3); transform: translateX(-50%);"></div>
+                <div style="position: absolute; top: 50%; right: 2%; width: 15px; height: 2px; background: rgba(255,255,255,0.3); transform: translateY(-50%);"></div>
+                <div style="position: absolute; bottom: 2%; left: 50%; width: 2px; height: 15px; background: rgba(255,255,255,0.3); transform: translateX(-50%);"></div>
+                <div style="position: absolute; top: 50%; left: 2%; width: 15px; height: 2px; background: rgba(255,255,255,0.3); transform: translateY(-50%);"></div>
+                
+                <!-- Hour hand -->
+                <div class="clock-hand hour-hand" id="hourHand"></div>
+                
+                <!-- Minute hand -->
+                <div class="clock-hand minute-hand" id="minuteHand"></div>
+                
+                <!-- Center dot -->
+                <div class="clock-center"></div>
+            </div>
+        </div>
+        
+        <div class="time-display" id="timeDisplay">12:00</div>
+        <p class="instruction">Drag the hands to adjust the time manually</p>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const clockFace = document.getElementById('clockFace');
+        const hourHand = document.getElementById('hourHand');
+        const minuteHand = document.getElementById('minuteHand');
+        const timeDisplay = document.getElementById('timeDisplay');
+
+        let hourAngle = 0;
+        let minuteAngle = 0;
+        let isDraggingHour = false;
+        let isDraggingMinute = false;
+
+        // Load saved time
+        function loadClockState() {
+            const saved = Storage.get('clockTime');
+            if (saved) {
+                hourAngle = saved.hourAngle || 0;
+                minuteAngle = saved.minuteAngle || 0;
+                updateClock();
+            }
+        }
+
+        // Save time
+        function saveClockState() {
+            Storage.set('clockTime', {
+                hourAngle: hourAngle,
+                minuteAngle: minuteAngle,
+                timestamp: Date.now()
+            });
+        }
+
+        // Calculate angle from center point
+        function getAngleFromCenter(event, element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+            
+            const dx = clientX - centerX;
+            const dy = clientY - centerY;
+            
+            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            angle = (angle + 90 + 360) % 360; // Adjust so 0° is at top
+            return angle;
+        }
+
+        // Update clock display
+        function updateClock() {
+            hourHand.style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+            minuteHand.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            
+            // Calculate time display
+            const hours = Math.floor((hourAngle / 360) * 12) % 12 || 12;
+            const minutes = Math.floor((minuteAngle / 360) * 60);
+            timeDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            
+            saveClockState();
+        }
+
+        // Hour hand drag
+        hourHand.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDraggingHour = true;
+        });
+
+        minuteHand.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDraggingMinute = true;
+        });
+
+        // Touch events
+        hourHand.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDraggingHour = true;
+        });
+
+        minuteHand.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isDraggingMinute = true;
+        });
+
+        // Mouse move
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingHour) {
+                hourAngle = getAngleFromCenter(e, clockFace);
+                updateClock();
+            } else if (isDraggingMinute) {
+                minuteAngle = getAngleFromCenter(e, clockFace);
+                updateClock();
+            }
+        });
+
+        // Touch move
+        document.addEventListener('touchmove', (e) => {
+            if (isDraggingHour) {
+                hourAngle = getAngleFromCenter(e, clockFace);
+                updateClock();
+            } else if (isDraggingMinute) {
+                minuteAngle = getAngleFromCenter(e, clockFace);
+                updateClock();
+            }
+        });
+
+        // Release
+        document.addEventListener('mouseup', () => {
+            isDraggingHour = false;
+            isDraggingMinute = false;
+        });
+
+        document.addEventListener('touchend', () => {
+            isDraggingHour = false;
+            isDraggingMinute = false;
+        });
+
+        // Initialize
+        loadClockState();
+        if (hourAngle === 0 && minuteAngle === 0) {
+            // Default to 12:00 if no saved state
+            updateClock();
+        }
+    </script>
+</body>
+</html>

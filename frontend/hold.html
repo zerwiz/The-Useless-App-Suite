@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hold On - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .hold-button {
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+        .hold-button:active {
+            transform: scale(0.92);
+            background-color: #1d4ed8;
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.7);
+        }
+        .pulsate { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="text-center mt-12 mb-12">
+        <h1 class="text-7xl font-mono font-extrabold tracking-tighter tabular-nums" id="hold-timer">000000</h1>
+        <p class="text-slate-500 mt-4 uppercase tracking-[0.3em] text-[10px] font-bold">Milliseconds Clocked</p>
+    </div>
+    <div class="flex-grow flex items-center justify-center w-full">
+        <button id="mainHoldButton" class="hold-button w-60 h-60 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-black uppercase tracking-widest pulsate border-8 border-white/10">
+            Hold
+        </button>
+    </div>
+    <div class="mt-12 text-center h-10">
+        <p id="hold-status" class="text-xl font-bold text-slate-500 uppercase tracking-widest">Ready for input</p>
+    </div>
+    <div class="mt-12 w-full max-w-sm bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 mb-16 border border-white/10 shadow-2xl mx-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">The Hall of Fame</h2>
+            <span id="user-id-tag" class="text-[10px] text-slate-500 font-mono font-bold">Connecting...</span>
+        </div>
+        <div id="leaderboard" class="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scroll">
+            <div class="text-center text-slate-500 py-4 italic text-sm">Synchronizing ranks...</div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hold-on-global-suite-v2';
+        let db, auth, currentUser = null;
+
+        try {
+            const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+            if (firebaseConfigStr) {
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+                onAuthStateChanged(auth, u => {
+                    currentUser = u;
+                    if (u) {
+                        const tag = document.getElementById('user-id-tag');
+                        if (tag) tag.textContent = `UID: ${u.uid.slice(0, 8)}`;
+                        setupLeaderboard();
+                    }
+                });
+            } else {
+                const tag = document.getElementById('user-id-tag');
+                if (tag) tag.textContent = "Offline Mode";
+            }
+        } catch (e) {
+            const tag = document.getElementById('user-id-tag');
+            if (tag) tag.textContent = "Offline Mode";
+        }
+
+        let isHolding = false;
+        let holdStartTime = null;
+        let holdFrame = null;
+
+        const holdTimer = document.getElementById('hold-timer');
+        const holdBtn = document.getElementById('mainHoldButton');
+        const holdStatus = document.getElementById('hold-status');
+        const leaderboard = document.getElementById('leaderboard');
+
+        function updateHoldLoop() {
+            if (!isHolding) return;
+            const elap = Date.now() - holdStartTime;
+            if (holdTimer) holdTimer.textContent = Math.floor(elap).toString().padStart(6, '0');
+            holdFrame = requestAnimationFrame(updateHoldLoop);
+        }
+
+        async function saveHoldScore(s) {
+            if (!currentUser || !db || s < 100) return;
+            try {
+                const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                await addDoc(col, { userId: currentUser.uid, score: s, timestamp: Date.now() });
+            } catch (e) {}
+        }
+
+        function setupLeaderboard() {
+            if (!db) return;
+            const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            onSnapshot(col, snap => {
+                const scores = [];
+                snap.forEach(d => scores.push(d.data()));
+                scores.sort((a,b) => b.score - a.score);
+                const top = scores.slice(0, 10);
+                if (top.length === 0) {
+                    if (leaderboard) leaderboard.innerHTML = '<div class="text-center text-slate-500 py-4 italic">No scores yet.</div>';
+                    return;
+                }
+                if (leaderboard) {
+                    leaderboard.innerHTML = top.map((s, i) => `
+                        <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5 ${currentUser && s.userId === currentUser.uid ? 'border-blue-500 bg-blue-500/10' : ''}">
+                            <div class="flex items-center gap-3">
+                                <span class="text-slate-500 font-bold text-[10px]">${i+1}</span>
+                                <span class="font-mono text-[10px] text-slate-200 font-bold">${s.userId ? s.userId.slice(0, 6).toUpperCase() : 'ANON'}</span>
+                            </div>
+                            <span class="font-black text-blue-400 font-mono text-xs">${s.score.toLocaleString()}ms</span>
+                        </div>
+                    `).join('');
+                }
+            }, (err) => console.log("LB error:", err));
+        }
+
+        function startHold(e) {
+            if (e) e.preventDefault();
+            if (isHolding) return;
+            isHolding = true;
+            holdStartTime = Date.now();
+            if (holdStatus) {
+                holdStatus.textContent = "HOLDING STEADY";
+                holdStatus.className = "text-xl font-black text-blue-400 italic tracking-[0.2em]";
+            }
+            if (holdBtn) holdBtn.classList.remove('pulsate');
+            updateHoldLoop();
+        }
+
+        function stopHold() {
+            if (!isHolding) return;
+            isHolding = false;
+            cancelAnimationFrame(holdFrame);
+            const total = Date.now() - holdStartTime;
+            if (holdTimer) holdTimer.textContent = total.toString().padStart(6, '0');
+            if (holdStatus) {
+                holdStatus.textContent = "RELEASED";
+                holdStatus.className = "text-xl font-black text-rose-500 italic tracking-[0.2em]";
+            }
+            if (holdBtn) holdBtn.classList.add('pulsate');
+            saveHoldScore(total);
+            
+            const personalBest = Storage.get('holdPersonalBest', 0);
+            if (total > personalBest) {
+                Storage.set('holdPersonalBest', total);
+            }
+        }
+
+        if (holdBtn) {
+            holdBtn.addEventListener('mousedown', startHold);
+            window.addEventListener('mouseup', stopHold);
+            holdBtn.addEventListener('touchstart', startHold, { passive: false });
+            window.addEventListener('touchend', stopHold, { passive: false });
+        }
+    </script>
+</body>
+</html>

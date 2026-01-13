@@ -1,0 +1,3 @@
+# Netlify redirects
+# All routes serve index.html as fallback (for direct app page access)
+/*    /index.html   200

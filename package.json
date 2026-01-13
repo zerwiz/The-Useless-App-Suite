@@ -1,0 +1,47 @@
+{
+  "name": "the-useless-app-suite",
+  "version": "2.0.3",
+  "description": "A curated collection of digital artifacts designed to do absolutely nothing useful",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zerwiz/Random-Currency-Converter.git"
+  },
+  "private": true,
+  "scripts": {
+    "lint:html": "htmlhint index.html",
+    "lint:js": "eslint --ext .html index.html",
+    "lint": "npm run lint:html && npm run lint:js",
+    "accessibility": "pa11y --standard WCAG2AA index.html || true",
+    "security": "npm audit --audit-level=moderate",
+    "compatibility": "browserslist",
+    "analyze": "npm run lint && npm run accessibility && npm run security",
+    "check": "npm run analyze"
+  },
+  "keywords": [
+    "useless",
+    "apps",
+    "entertainment",
+    "spa"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@html-eslint/eslint-plugin": "^0.20.0",
+    "@html-eslint/parser": "^0.20.0",
+    "eslint": "^8.57.0",
+    "htmlhint": "^1.1.4",
+    "pa11y": "^7.0.0",
+    "browserslist": "^4.23.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "not IE 11"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

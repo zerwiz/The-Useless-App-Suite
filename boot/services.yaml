@@ -1,0 +1,18 @@
+# Services Configuration
+# Defines which services to spin up
+
+services:
+  frontend:
+    name: "The Useless App Suite Frontend"
+    type: "static"
+    path: "../systems/frontend"
+    port: 8000
+    enabled: true
+    description: "Main web application with three interactive apps"
+    
+  # Future services can be added here
+  # auth-service:
+  #   name: "Authentication Service"
+  #   type: "api"
+  #   port: 3001
+  #   enabled: false

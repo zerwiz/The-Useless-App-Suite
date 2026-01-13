@@ -1,0 +1,38 @@
+# Netlify Configuration for The Useless App Suite
+
+[build]
+  # Publish directory - Netlify will serve files from here
+  publish = "."
+  
+  # Build command (optional - we don't need a build step currently)
+  # command = "echo 'No build step required'"
+  
+  # Build command (optional - we don't need a build step currently)
+  # command = "echo 'No build step required'"
+
+# Redirect rules
+# No SPA redirects needed - we use actual HTML pages
+# The _redirects file handles any edge cases
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Environment variables (set these in Netlify dashboard)
+# [build.environment]
+#   NODE_VERSION = "18"

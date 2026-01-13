@@ -1,0 +1,35 @@
+# Environment files with actual credentials
+configs/*.env
+!configs/*.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+*.log
+logs/
+
+# Node modules
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs (if added later)
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# Netlify
+.netlify/

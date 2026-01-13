@@ -1,0 +1,78 @@
+# Cursor Rules for The Useless App Suite
+
+## Project Structure
+
+- Follow the repo structure defined in user rules strictly
+- Main hub page: `index.html` (root directory)
+- All app pages go under `/frontend` (one file per app)
+- Shared resources: `frontend/shared.css` and `frontend/shared.js`
+- Boot scripts in `/boot`
+- Documentation in `/docs`
+- Configs in `/configs`
+
+## Code Style
+
+- Use ES6+ JavaScript
+- Tailwind CSS for styling
+- Shared styles in `frontend/shared.css`
+- Shared utilities in `frontend/shared.js`
+- Each app page is a standalone HTML file
+- Follow STYLE_GUIDE.md for conventions
+
+## File Organization
+
+- **Main Hub:** `index.html` - Entry point with app cards
+- **App Pages:** `frontend/[app-name].html` - One file per app
+  - `frontend/progress.html` - Progress Simulator
+  - `frontend/currency.html` - Currency Converter
+  - `frontend/hold.html` - Hold On Game
+  - `frontend/weather.html` - Nihilist Weather
+  - `frontend/clock.html` - Manual Clock
+- **Shared:** `frontend/shared.css` and `frontend/shared.js`
+
+## Navigation
+
+- Use standard HTML links (`<a>` tags) for navigation
+- Each app page includes a "Back to Hub" button linking to `../index.html`
+- No JavaScript-based routing (multi-page architecture)
+
+## Documentation
+
+- Always update PLANNING.md when making architectural changes
+- Keep README.md files current
+- Document new features in CHANGELOG.md
+- Update ARCHITECTURE.md when structure changes
+
+## Firebase
+
+- Use anonymous authentication only
+- Firestore for leaderboard data (Hold On app)
+- Configuration via environment variables
+- Firebase config can be injected via global variables
+
+## Local Storage
+
+- Use `Storage` utility from `shared.js` for all localStorage operations
+- All keys prefixed with `useless-suite-` for namespacing
+- Persist user preferences and app state
+
+## Development
+
+- Test locally before committing
+- Run `npm run check` for code quality checks
+- Keep app pages modular and independent
+- Each app should be self-contained but can use shared resources
+
+## Netlify Deployment
+
+- Main entry point: `index.html` (root)
+- Publish directory: `.` (root)
+- All app pages accessible via `frontend/[app-name].html`
+- `_redirects` file handles routing fallbacks
+
+## Code Quality
+
+- Node.js 16+ and npm 8+ required for linting
+- Run `npm install` to set up development tools
+- Use `npm run check` for automated quality checks
+- Follow accessibility guidelines (WCAG 2AA)
