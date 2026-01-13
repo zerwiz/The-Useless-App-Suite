@@ -300,6 +300,53 @@
 
     <script src="shared.js"></script>
     <script>
+        // Audio Context for button sounds
+        let audioCtx;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playButtonSound(type = 'default') {
+            initAudio();
+            if (!audioCtx) return;
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Different sounds for different button types
+            if (type === 'number') {
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+            } else if (type === 'operator') {
+                oscillator.frequency.value = 600;
+                oscillator.type = 'square';
+            } else if (type === 'equals') {
+                oscillator.frequency.value = 400;
+                oscillator.type = 'sawtooth';
+            } else if (type === 'clear') {
+                oscillator.frequency.value = 300;
+                oscillator.type = 'triangle';
+            } else {
+                oscillator.frequency.value = 500;
+                oscillator.type = 'sine';
+            }
+
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
         let currentInput = '';
         let hasResult = false;
 
@@ -341,6 +388,7 @@
         }
 
         function appendNumber(num) {
+            playButtonSound('number');
             if (hasResult) {
                 currentInput = num;
                 hasResult = false;
@@ -355,6 +403,7 @@
         }
 
         function appendOperator(op) {
+            playButtonSound('operator');
             if (hasResult) {
                 hasResult = false;
                 resultDisplay.classList.remove('glitch-pop');
@@ -371,6 +420,7 @@
         }
 
         function clearDisplay() {
+            playButtonSound('clear');
             currentInput = '';
             hasResult = false;
             inputDisplay.innerText = 'READY_';
@@ -382,6 +432,7 @@
         }
 
         function deleteLast() {
+            playButtonSound();
             if (hasResult) {
                 clearDisplay();
                 return;
@@ -397,6 +448,7 @@
 
         function calculate() {
             if (!currentInput) return;
+            playButtonSound('equals');
 
             try {
                 let expression = currentInput;

@@ -109,6 +109,12 @@ The Useless App Suite is a client-side single-page application with optional Fir
 - **UI:** Calculator interface with neon cyber aesthetic, CRT scanlines, animated grid
 - **Persistence:** LocalStorage (saves input and result state)
 
+#### 11. Digital Dusting
+- **State:** Timer countdown, dust/residue canvas state, UI position
+- **Logic:** Dual-canvas dust system, continuous settling, procedural audio, timer mechanics
+- **UI:** Full-screen canvas, draggable stats container, hidden text background
+- **Persistence:** None (resets on each session for maximum futility)
+
 ## Data Flow
 
 ### Hold On Leaderboard

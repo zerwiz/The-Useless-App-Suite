@@ -41,6 +41,61 @@
             db = getFirestore(app);
         }
 
+        // --- Audio System ---
+        let audioCtx;
+        
+        function initAudio() {
+            if (audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio context not available:', e);
+                return;
+            }
+        }
+
+        function playButtonSound(type = 'default') {
+            initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') {
+                if (audioCtx) audioCtx.resume();
+                return;
+            }
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Different sounds for different actions
+            if (type === 'feed') {
+                // Low thud for feeding (like dropping food)
+                oscillator.frequency.value = 200;
+                oscillator.type = 'sine';
+            } else if (type === 'walk') {
+                // Quick step-like sound
+                oscillator.frequency.value = 400;
+                oscillator.type = 'square';
+            } else if (type === 'pet') {
+                // Gentle tone for petting
+                oscillator.frequency.value = 300;
+                oscillator.type = 'sine';
+            } else if (type === 'click') {
+                // Subtle click for other buttons
+                oscillator.frequency.value = 500;
+                oscillator.type = 'sine';
+            } else {
+                oscillator.frequency.value = 350;
+                oscillator.type = 'sine';
+            }
+
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
         // --- State Management ---
         let lastInteraction = Date.now();
         let currentStatus = "Sitting perfectly still.";
@@ -187,12 +242,14 @@
         // --- Event Listeners ---
         Object.keys(buttons).forEach(key => {
             buttons[key].addEventListener('click', () => {
+                playButtonSound(key); // Play sound for the action
                 runUselessDiagnostic(key);
                 recordInteraction();
             });
         });
 
         simulateBtn.addEventListener('click', () => {
+            playButtonSound('click');
             const wayBack = Date.now() - (ONE_WEEK_MS + 5000);
             addLog("System time manipulation active...");
             recordInteraction(wayBack);
@@ -254,7 +311,7 @@
         </div>
 
         <!-- The Rock -->
-        <div class="relative group cursor-default">
+        <div class="relative group cursor-default" id="rock-svg" onclick="playButtonSound('pet')">
             <div class="absolute -inset-8 bg-neutral-200/40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
             <svg viewBox="0 0 200 200" class="w-48 h-48 drop-shadow-2xl relative rock-float">
                 <path d="M40,120 Q30,80 70,50 Q110,20 160,60 Q190,100 170,140 Q150,180 90,175 Q40,170 40,120" fill="#78716c"/>

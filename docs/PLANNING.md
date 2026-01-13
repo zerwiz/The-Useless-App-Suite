@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-The Useless App Suite is a collection of ten interactive web applications that serve no practical purpose, designed for entertainment and digital experimentation.
+The Useless App Suite is a collection of eleven interactive web applications that serve no practical purpose, designed for entertainment and digital experimentation.
 
 ## Current Status
 
@@ -123,6 +123,20 @@ The Useless App Suite is a collection of ten interactive web applications that s
 - **Status:** ✅ Complete
 - **Dependencies:** None (pure JavaScript)
 
+### 11. Digital Dusting (Maximum Entropy)
+- **Purpose:** Fight entropy by dusting a surface that never stays clean
+- **Features:**
+  - Two-layer dust system (grey base dust, purple toxic residue)
+  - Dust continuously settles when idle
+  - Purple residue requires repeated swiping to clear
+  - 10-minute countdown timer that reverses when idle
+  - Procedural white noise audio feedback
+  - Draggable UI stats container that spawns purple dust
+  - Hidden inspirational text revealed beneath dust
+  - Completion sequence when timer reaches zero
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript, Web Audio API, Canvas API)
+
 ## Architecture
 
 ### Frontend
@@ -140,7 +154,7 @@ The Useless App Suite is a collection of ten interactive web applications that s
 
 ### Phase 1: Foundation ✅
 - [x] Create project structure
-- [x] Implement all ten apps
+- [x] Implement all eleven apps
 - [x] Set up Firebase integration
 - [x] Create documentation
 

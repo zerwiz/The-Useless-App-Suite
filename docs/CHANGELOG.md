@@ -79,6 +79,22 @@ All notable changes to The Useless App Suite will be documented in this file.
   - Shake animation on calculation
 - Updated home page grid to accommodate ten apps (3 cards per row, 4 rows)
 
+## [2.0.9] - 2026-01-XX
+
+### Added
+- **Digital Dusting (Maximum Entropy)** app - Fight entropy by dusting a surface that never stays clean
+  - Two-layer dust system (grey base dust, purple toxic residue)
+  - Dust continuously settles when idle (entropy simulation)
+  - Purple residue requires repeated swiping to clear (harder to remove)
+  - 10-minute countdown timer that reverses when idle
+  - Procedural white noise audio feedback based on movement speed
+  - Draggable UI stats container that spawns purple dust when brushed
+  - Hidden inspirational text revealed beneath dust layers
+  - Completion sequence when timer reaches zero
+  - Full-screen canvas interface with touch and mouse support
+- Fixed copyright year in Bubble Wrap app (2024 → 2026)
+- Updated home page grid to accommodate eleven apps (3 cards per row, 4 rows)
+
 ### Changed
 - **Refactored to multi-page architecture**
   - Split single-file SPA into separate HTML pages

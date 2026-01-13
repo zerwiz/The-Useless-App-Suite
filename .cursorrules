@@ -33,6 +33,7 @@
   - `frontend/bubble-wrap.html` - Virtual Bubble Wrap
   - `frontend/typing-speedster.html` - Typing Speedster
   - `frontend/un-calculator.html` - Un-Calculator
+  - `frontend/dusting.html` - Digital Dusting
 - **Shared:** `frontend/shared.css` and `frontend/shared.js`
 
 ## Navigation

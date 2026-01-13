@@ -78,6 +78,50 @@
             from { opacity: 1; transform: translateY(0); }
             to { opacity: 0; transform: translateY(-20px); }
         }
+
+        /* Easter Egg: Real Pop Animation */
+        .bubble.popable {
+            background: #fff;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bubble.popable::after {
+            display: none;
+        }
+
+        .bubble.popped {
+            animation: real-pop 0.3s ease-out forwards;
+        }
+
+        @keyframes real-pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .easter-egg-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            animation: reveal-message 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes reveal-message {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -99,7 +143,7 @@
     </main>
 
     <footer class="mt-12 text-center text-gray-400 text-xs mb-8">
-        <p>No satisfaction guaranteed. &copy; 2024 WasteOfTime Tech.</p>
+        <p>No satisfaction guaranteed. &copy; 2026 WasteOfTime Tech.</p>
     </footer>
 
     <script src="shared.js"></script>
@@ -169,26 +213,137 @@
             setTimeout(() => span.remove(), 500);
         }
 
+        // Easter Egg: One bubble can actually pop!
+        const easterEggIndex = Math.floor(bubbleCount / 2) - 1; // Middle-ish bubble
+        let easterEggPopped = Storage.get('bubbleWrapEasterEgg', false);
+
+        function playRealPop() {
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const masterGain = audioCtx.createGain();
+            masterGain.connect(audioCtx.destination);
+
+            // Satisfying pop sound
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+
+            // Add a satisfying "snap" at the end
+            const snap = audioCtx.createOscillator();
+            const snapGain = audioCtx.createGain();
+            snap.type = 'square';
+            snap.frequency.value = 800;
+            snapGain.gain.setValueAtTime(0.2, audioCtx.currentTime + 0.05);
+            snapGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            snap.connect(snapGain);
+            snapGain.connect(masterGain);
+            snap.start();
+            snap.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function showEasterEggMessage() {
+            const message = document.createElement('div');
+            message.className = 'easter-egg-message';
+            message.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;">You found it!</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">One bubble was actually popable.</div>
+                <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem;">Too bad you can only pop it once.</div>
+            `;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                message.style.transition = 'all 0.3s ease-out';
+                setTimeout(() => message.remove(), 300);
+            }, 2500);
+        }
+
         // Generate the bubbles
         for (let i = 0; i < bubbleCount; i++) {
             const bubble = document.createElement('div');
-            bubble.className = 'bubble';
+            
+            // Easter egg bubble is popable (unless already popped)
+            if (i === easterEggIndex && !easterEggPopped) {
+                bubble.className = 'bubble popable';
+                bubble.setAttribute('data-easter-egg', 'true');
+            } else {
+                bubble.className = 'bubble';
+            }
             
             bubble.addEventListener('mousedown', (e) => {
-                playThud();
-                createVisualFeedback(e);
-                clickCount++;
-                Storage.set('bubbleWrapClicks', clickCount);
+                // Check if this is the easter egg bubble
+                if (bubble.hasAttribute('data-easter-egg') && !easterEggPopped) {
+                    easterEggPopped = true;
+                    Storage.set('bubbleWrapEasterEgg', true);
+                    
+                    // Real pop!
+                    bubble.classList.add('popped');
+                    playRealPop();
+                    
+                    // Show celebration message
+                    setTimeout(() => {
+                        showEasterEggMessage();
+                    }, 150);
+                    
+                    // Remove the bubble after animation
+                    setTimeout(() => {
+                        bubble.style.display = 'none';
+                    }, 300);
+                } else {
+                    // Normal thud
+                    playThud();
+                    createVisualFeedback(e);
+                    clickCount++;
+                    Storage.set('bubbleWrapClicks', clickCount);
+                }
             });
 
             // Touch support
             bubble.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent double triggers
-                playThud();
-                const touch = e.touches[0];
-                createVisualFeedback({ pageX: touch.pageX, pageY: touch.pageY });
-                clickCount++;
-                Storage.set('bubbleWrapClicks', clickCount);
+                e.preventDefault();
+                
+                // Check if this is the easter egg bubble
+                if (bubble.hasAttribute('data-easter-egg') && !easterEggPopped) {
+                    easterEggPopped = true;
+                    Storage.set('bubbleWrapEasterEgg', true);
+                    
+                    // Real pop!
+                    bubble.classList.add('popped');
+                    playRealPop();
+                    
+                    // Show celebration message
+                    setTimeout(() => {
+                        showEasterEggMessage();
+                    }, 150);
+                    
+                    // Remove the bubble after animation
+                    setTimeout(() => {
+                        bubble.style.display = 'none';
+                    }, 300);
+                } else {
+                    // Normal thud
+                    playThud();
+                    const touch = e.touches[0];
+                    createVisualFeedback({ pageX: touch.pageX, pageY: touch.pageY });
+                    clickCount++;
+                    Storage.set('bubbleWrapClicks', clickCount);
+                }
             }, { passive: false });
 
             grid.appendChild(bubble);

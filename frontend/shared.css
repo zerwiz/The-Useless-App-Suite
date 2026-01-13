@@ -50,6 +50,31 @@ body {
     transform: translateX(-2px); 
 }
 
+/* Modal overlay animation */
+#back-to-hub-overlay {
+    animation: fadeIn 0.2s ease-out;
+}
+
+#back-to-hub-modal {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+    to { 
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
 .custom-scroll::-webkit-scrollbar {
     width: 4px;
 }
@@ -79,4 +104,13 @@ body {
     background: linear-gradient(to right, #60a5fa, #a78bfa, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* Glass effect for modals */
+.glass {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }

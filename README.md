@@ -6,7 +6,7 @@ A curated collection of digital artifacts designed to do absolutely nothing usef
 
 ## Overview
 
-The Useless App Suite is a web-based application featuring ten interactive experiences:
+The Useless App Suite is a web-based application featuring eleven interactive experiences:
 
 1. **Progress Sim** - Master patience with infinite 99% loops and fake breakthroughs
 2. **Useless Cash** - Convert savings into digital burritos and rubber ducks
@@ -18,6 +18,7 @@ The Useless App Suite is a web-based application featuring ten interactive exper
 8. **Bubble Wrap** - Already popped. The world's most disappointing sensory experience.
 9. **Typing Speedster** - Type fast for invisibility, or wait 10 minutes for clarity.
 10. **Un-Calculator** - Cyber edition. Always gives wrong answers with confidence.
+11. **Digital Dusting** - Fight entropy. Dust that never stops settling. Maximum futility.
 
 ## Quick Start
 
@@ -85,6 +86,7 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 │   ├── bubble-wrap.html # Virtual Bubble Wrap
 │   ├── typing-speedster.html # Typing Speedster
 │   ├── un-calculator.html # Un-Calculator
+│   ├── dusting.html # Digital Dusting
 │   ├── shared.css    # Shared styles
 │   └── shared.js     # Shared utilities
 ├── _redirects         # Netlify routing
@@ -100,7 +102,7 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 
 ## Version
 
-**Version 2.0.8**
+**Version 2.0.9**
 
 ## Documentation
 
