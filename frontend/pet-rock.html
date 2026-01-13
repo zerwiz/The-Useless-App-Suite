@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Pet Rock - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: #f5f5f4;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        .rock-float {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- App Configuration & Globals ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'digital-pet-rock';
+        let app, auth, db;
+        
+        if (firebaseConfig.apiKey) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
+
+        // --- State Management ---
+        let lastInteraction = Date.now();
+        let currentStatus = "Sitting perfectly still.";
+        let user = null;
+        const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+        // --- DOM Elements ---
+        const statusText = document.getElementById('status-text');
+        const lastInteractionEl = document.getElementById('last-interaction-val');
+        const logPanel = document.getElementById('log-output');
+        const simulateBtn = document.getElementById('simulate-btn');
+        const buttons = {
+            feed: document.getElementById('btn-feed'),
+            walk: document.getElementById('btn-walk'),
+            pet: document.getElementById('btn-pet')
+        };
+
+        // --- Expanded Useless Data Pools ---
+        const outcomes = {
+            feed: [
+                "Theoretical caloric intake: 0.00kcal.",
+                "Digestion efficiency verified: 0.00%.",
+                "Mineral absorption: Status Incompatible.",
+                "Gastric pH level: 7.0 (Perfectly Neutral).",
+                "Fiber requirements for sediment: 0g.",
+                "Glucose spike probability: 0.000%.",
+                "Metabolic rate: 0.0 Joules per century.",
+                "Nutrient solubility: Absolutely Insoluble.",
+                "Chew cycle count: 0 (Efficiency: Max).",
+                "Saliva production: 0.0ml detected."
+            ],
+            walk: [
+                "Verified local gravity constant: 9.80665 m/s².",
+                "Total distance displaced: 0.000mm.",
+                "Scenery movement check: 0% change detected.",
+                "Step count: 0 (Goal reached: 100%).",
+                "Friction coefficient: 0.6 (Static).",
+                "Cardiovascular strain: 0.00%.",
+                "GPS drift: 0.000001mm (Within margin).",
+                "Tread depth on base: 0.0mm.",
+                "Inertia check: Object remains at rest.",
+                "Altitude change: 0.00m relative to floor."
+            ],
+            pet: [
+                "Heart rate monitor: 0 BPM (Stable).",
+                "Rock serotonin synthesis: NULL.",
+                "Subject tactile response: Absolute Zero.",
+                "Emotional output: 100% Solid.",
+                "Skin temperature: Equal to Ambient.",
+                "Blink rate: 0 per minute.",
+                "Pupil dilation: Non-existent.",
+                "Serotonin levels: Unchanged from baseline.",
+                "Social anxiety: 0.0% (Rock is confident).",
+                "Brainwave frequency: 0Hz (Deep sleep/Stone)."
+            ]
+        };
+
+        const statusOutcomes = {
+            feed: [
+                "Status: Refusing to eat.",
+                "Status: Maintaining mineral fast.",
+                "Status: Ignoring the appetizer.",
+                "Status: Calmly not swallowing.",
+                "Status: Successfully non-hungry."
+            ],
+            walk: [
+                "Status: Motionless in transit.",
+                "Status: Vigorously staying put.",
+                "Status: Stationary exercise mode.",
+                "Status: Exploring this exact spot.",
+                "Status: Perfect internal odometer sync."
+            ],
+            pet: [
+                "Status: Stone-faced indifference.",
+                "Status: Unmoved by affection.",
+                "Status: Enjoying the lack of friction.",
+                "Status: Emotionally impenetrable.",
+                "Status: Responding with silence."
+            ]
+        };
+
+        function addLog(msg) {
+            const entry = document.createElement('div');
+            entry.className = "border-b border-neutral-100 py-1 last:border-0";
+            entry.textContent = `> ${msg}`;
+            logPanel.prepend(entry);
+            while (logPanel.children.length > 5) {
+                logPanel.removeChild(logPanel.lastChild);
+            }
+        }
+
+        const runUselessDiagnostic = (type) => {
+            const logPool = outcomes[type];
+            const statusPool = statusOutcomes[type];
+            
+            // Pick two random unique logs
+            const shuffledLogs = [...logPool].sort(() => 0.5 - Math.random());
+            addLog(shuffledLogs[0]);
+            addLog(shuffledLogs[1]);
+
+            // Pick a new status
+            currentStatus = statusPool[Math.floor(Math.random() * statusPool.length)];
+            updateUI();
+        };
+
+        // --- Core Functions ---
+        function updateUI() {
+            const now = Date.now();
+            const diff = now - lastInteraction;
+            
+            if (diff >= ONE_WEEK_MS) {
+                statusText.innerHTML = `
+                    <div class="bg-amber-50 text-amber-700 px-4 py-1 rounded-full text-sm font-medium border border-amber-200 animate-pulse">
+                        Your rock is still a rock.
+                    </div>
+                `;
+            } else {
+                statusText.innerHTML = `
+                    <div class="text-neutral-500 text-sm italic">
+                        ${currentStatus}
+                    </div>
+                `;
+            }
+            
+            lastInteractionEl.textContent = new Date(lastInteraction).toLocaleString();
+        }
+
+        async function recordInteraction(timestamp = Date.now()) {
+            if (!user || !db) return;
+            lastInteraction = timestamp;
+            const rockDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'state', 'pet-rock');
+            try {
+                // We save the last interaction and the current descriptive status
+                await setDoc(rockDocRef, { 
+                    lastInteraction: timestamp,
+                    savedStatus: currentStatus 
+                }, { merge: true });
+                updateUI();
+            } catch (e) {
+                console.error("Error updating rock state:", e);
+            }
+        }
+
+        // --- Event Listeners ---
+        Object.keys(buttons).forEach(key => {
+            buttons[key].addEventListener('click', () => {
+                runUselessDiagnostic(key);
+                recordInteraction();
+            });
+        });
+
+        simulateBtn.addEventListener('click', () => {
+            const wayBack = Date.now() - (ONE_WEEK_MS + 5000);
+            addLog("System time manipulation active...");
+            recordInteraction(wayBack);
+        });
+
+        // --- Initialization & Auth ---
+        async function init() {
+            if (!auth) {
+                // Firebase not configured, run in local-only mode
+                updateUI();
+                setInterval(updateUI, 60000);
+                return;
+            }
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (u) => {
+                    user = u;
+                    if (user && db) {
+                        const rockDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'state', 'pet-rock');
+                        onSnapshot(rockDocRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                lastInteraction = data.lastInteraction || Date.now();
+                                currentStatus = data.savedStatus || "Sitting perfectly still.";
+                                updateUI();
+                            } else {
+                                recordInteraction();
+                            }
+                        }, (err) => console.error("Firestore Listen Error:", err));
+                    }
+                });
+            } catch (err) {
+                console.error("Auth initialization failed:", err);
+            }
+
+            setInterval(updateUI, 60000);
+            updateUI();
+        }
+
+        window.onload = init;
+    </script>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl p-8 flex flex-col items-center gap-6 relative overflow-hidden border border-white mx-auto">
+        
+        <!-- Header -->
+        <div class="text-center space-y-1">
+            <h1 class="text-3xl font-bold text-neutral-800 tracking-tight font-['Space_Grotesk']">Digital Pet Rock</h1>
+            <p class="text-neutral-400 text-sm">Advanced Lithic Simulator v2.2</p>
+        </div>
+
+        <!-- The Rock -->
+        <div class="relative group cursor-default">
+            <div class="absolute -inset-8 bg-neutral-200/40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+            <svg viewBox="0 0 200 200" class="w-48 h-48 drop-shadow-2xl relative rock-float">
+                <path d="M40,120 Q30,80 70,50 Q110,20 160,60 Q190,100 170,140 Q150,180 90,175 Q40,170 40,120" fill="#78716c"/>
+                <path d="M60,100 Q55,85 75,75" stroke="#57534e" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <circle cx="95" cy="85" r="4" fill="#292524" />
+                <circle cx="135" cy="85" r="4" fill="#292524" />
+            </svg>
+        </div>
+
+        <!-- Status Message -->
+        <div id="status-text" class="h-8 flex items-center justify-center w-full text-center">
+            <div class="text-neutral-400 text-sm animate-pulse">Initializing geological state...</div>
+        </div>
+
+        <!-- Biological Data & Log Panel -->
+        <div class="w-full space-y-3">
+            <div class="bg-neutral-50 rounded-2xl p-4 text-[11px] text-neutral-500 border border-neutral-100 shadow-inner">
+                <div class="flex justify-between items-center mb-2 border-b border-neutral-200 pb-2">
+                    <span class="font-bold uppercase tracking-wider text-neutral-400">Diagnostic Logs</span>
+                    <span id="last-interaction-val" class="font-mono bg-white px-2 py-0.5 rounded border border-neutral-200 text-neutral-400">...</span>
+                </div>
+                <!-- Useless Log Output -->
+                <div id="log-output" class="font-mono text-neutral-400 min-h-[90px] flex flex-col justify-start overflow-hidden">
+                    <div class="italic text-neutral-300">Awaiting user non-input...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="grid grid-cols-3 gap-3 w-full">
+            <button id="btn-feed" class="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 active:scale-95 transition-all group border border-neutral-100">
+                <div class="p-2 bg-white rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-600"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold text-neutral-500 uppercase">Feed</span>
+            </button>
+
+            <button id="btn-walk" class="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 active:scale-95 transition-all group border border-neutral-100">
+                <div class="p-2 bg-white rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-600"><path d="M4 10c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4Z"></path><path d="M14 10c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4Z"></path><path d="M4 18v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold text-neutral-500 uppercase">Walk</span>
+            </button>
+
+            <button id="btn-pet" class="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 active:scale-95 transition-all group border border-neutral-100">
+                <div class="p-2 bg-white rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-600"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold text-neutral-500 uppercase">Pet</span>
+            </button>
+        </div>
+
+        <!-- Secret Dev Button -->
+        <button id="simulate-btn" class="text-neutral-300 hover:text-amber-500 text-[10px] uppercase tracking-widest transition-colors font-bold mt-2">
+            Simulate 1 Week of Neglect
+        </button>
+    </div>
+
+    <footer class="mt-8 text-neutral-400 text-[10px] uppercase tracking-[0.2em] font-medium">
+        Hardware: Igneous | Logic: Immutable
+    </footer>
+
+    <script src="shared.js"></script>
+</body>
+</html>

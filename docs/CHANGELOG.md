@@ -13,6 +13,72 @@ All notable changes to The Useless App Suite will be documented in this file.
   - Saves time state to localStorage
 - Updated home page grid to accommodate five apps (responsive 1-5 columns)
 
+## [2.0.4] - 2026-01-XX
+
+### Added
+- **Digital Pet Rock** app - Advanced lithic simulator
+  - Interactive rock with floating animation
+  - Feed, walk, and pet actions with useless diagnostic logs
+  - Status tracking with Firebase Firestore (optional)
+  - Simulate neglect feature (1 week of neglect)
+  - Geological state monitoring
+  - Works in local-only mode if Firebase not configured
+- Updated home page grid to accommodate six apps (3 cards per row)
+- Added Monday-Sunday day buttons to Nihilist Weather app
+- Centered all content on all app pages
+
+## [2.0.5] - 2026-01-XX
+
+### Added
+- **Ego Inflator** app - Dismissive problem submission system
+  - Text input for problems/concerns
+  - Dismissive response popup ("That sounds like a 'you' problem")
+  - Submission counter in localStorage
+  - Glassmorphism design with purple accents
+  - Smooth animations and transitions
+- Fixed Hold On leaderboard to work in offline mode with localStorage fallback
+- Updated home page grid to accommodate seven apps (3 cards per row, 3 rows)
+
+## [2.0.6] - 2026-01-XX
+
+### Added
+- **Virtual Bubble Wrap (Already Popped)** app - The world's most disappointing sensory experience
+  - Grid of 80 pre-popped bubbles with inset shadow styling
+  - Procedural "thud" sound generation using Web Audio API
+  - Visual feedback with floating "thud..." text indicators
+  - Click counter in localStorage
+  - Touch and mouse support
+  - Already popped appearance that never changes
+- Updated home page grid to accommodate eight apps (3 cards per row, 3 rows)
+
+## [2.0.7] - 2026-01-XX
+
+### Added
+- **Typing Speedster** app - Type fast for invisibility, or wait 10 minutes for clarity
+  - Real-time WPM (Words Per Minute) calculation
+  - Font size decreases as typing speed increases (becomes invisible at 100 WPM)
+  - 10-minute cooldown timer that reveals text when untouched
+  - Text persistence in localStorage
+  - Cooldown state persistence across sessions
+  - Status indicators and progress bar
+  - Dark terminal-style interface
+- Updated home page grid to accommodate nine apps (3 cards per row, 3 rows)
+
+## [2.0.8] - 2026-01-XX
+
+### Added
+- **Un-Calculator (Cyber Edition)** app - Always gives wrong answers with confidence
+  - Full calculator functionality (numbers, operators, decimals)
+  - Always generates incorrect answers with 8-18% error margin
+  - Cyber aesthetic with neon colors (blue, pink, purple)
+  - Animated grid background with perspective effect
+  - CRT scanline effects on display
+  - Glitch animations on results
+  - History log showing calculation "lies"
+  - State persistence in localStorage
+  - Shake animation on calculation
+- Updated home page grid to accommodate ten apps (3 cards per row, 4 rows)
+
 ### Changed
 - **Refactored to multi-page architecture**
   - Split single-file SPA into separate HTML pages

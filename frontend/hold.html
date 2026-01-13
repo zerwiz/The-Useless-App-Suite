@@ -97,10 +97,12 @@
             } else {
                 const tag = document.getElementById('user-id-tag');
                 if (tag) tag.textContent = "Offline Mode";
+                showLocalLeaderboard();
             }
         } catch (e) {
             const tag = document.getElementById('user-id-tag');
             if (tag) tag.textContent = "Offline Mode";
+            showLocalLeaderboard();
         }
 
         let isHolding = false;
@@ -112,6 +114,29 @@
         const holdStatus = document.getElementById('hold-status');
         const leaderboard = document.getElementById('leaderboard');
 
+        function showLocalLeaderboard() {
+            const localScores = Storage.get('holdLocalScores', []);
+            if (localScores.length === 0) {
+                if (leaderboard) {
+                    leaderboard.innerHTML = '<div class="text-center text-slate-500 py-4 italic text-sm">No local scores yet. Hold the button to create a record!</div>';
+                }
+                return;
+            }
+            localScores.sort((a, b) => b.score - a.score);
+            const top = localScores.slice(0, 10);
+            if (leaderboard) {
+                leaderboard.innerHTML = top.map((s, i) => `
+                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-500 font-bold text-[10px]">${i+1}</span>
+                            <span class="font-mono text-[10px] text-slate-200 font-bold">LOCAL</span>
+                        </div>
+                        <span class="font-black text-blue-400 font-mono text-xs">${s.score.toLocaleString()}ms</span>
+                    </div>
+                `).join('');
+            }
+        }
+
         function updateHoldLoop() {
             if (!isHolding) return;
             const elap = Date.now() - holdStartTime;
@@ -120,15 +145,31 @@
         }
 
         async function saveHoldScore(s) {
-            if (!currentUser || !db || s < 100) return;
-            try {
-                const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                await addDoc(col, { userId: currentUser.uid, score: s, timestamp: Date.now() });
-            } catch (e) {}
+            if (s < 100) return;
+            
+            // Always save to local storage
+            const localScores = Storage.get('holdLocalScores', []);
+            localScores.push({ score: s, timestamp: Date.now() });
+            Storage.set('holdLocalScores', localScores);
+            showLocalLeaderboard();
+            
+            // Try to save to Firebase if available
+            if (currentUser && db) {
+                try {
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                    await addDoc(col, { userId: currentUser.uid, score: s, timestamp: Date.now() });
+                } catch (e) {
+                    console.log("Firebase save failed, using local storage only");
+                }
+            }
         }
 
         function setupLeaderboard() {
-            if (!db) return;
+            if (!db) {
+                // Offline mode - show local scores
+                showLocalLeaderboard();
+                return;
+            }
             const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
             onSnapshot(col, snap => {
                 const scores = [];
@@ -150,7 +191,10 @@
                         </div>
                     `).join('');
                 }
-            }, (err) => console.log("LB error:", err));
+            }, (err) => {
+                console.log("LB error:", err);
+                showLocalLeaderboard();
+            });
         }
 
         function startHold(e) {

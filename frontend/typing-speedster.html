@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Typing Speedster - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #0f172a;
+            color: #f8fafc;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #editor {
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            border: none;
+            outline: none;
+            background: transparent;
+            resize: none;
+            line-height: 1.5;
+            transition: font-size 0.3s ease, opacity 0.3s ease;
+            color: #38bdf8;
+        }
+
+        .stats-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #334155;
+        }
+
+        .pixel-mode {
+            font-size: 1px !important;
+            opacity: 0.05;
+        }
+
+        .cooldown-progress {
+            transition: width 1s linear;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="stats-panel p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-6">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-slate-400 block">Current Speed</span>
+                <span id="wpm-display" class="text-2xl font-bold text-sky-400">0</span>
+                <span class="text-xs text-slate-500">WPM</span>
+            </div>
+            
+            <div>
+                <span class="text-xs uppercase tracking-widest text-slate-400 block">Status</span>
+                <span id="status-display" class="text-sm font-medium text-emerald-400">Ready to type</span>
+            </div>
+        </div>
+
+        <div class="flex-1 max-w-md">
+            <div class="flex justify-between mb-1">
+                <span class="text-xs uppercase tracking-widest text-slate-400">Restoration Cooldown (10m)</span>
+                <span id="timer-display" class="text-xs font-mono text-slate-400">00:00</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="cooldown-bar" class="cooldown-progress bg-sky-500 h-full w-0"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 relative overflow-auto">
+        <textarea id="editor" placeholder="Start typing... fast for chaos, slow for clarity, or wait for the reveal."></textarea>
+        
+        <!-- Overlay for when text is revealed -->
+        <div id="reveal-overlay" class="hidden absolute inset-0 pointer-events-none bg-emerald-500/5 flex items-center justify-center">
+            <div class="bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce">
+                Text Restored!
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-3 text-[10px] text-slate-500 text-center border-t border-slate-800">
+        REACH 100 WPM FOR INVISIBILITY | DON'T TOUCH THE KEYS FOR 10 MINUTES TO SEE EVERYTHING
+    </footer>
+
+    <script src="shared.js"></script>
+    <script>
+        const editor = document.getElementById('editor');
+        const wpmDisplay = document.getElementById('wpm-display');
+        const statusDisplay = document.getElementById('status-display');
+        const cooldownBar = document.getElementById('cooldown-bar');
+        const timerDisplay = document.getElementById('timer-display');
+        const revealOverlay = document.getElementById('reveal-overlay');
+
+        const COOLDOWN_TIME = 10 * 60; // 10 minutes in seconds
+        let keystrokes = [];
+        let cooldownSeconds = 0;
+        let cooldownInterval = null;
+        let isRevealed = false;
+
+        // Configuration
+        const BASE_FONT_SIZE = 32;
+        const MIN_FONT_SIZE = 0.5;
+        const SPEED_LIMIT = 100;
+
+        // Load saved state
+        function loadState() {
+            const savedText = Storage.get('typingSpeedsterText', '');
+            const savedCooldown = Storage.get('typingSpeedsterCooldown', 0);
+            const savedTime = Storage.get('typingSpeedsterCooldownTime', 0);
+            
+            if (savedText) {
+                editor.value = savedText;
+            }
+            
+            // Resume cooldown if it was in progress
+            if (savedCooldown > 0 && savedTime > 0) {
+                const elapsed = Math.floor((Date.now() - savedTime) / 1000);
+                cooldownSeconds = Math.max(0, savedCooldown - elapsed);
+                if (cooldownSeconds > 0) {
+                    startCooldown();
+                } else {
+                    revealText();
+                }
+            }
+        }
+
+        function updateWPM() {
+            const now = Date.now();
+            // Only count keystrokes from the last 5 seconds for "live" speed
+            keystrokes = keystrokes.filter(ts => now - ts < 5000);
+            
+            // Standard WPM formula: (chars / 5) / (time in minutes)
+            // Here we use our 5-second window: (keystrokes / 5) / (5 / 60)
+            const wpm = Math.round((keystrokes.length / 5) / (5 / 60));
+            
+            wpmDisplay.innerText = wpm;
+
+            if (isRevealed) return;
+
+            // Calculate font size logic
+            // As WPM approaches 100, font size approaches 0
+            let newSize = BASE_FONT_SIZE - (Math.min(wpm, SPEED_LIMIT) / SPEED_LIMIT) * (BASE_FONT_SIZE - MIN_FONT_SIZE);
+            
+            editor.style.fontSize = `${newSize}px`;
+            
+            if (wpm >= SPEED_LIMIT) {
+                statusDisplay.innerText = "INVISIBLE SPEED";
+                statusDisplay.className = "text-sm font-medium text-rose-500 animate-pulse";
+            } else if (wpm > 0) {
+                statusDisplay.innerText = "Typing...";
+                statusDisplay.className = "text-sm font-medium text-sky-400";
+            }
+        }
+
+        function startCooldown() {
+            clearInterval(cooldownInterval);
+            cooldownSeconds = 0;
+            isRevealed = false;
+            revealOverlay.classList.add('hidden');
+            statusDisplay.innerText = "Waiting...";
+            statusDisplay.className = "text-sm font-medium text-amber-400";
+
+            cooldownInterval = setInterval(() => {
+                cooldownSeconds++;
+                
+                const progress = (cooldownSeconds / COOLDOWN_TIME) * 100;
+                cooldownBar.style.width = `${progress}%`;
+                
+                const mins = Math.floor(cooldownSeconds / 60);
+                const secs = cooldownSeconds % 60;
+                timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                // Save state
+                Storage.set('typingSpeedsterCooldown', cooldownSeconds);
+                Storage.set('typingSpeedsterCooldownTime', Date.now());
+
+                if (cooldownSeconds >= COOLDOWN_TIME) {
+                    revealText();
+                }
+            }, 1000);
+        }
+
+        function revealText() {
+            clearInterval(cooldownInterval);
+            isRevealed = true;
+            editor.style.fontSize = '18px';
+            editor.style.opacity = '1';
+            statusDisplay.innerText = "REVEALED";
+            statusDisplay.className = "text-sm font-medium text-emerald-400";
+            revealOverlay.classList.remove('hidden');
+            Storage.set('typingSpeedsterCooldown', 0);
+            Storage.set('typingSpeedsterCooldownTime', 0);
+        }
+
+        editor.addEventListener('keydown', (e) => {
+            // Ignore modifier keys for speed calc
+            if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Enter') {
+                keystrokes.push(Date.now());
+            }
+            
+            // Reset cooldown on any key press
+            startCooldown();
+            updateWPM();
+        });
+
+        editor.addEventListener('input', () => {
+            Storage.set('typingSpeedsterText', editor.value);
+        });
+
+        // Loop to decay WPM even when not typing
+        setInterval(updateWPM, 100);
+
+        // Initial state
+        editor.style.fontSize = `${BASE_FONT_SIZE}px`;
+        loadState();
+    </script>
+</body>
+</html>

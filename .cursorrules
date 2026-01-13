@@ -28,6 +28,11 @@
   - `frontend/hold.html` - Hold On Game
   - `frontend/weather.html` - Nihilist Weather
   - `frontend/clock.html` - Manual Clock
+  - `frontend/pet-rock.html` - Digital Pet Rock
+  - `frontend/ego-inflator.html` - Ego Inflator
+  - `frontend/bubble-wrap.html` - Virtual Bubble Wrap
+  - `frontend/typing-speedster.html` - Typing Speedster
+  - `frontend/un-calculator.html` - Un-Calculator
 - **Shared:** `frontend/shared.css` and `frontend/shared.js`
 
 ## Navigation

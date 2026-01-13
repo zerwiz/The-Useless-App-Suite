@@ -6,13 +6,18 @@ A curated collection of digital artifacts designed to do absolutely nothing usef
 
 ## Overview
 
-The Useless App Suite is a web-based application featuring five interactive experiences:
+The Useless App Suite is a web-based application featuring ten interactive experiences:
 
 1. **Progress Sim** - Master patience with infinite 99% loops and fake breakthroughs
 2. **Useless Cash** - Convert savings into digital burritos and rubber ducks
 3. **Hold On** - Compete globally for the record of holding a blue button
 4. **Nihilist Weather** - Quantify the void with terminal-style existential forecasts
 5. **Manual Clock** - A clock that doesn't sync with system time. Drag the hands yourself.
+6. **Digital Pet Rock** - Advanced lithic simulator. Feed, walk, and pet your rock.
+7. **Ego Inflator** - Tell us your problems. We definitely care.
+8. **Bubble Wrap** - Already popped. The world's most disappointing sensory experience.
+9. **Typing Speedster** - Type fast for invisibility, or wait 10 minutes for clarity.
+10. **Un-Calculator** - Cyber edition. Always gives wrong answers with confidence.
 
 ## Quick Start
 
@@ -75,6 +80,11 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 │   ├── hold.html     # Hold On Game
 │   ├── weather.html  # Nihilist Weather
 │   ├── clock.html    # Manual Clock
+│   ├── pet-rock.html # Digital Pet Rock
+│   ├── ego-inflator.html # Ego Inflator
+│   ├── bubble-wrap.html # Virtual Bubble Wrap
+│   ├── typing-speedster.html # Typing Speedster
+│   ├── un-calculator.html # Un-Calculator
 │   ├── shared.css    # Shared styles
 │   └── shared.js     # Shared utilities
 ├── _redirects         # Netlify routing
@@ -90,7 +100,7 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 
 ## Version
 
-**Version 2.0.3**
+**Version 2.0.8**
 
 ## Documentation
 

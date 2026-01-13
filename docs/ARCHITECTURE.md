@@ -79,6 +79,36 @@ The Useless App Suite is a client-side single-page application with optional Fir
 - **UI:** Interactive clock face with draggable hands
 - **Persistence:** LocalStorage (saves manually set time)
 
+#### 6. Digital Pet Rock
+- **State:** Last interaction timestamp, current status
+- **Logic:** Useless diagnostic logs, status tracking
+- **UI:** SVG rock illustration, action buttons, log panel
+- **Persistence:** Firebase Firestore (optional, falls back to local-only mode)
+
+#### 7. Ego Inflator
+- **State:** Submission count
+- **Logic:** Dismissive response system
+- **UI:** Text input, modal popup with dismissive message
+- **Persistence:** LocalStorage (tracks submission count)
+
+#### 8. Virtual Bubble Wrap
+- **State:** Click count
+- **Logic:** Procedural sound generation, visual feedback
+- **UI:** Grid of pre-popped bubbles, "thud" indicators
+- **Persistence:** LocalStorage (tracks total clicks)
+
+#### 9. Typing Speedster
+- **State:** Text content, WPM, cooldown timer, cooldown start time
+- **Logic:** Real-time WPM calculation, dynamic font sizing, cooldown timer
+- **UI:** Text editor, stats panel, progress bar, reveal overlay
+- **Persistence:** LocalStorage (saves text and cooldown state)
+
+#### 10. Un-Calculator
+- **State:** Current input, last result, calculation history
+- **Logic:** Expression evaluation, wrong answer generation (8-18% error), glitch animations
+- **UI:** Calculator interface with neon cyber aesthetic, CRT scanlines, animated grid
+- **Persistence:** LocalStorage (saves input and result state)
+
 ## Data Flow
 
 ### Hold On Leaderboard

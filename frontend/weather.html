@@ -49,6 +49,11 @@
             color: #0a0a0a;
             border-color: #d1d1d1;
         }
+        .day-btn.active {
+            background-color: #d1d1d1;
+            color: #0a0a0a;
+            border-color: #d1d1d1;
+        }
         input {
             background: transparent;
             border-bottom: 1px solid #333;
@@ -96,6 +101,16 @@
                 Outside exists.
             </p>
             <div id="unit-indicator" class="mt-4 text-[10px] opacity-0 transition-opacity duration-1000">SYSTEM: ABSOLUTE</div>
+            
+            <div class="mt-8 flex flex-wrap justify-center gap-2">
+                <button onclick="selectDay('monday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="monday">Monday</button>
+                <button onclick="selectDay('tuesday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="tuesday">Tuesday</button>
+                <button onclick="selectDay('wednesday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="wednesday">Wednesday</button>
+                <button onclick="selectDay('thursday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="thursday">Thursday</button>
+                <button onclick="selectDay('friday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="friday">Friday</button>
+                <button onclick="selectDay('saturday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="saturday">Saturday</button>
+                <button onclick="selectDay('sunday')" class="btn-nihilist px-4 py-2 text-[10px] uppercase tracking-widest day-btn" data-day="sunday">Sunday</button>
+            </div>
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -267,6 +282,48 @@
                     satelliteText.style.opacity = "0.6";
                 }
             }, 1500);
+        };
+
+        window.selectDay = (day) => {
+            // Remove active class from all day buttons
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            const selectedBtn = document.querySelector(`[data-day="${day}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+            
+            // Update status message
+            if (statusMsg) {
+                const dayNames = {
+                    monday: 'MONDAY',
+                    tuesday: 'TUESDAY',
+                    wednesday: 'WEDNESDAY',
+                    thursday: 'THURSDAY',
+                    friday: 'FRIDAY',
+                    saturday: 'SATURDAY',
+                    sunday: 'SUNDAY'
+                };
+                statusMsg.innerText = `Selected temporal fragment: ${dayNames[day]}. Existence probability: 100%.`;
+            }
+            
+            // Update weather display with day-specific message
+            if (weatherDisplay) {
+                const dayMessages = {
+                    monday: 'Monday exists. The void persists.',
+                    tuesday: 'Tuesday confirmed. Reality holds.',
+                    wednesday: 'Wednesday verified. Outside remains.',
+                    thursday: 'Thursday validated. Existence continues.',
+                    friday: 'Friday authenticated. The void endures.',
+                    saturday: 'Saturday confirmed. Outside persists.',
+                    sunday: 'Sunday verified. Reality maintains.'
+                };
+                weatherDisplay.innerText = dayMessages[day] || 'Outside exists.';
+                weatherDisplay.classList.add('revealed-truth');
+            }
         };
 
         function loadWeatherState() {

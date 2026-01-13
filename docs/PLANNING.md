@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-The Useless App Suite is a collection of five interactive web applications that serve no practical purpose, designed for entertainment and digital experimentation.
+The Useless App Suite is a collection of ten interactive web applications that serve no practical purpose, designed for entertainment and digital experimentation.
 
 ## Current Status
 
@@ -64,6 +64,65 @@ The Useless App Suite is a collection of five interactive web applications that 
 - **Status:** ✅ Complete
 - **Dependencies:** None (pure JavaScript)
 
+### 6. Digital Pet Rock
+- **Purpose:** Advanced lithic simulator - feed, walk, and pet your digital rock
+- **Features:**
+  - Interactive rock with useless diagnostic logs
+  - Feed, walk, and pet actions
+  - Status tracking with Firebase (optional)
+  - Simulate neglect feature
+  - Geological state monitoring
+- **Status:** ✅ Complete
+- **Dependencies:** Firebase (optional, works without it)
+
+### 7. Ego Inflator
+- **Purpose:** A dismissive problem submission system that doesn't care
+- **Features:**
+  - Text input for problems/concerns
+  - Dismissive response popup ("That sounds like a 'you' problem")
+  - Submission counter in localStorage
+  - Glassmorphism design with purple accents
+  - Smooth animations and transitions
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript)
+
+### 8. Virtual Bubble Wrap (Already Popped)
+- **Purpose:** The world's most disappointing sensory experience - all bubbles are already popped
+- **Features:**
+  - Grid of 80 pre-popped bubbles
+  - Procedural "thud" sound generation using Web Audio API
+  - Visual feedback ("thud..." text)
+  - Click counter in localStorage
+  - Already popped appearance with inset shadows
+  - Touch and mouse support
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript, Web Audio API)
+
+### 9. Typing Speedster
+- **Purpose:** A typing app where speed makes text invisible, and waiting 10 minutes reveals everything
+- **Features:**
+  - Real-time WPM (Words Per Minute) calculation
+  - Font size decreases as typing speed increases (invisible at 100 WPM)
+  - 10-minute cooldown timer that reveals text when untouched
+  - Text persistence in localStorage
+  - Cooldown state persistence across sessions
+  - Status indicators and progress bar
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript)
+
+### 10. Un-Calculator (Cyber Edition)
+- **Purpose:** A calculator that always gives wrong answers with confidence
+- **Features:**
+  - Full calculator functionality (numbers, operators, decimals)
+  - Always generates incorrect answers (8-18% error margin)
+  - Cyber aesthetic with neon colors and animated grid background
+  - CRT scanline effects
+  - Glitch animations on results
+  - History log of "lies"
+  - State persistence in localStorage
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript)
+
 ## Architecture
 
 ### Frontend
@@ -81,7 +140,7 @@ The Useless App Suite is a collection of five interactive web applications that 
 
 ### Phase 1: Foundation ✅
 - [x] Create project structure
-- [x] Implement all five apps
+- [x] Implement all ten apps
 - [x] Set up Firebase integration
 - [x] Create documentation
 

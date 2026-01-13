@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Un-Calculator - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff007b;
+            --neon-purple: #bc13fe;
+            --bg-dark: #08080f;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 123, 0.05) 0%, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Animated Grid Background */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            animation: grid-move 20s linear infinite;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        @keyframes grid-move {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        .calc-container {
+            background: rgba(13, 13, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 242, 255, 0.05);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 2.5rem;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        /* Neon Accent Line */
+        .calc-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), var(--neon-pink), transparent);
+            animation: scan-line 3s linear infinite;
+        }
+
+        @keyframes scan-line {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .display {
+            background: #000;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        /* CRT Scanline Effect */
+        .display::after {
+            content: " ";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .input-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 5px var(--neon-blue);
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            text-align: right;
+            line-height: 1.2;
+            z-index: 3;
+        }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.85rem;
+        }
+
+        button {
+            aspect-ratio: 1/1;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 242, 255, 0.3);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        button:hover::after { opacity: 1; }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button.operator {
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        button.equals {
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+            color: white;
+            grid-column: span 2;
+            aspect-ratio: auto;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            border: none;
+            box-shadow: 0 0 20px rgba(255, 0, 123, 0.3);
+        }
+
+        button.equals:hover {
+            box-shadow: 0 0 30px rgba(255, 0, 123, 0.5);
+            filter: brightness(1.2);
+        }
+
+        button.clear {
+            color: var(--neon-pink);
+        }
+
+        /* Glitch Animation for Results */
+        .glitch-pop {
+            animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: none; }
+            20% { transform: translate(-2px, 2px); text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue); }
+            40% { transform: translate(-2px, -2px); text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-blue); }
+            60% { transform: translate(2px, 2px); text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue); }
+            80% { transform: translate(2px, -2px); text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-blue); }
+            100% { transform: translate(0); text-shadow: none; }
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        .history-item {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1rem;
+            text-align: center;
+        }
+
+        #last-lie {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+    <div class="grid-overlay"></div>
+
+    <div class="calc-container" id="calculator">
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-bold tracking-[0.2em] italic" style="font-family: 'Orbitron';">
+                UN<span class="text-pink-500">CALC</span>
+            </h1>
+            <p class="text-[0.6rem] text-cyan-400 opacity-60 uppercase tracking-widest">Inaccuracy Engine v2.0</p>
+        </div>
+
+        <div class="display" id="display-container">
+            <div class="input-text" id="input-display">READY_</div>
+            <div class="result-text" id="result-display">AWAITING_INPUT</div>
+        </div>
+
+        <div class="grid-buttons">
+            <button class="clear" onclick="clearDisplay()">DEL</button>
+            <button class="operator" onclick="appendOperator('/')">/</button>
+            <button class="operator" onclick="appendOperator('*')">*</button>
+            <button class="operator" onclick="deleteLast()"><i class="fas fa-arrow-left"></i></button>
+
+            <button onclick="appendNumber('7')">7</button>
+            <button onclick="appendNumber('8')">8</button>
+            <button onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('-')">-</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendNumber('.')">.</button>
+
+            <button onclick="appendNumber('0')">0</button>
+            <button class="equals" onclick="calculate()">RUN_ESTIMATE</button>
+        </div>
+
+        <div id="history" class="history-item hidden">
+            LOG: <span id="last-lie"></span>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        let currentInput = '';
+        let hasResult = false;
+
+        const inputDisplay = document.getElementById('input-display');
+        const resultDisplay = document.getElementById('result-display');
+        const calcContainer = document.getElementById('calculator');
+        const historyDiv = document.getElementById('history');
+        const lastLieSpan = document.getElementById('last-lie');
+
+        const phrases = [
+            "Around {n} maybe?",
+            "Balls-park: {n}",
+            "Roughly {n}",
+            "~{n}",
+            "Literally {n}",
+            "Estimated {n}",
+            "Feeling like {n}",
+            "{n}-ish",
+            "Say... {n}?",
+            "Call it {n}"
+        ];
+
+        // Load saved state
+        function loadState() {
+            const savedInput = Storage.get('unCalculatorInput', '');
+            const savedResult = Storage.get('unCalculatorResult', '');
+            
+            if (savedInput) {
+                currentInput = savedInput;
+                updateDisplay();
+            }
+            
+            if (savedResult) {
+                resultDisplay.innerText = savedResult;
+                hasResult = true;
+                historyDiv.classList.remove('hidden');
+                lastLieSpan.innerText = savedResult;
+            }
+        }
+
+        function appendNumber(num) {
+            if (hasResult) {
+                currentInput = num;
+                hasResult = false;
+                resultDisplay.classList.remove('glitch-pop');
+                resultDisplay.innerText = "CALCULATING...";
+            } else {
+                if (currentInput === '') currentInput = num;
+                else currentInput += num;
+            }
+            updateDisplay();
+            Storage.set('unCalculatorInput', currentInput);
+        }
+
+        function appendOperator(op) {
+            if (hasResult) {
+                hasResult = false;
+                resultDisplay.classList.remove('glitch-pop');
+            }
+            if (currentInput === '' && (op === '*' || op === '/')) return;
+            const lastChar = currentInput.slice(-1);
+            if (['+', '-', '*', '/'].includes(lastChar)) {
+                currentInput = currentInput.slice(0, -1) + op;
+            } else {
+                currentInput += op;
+            }
+            updateDisplay();
+            Storage.set('unCalculatorInput', currentInput);
+        }
+
+        function clearDisplay() {
+            currentInput = '';
+            hasResult = false;
+            inputDisplay.innerText = 'READY_';
+            resultDisplay.innerText = "AWAITING_INPUT";
+            resultDisplay.classList.remove('text-pink-500', 'glitch-pop');
+            historyDiv.classList.add('hidden');
+            Storage.set('unCalculatorInput', '');
+            Storage.set('unCalculatorResult', '');
+        }
+
+        function deleteLast() {
+            if (hasResult) {
+                clearDisplay();
+                return;
+            }
+            currentInput = currentInput.slice(0, -1);
+            updateDisplay();
+            Storage.set('unCalculatorInput', currentInput);
+        }
+
+        function updateDisplay() {
+            inputDisplay.innerText = (currentInput || '0') + '_';
+        }
+
+        function calculate() {
+            if (!currentInput) return;
+
+            try {
+                let expression = currentInput;
+                if (['+', '-', '*', '/'].includes(expression.slice(-1))) {
+                    expression = expression.slice(0, -1);
+                }
+
+                const realAnswer = eval(expression);
+                if (isNaN(realAnswer) || !isFinite(realAnswer)) throw new Error();
+
+                const wrongAnswer = generateWrongAnswer(realAnswer);
+                const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                const resultText = randomPhrase.replace('{n}', wrongAnswer);
+                
+                resultDisplay.innerText = resultText;
+                hasResult = true;
+
+                // Visual Feedback
+                resultDisplay.classList.add('glitch-pop');
+                calcContainer.classList.add('shake');
+                setTimeout(() => calcContainer.classList.remove('shake'), 400);
+
+                // History
+                historyDiv.classList.remove('hidden');
+                lastLieSpan.innerText = `${expression} → ${wrongAnswer}`;
+
+                // Save state
+                Storage.set('unCalculatorResult', resultText);
+                Storage.set('unCalculatorInput', '');
+
+            } catch (e) {
+                resultDisplay.innerText = "SYNTAX_ERROR";
+                resultDisplay.classList.add('text-pink-500', 'glitch-pop');
+            }
+        }
+
+        function generateWrongAnswer(n) {
+            if (n === 0) return (Math.random() > 0.5 ? "0.01" : "-0.5");
+            
+            let offset;
+            if (Math.abs(n) < 10) {
+                // For small numbers, move by 1 or 2
+                offset = (Math.random() > 0.5 ? 1.2 : -0.8);
+                return (n + offset).toFixed(1);
+            }
+
+            // For larger numbers, use a percentage error (8% to 18%)
+            const errorFactor = 0.08 + (Math.random() * 0.1);
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const final = n * (1 + (errorFactor * direction));
+
+            if (Math.abs(final) > 999999) return "TOO_MUCH";
+            
+            // Format with commas but slightly "off"
+            return Math.floor(final + (Math.random() * 2)).toLocaleString();
+        }
+
+        // Initialize
+        loadState();
+    </script>
+</body>
+</html>
