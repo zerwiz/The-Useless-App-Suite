@@ -115,6 +115,61 @@ The Useless App Suite is a client-side single-page application with optional Fir
 - **UI:** Full-screen canvas, draggable stats container, hidden text background
 - **Persistence:** None (resets on each session for maximum futility)
 
+#### 12. The Undo-Only Text Editor
+- **State:** Words array, editor display state
+- **Logic:** Keyboard event blocking (only navigation and Ctrl+Z allowed)
+- **UI:** Windows 95-style interface with classic gray aesthetic
+- **Features:** 
+  - Massive 5,000-page "Saline Chronicles Manifesto" about salt
+  - Only undo and navigation keys allowed
+  - Typing is blocked with toast notifications
+  - Visual feedback when undoing
+- **Persistence:** None (resets on reload)
+
+#### 13. The Virtual Waiting Room
+- **State:** Current page, start time, audio context
+- **Logic:** Magazine page generation, timer updates, intercom simulation
+- **UI:** Office beige aesthetic with flicker animation, 3D magazine pages
+- **Features:**
+  - 100-page magazine from November 2014 with real news articles
+  - Click-through magazine pages (previous/next navigation)
+  - Wait timer that counts up from check-in time
+  - Analog clock showing elapsed wait time
+  - Procedural white noise ambient audio
+  - Simulated intercom announcements with status lights
+  - Check-in screen before accessing the magazine
+- **Persistence:** None (resets on reload)
+
+#### 14. Existential Clock
+- **State:** Current time, rotating thoughts, dynamic background
+- **Logic:** Real-time clock updates, status messages based on hour, thought cycling
+- **UI:** Minimalist dark aesthetic with circular clock face, glowing effects
+- **Features:**
+  - Circular clock face with existential labels instead of numbers
+  - Labels: "Eventually", "Not Yet", "Too Late", "Again", "Soon", "Now", "Maybe", "Someday", "Never", "Always", "Almost", "Inevitably"
+  - Real-time clock with smooth second hand animation
+  - Dynamic status messages based on time of day
+  - Rotating philosophical thoughts below the clock
+  - Subtle background color shifts based on hour
+  - Digital time display in monospace font
+- **Persistence:** None (resets on reload)
+
+#### 15. The Useless Food Idea Generator
+- **State:** Food ideas array, modal state
+- **Logic:** Array shuffling, random refusal selection, modal display
+- **UI:** Dark aesthetic with amber accents, responsive grid layout
+- **Features:**
+  - 40 useless food ideas displayed in a grid
+  - Each idea card with title and description
+  - "Cook Up a New Batch" button to randomize order
+  - "View Recipe" button on each card that shows refusal modal
+  - 50+ different refusal messages with creative excuses
+  - Modal popup with humorous legal/moral/scientific warnings
+  - Gradient text styling for header
+  - Hover effects on cards
+  - Responsive grid layout (1-4 columns)
+- **Persistence:** None (resets on reload)
+
 ## Data Flow
 
 ### Hold On Leaderboard

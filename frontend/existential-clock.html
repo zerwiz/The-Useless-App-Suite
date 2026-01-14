@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Existential Clock - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            transition: background 2s ease;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        @media (min-width: 640px) {
+            .clock-container {
+                width: 450px;
+                height: 450px;
+            }
+        }
+
+        .hand {
+            transform-origin: bottom center;
+            transition: transform 0.5s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+        }
+
+        .hand-smooth {
+            transform-origin: bottom center;
+            transition: transform 0.1s linear;
+        }
+
+        .existential-label {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0.7;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            z-index: 60;
+        }
+
+        .existential-label:hover {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+            color: #fff;
+        }
+
+        .existential-modal {
+            position: fixed;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem 2rem;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeInModal 0.3s ease-out;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #e5e5e5;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            font-size: 1.2rem;
+            color: #e5e5e5;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .center-dot {
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .blur-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            opacity: 0.8;
+        }
+
+        .reflection {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="blur-bg" id="dynamic-bg"></div>
+
+    <div class="text-center mb-12 space-y-2 z-10">
+        <h1 class="text-3xl font-light tracking-widest uppercase opacity-40">Existential Clock</h1>
+        <p id="thought-of-the-moment" class="text-sm italic opacity-60 h-6 transition-opacity duration-1000">When is the right time?</p>
+    </div>
+
+    <div class="clock-container flex items-center justify-center border border-white/10 rounded-full shadow-2xl bg-black/20 backdrop-blur-sm">
+        <div class="reflection"></div>
+        
+        <!-- Hands -->
+        <div id="hour-hand" class="hand bg-white w-1.5 h-24 rounded-full absolute bottom-1/2 left-1/2 -translate-x-1/2 z-30" style="height: 25%; margin-bottom: 0;"></div>
+        <div id="minute-hand" class="hand bg-white/70 w-1 h-36 rounded-full absolute bottom-1/2 left-1/2 -translate-x-1/2 z-20" style="height: 35%; margin-bottom: 0;"></div>
+        <div id="second-hand" class="hand-smooth bg-red-500/80 w-0.5 h-40 absolute bottom-1/2 left-1/2 -translate-x-1/2 z-40" style="height: 40%; margin-bottom: 0;"></div>
+        
+        <div class="center-dot"></div>
+
+        <!-- Labels will be injected here -->
+        <div id="labels-container" class="absolute inset-0"></div>
+    </div>
+
+    <div class="mt-16 text-center z-10 max-w-md">
+        <div id="status-text" class="text-xl font-light tracking-wide text-white/80">
+            Fetching the current state of being...
+        </div>
+        <div id="precise-time" class="mt-4 font-mono text-xs opacity-20 tracking-tighter">
+            00:00:00
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        // Audio Context for sounds
+        let audioCtx;
+        
+        function initAudio() {
+            if (audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio context not available:', e);
+                return;
+            }
+        }
+
+        function playClickSound(type = 'default') {
+            initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') {
+                if (audioCtx) audioCtx.resume();
+                return;
+            }
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Different sounds for different interactions
+            if (type === 'label') {
+                // Gentle, ethereal sound for label clicks
+                oscillator.frequency.value = 350;
+                oscillator.type = 'sine';
+            } else if (type === 'modal') {
+                // Slightly higher, more mysterious sound for modals
+                oscillator.frequency.value = 420;
+                oscillator.type = 'sine';
+            } else {
+                oscillator.frequency.value = 400;
+                oscillator.type = 'sine';
+            }
+
+            gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        const labels = [
+            "Eventually", // 1
+            "Not Yet",    // 2
+            "Too Late",   // 3
+            "Again",      // 4
+            "Soon",       // 5
+            "Now",        // 6
+            "Maybe",      // 7
+            "Someday",    // 8
+            "Never",      // 9
+            "Always",     // 10
+            "Almost",     // 11
+            "Inevitably"  // 12
+        ];
+
+        const thoughts = [
+            "Time is a flat circle.",
+            "Are you waiting for the right moment?",
+            "Everything is temporary.",
+            "The future is already here.",
+            "Silence the noise.",
+            "Don't count the seconds; make the seconds count.",
+            "Reality is merely an illusion.",
+            "The past is a ghost.",
+            "What are you doing with your 'now'?"
+        ];
+
+        const modalMessages = [
+            "Eventually, everything returns to dust.",
+            "Not yet, not now, perhaps never.",
+            "Too late to undo what has been done.",
+            "Again, we find ourselves here, circling the void.",
+            "Soon, but when? The question remains unanswered.",
+            "Now, this moment, is all that truly exists.",
+            "Maybe tomorrow. Maybe never. Maybe always.",
+            "Someday we'll understand. Or we won't.",
+            "Never is such a definitive word, yet nothing is certain.",
+            "Always searching, never finding, forever questioning.",
+            "Almost there, almost here, almost nowhere.",
+            "Inevitably, time moves forward without our consent.",
+            "Eventually, all questions become meaningless.",
+            "Not yet ready, perhaps never will be.",
+            "Too late to change what's already happened.",
+            "Again and again, we return to the same thoughts.",
+            "Soon you'll realize, or you won't.",
+            "Now is the only moment that matters, yet we ignore it.",
+            "Maybe it's time. Maybe it's not. Who knows?",
+            "Someday feels so distant, yet tomorrow comes too soon.",
+            "Never forget, never remember, just exist.",
+            "Always in between, never fully here or there.",
+            "Almost understood, but not quite grasped.",
+            "Inevitably, we ask ourselves why.",
+            "Eventually, silence becomes the loudest sound.",
+            "Not yet, because the moment isn't right.",
+            "Too late for regrets, too early for acceptance.",
+            "Again, we question the nature of our existence.",
+            "Soon everything will make sense, or nothing will.",
+            "Now, pause. What are you actually doing?",
+            "Maybe the answer is in the question itself.",
+            "Someday we'll stop asking. Today is not that day.",
+            "Never certain, always uncertain, forever wondering.",
+            "Always moving, never arriving, perpetually searching.",
+            "Almost there, but there is nowhere to go.",
+            "Inevitably, we realize we knew nothing all along.",
+            "Eventually, the questions stop mattering.",
+            "Not yet prepared, but time doesn't wait.",
+            "Too late to go back, too soon to move forward.",
+            "Again, we find ourselves at the edge of understanding."
+        ];
+
+        const container = document.getElementById('labels-container');
+        const hourHand = document.getElementById('hour-hand');
+        const minHand = document.getElementById('minute-hand');
+        const secHand = document.getElementById('second-hand');
+        const statusText = document.getElementById('status-text');
+        const preciseTime = document.getElementById('precise-time');
+        const thoughtText = document.getElementById('thought-of-the-moment');
+        const dynamicBg = document.getElementById('dynamic-bg');
+
+        // Create and show modal
+        function showModal() {
+            // Play sound for label click
+            playClickSound('label');
+            
+            // Remove existing modal if any
+            const existingModal = document.querySelector('.existential-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Random message
+            const message = modalMessages[Math.floor(Math.random() * modalMessages.length)];
+            
+            // Random position (but not too close to edges)
+            const padding = 50;
+            const x = padding + Math.random() * (window.innerWidth - 2 * padding - 300);
+            const y = padding + Math.random() * (window.innerHeight - 2 * padding - 150);
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'existential-modal';
+            modal.style.left = `${x}px`;
+            modal.style.top = `${y}px`;
+            modal.innerHTML = `
+                <div class="modal-close" onclick="closeModal(this)">×</div>
+                <p class="text-lg leading-relaxed">${message}</p>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Play modal appear sound
+            setTimeout(() => playClickSound('modal'), 100);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (modal.parentElement) {
+                    modal.style.opacity = '0';
+                    modal.style.transition = 'opacity 0.3s ease-out';
+                    setTimeout(() => modal.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        function closeModal(closeBtn) {
+            playClickSound('click');
+            const modal = closeBtn.parentElement;
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.3s ease-out';
+            setTimeout(() => modal.remove(), 300);
+        }
+
+        window.closeModal = closeModal;
+
+        // Initialize labels
+        function initLabels() {
+            const radius = window.innerWidth < 640 ? 130 : 180;
+            labels.forEach((text, i) => {
+                const angle = (i + 1) * 30; // 30 degrees per hour
+                const radians = (angle - 90) * (Math.PI / 180);
+                const x = 50 + 40 * Math.cos(radians);
+                const y = 50 + 40 * Math.sin(radians);
+                
+                const label = document.createElement('div');
+                label.className = 'existential-label text-sm sm:text-lg';
+                label.style.left = `${x}%`;
+                label.style.top = `${y}%`;
+                label.innerText = text;
+                label.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showModal();
+                });
+                container.appendChild(label);
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+            const ms = now.getMilliseconds();
+
+            // Calculate rotations
+            const secDeg = ((seconds + ms / 1000) / 60) * 360;
+            const minDeg = ((minutes + seconds / 60) / 60) * 360;
+            const hourDeg = ((hours % 12 + minutes / 60) / 12) * 360;
+
+            secHand.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+            minHand.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+            hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+            // Update status text based on hour
+            updateStatus(hours, minutes);
+            
+            // Update digital ghost
+            preciseTime.innerText = now.toLocaleTimeString();
+        }
+
+        function updateStatus(h, m) {
+            let message = "";
+            if (h >= 5 && h < 12) message = "The dawn of a new 'perhaps'.";
+            else if (h >= 12 && h < 17) message = "The peak of 'eventually'.";
+            else if (h >= 17 && h < 21) message = "Dwindling towards 'too late'.";
+            else message = "Resting in the 'not yet'.";
+            
+            if (statusText.innerText !== message) {
+                statusText.style.opacity = 0;
+                setTimeout(() => {
+                    statusText.innerText = message;
+                    statusText.style.opacity = 1;
+                }, 500);
+            }
+
+            // Subtle background shift based on hour
+            const hue = (h * 15) % 360;
+            dynamicBg.style.background = `radial-gradient(circle at center, hsl(${hue}, 20%, 15%) 0%, #000 100%)`;
+        }
+
+        function cycleThought() {
+            thoughtText.style.opacity = 0;
+            setTimeout(() => {
+                const randomThought = thoughts[Math.floor(Math.random() * thoughts.length)];
+                thoughtText.innerText = randomThought;
+                thoughtText.style.opacity = 0.6;
+            }, 1000);
+        }
+
+        // Run
+        initLabels();
+        setInterval(updateClock, 50);
+        setInterval(cycleThought, 10000);
+        updateClock();
+        
+        // Responsive adjustment
+        window.addEventListener('resize', () => {
+            container.innerHTML = '';
+            initLabels();
+        });
+    </script>
+</body>
+</html>

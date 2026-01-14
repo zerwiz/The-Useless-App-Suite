@@ -19,6 +19,10 @@ The Useless App Suite is a web-based application featuring eleven interactive ex
 9. **Typing Speedster** - Type fast for invisibility, or wait 10 minutes for clarity.
 10. **Un-Calculator** - Cyber edition. Always gives wrong answers with confidence.
 11. **Digital Dusting** - Fight entropy. Dust that never stops settling. Maximum futility.
+12. **The Undo-Only Text Editor** - A text editor where you can only undo. No typing allowed.
+13. **The Virtual Waiting Room** - A waiting room with 2014 magazines and infinite wait time.
+14. **Existential Clock** - A clock that asks philosophical questions instead of telling time.
+15. **The Useless Food Idea Generator** - 40 culinary catastrophes. We provide the concept; you provide the indigestion.
 
 ## Quick Start
 
@@ -87,6 +91,10 @@ For Firebase integration (Hold On leaderboard), configure your Firebase credenti
 │   ├── typing-speedster.html # Typing Speedster
 │   ├── un-calculator.html # Un-Calculator
 │   ├── dusting.html # Digital Dusting
+│   ├── undo-editor.html # The Undo-Only Text Editor
+│   ├── waiting-room.html # The Virtual Waiting Room
+│   ├── existential-clock.html # Existential Clock
+│   ├── food-generator.html # The Useless Food Idea Generator
 │   ├── shared.css    # Shared styles
 │   └── shared.js     # Shared utilities
 ├── _redirects         # Netlify routing

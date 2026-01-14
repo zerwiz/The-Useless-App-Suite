@@ -124,18 +124,66 @@ The Useless App Suite is a collection of eleven interactive web applications tha
 - **Dependencies:** None (pure JavaScript)
 
 ### 11. Digital Dusting (Maximum Entropy)
-- **Purpose:** Fight entropy by dusting a surface that never stays clean
+
+### 12. The Undo-Only Text Editor
+- **Purpose:** A text editor where you can only undo - no typing allowed
 - **Features:**
-  - Two-layer dust system (grey base dust, purple toxic residue)
-  - Dust continuously settles when idle
-  - Purple residue requires repeated swiping to clear
-  - 10-minute countdown timer that reverses when idle
-  - Procedural white noise audio feedback
-  - Draggable UI stats container that spawns purple dust
-  - Hidden inspirational text revealed beneath dust
-  - Completion sequence when timer reaches zero
+  - Windows 95-style UI with classic gray aesthetic
+  - Massive 5,000-page "Saline Chronicles Manifesto" about salt
+  - Only navigation keys and Ctrl+Z (Undo) are allowed
+  - Typing is blocked with toast notifications
+  - Undo removes words in chunks of 15
+  - Visual feedback when undoing (red highlight fade)
+  - Word counter shows remaining words
+  - Scroll through the massive document
 - **Status:** ✅ Complete
-- **Dependencies:** None (pure JavaScript, Web Audio API, Canvas API)
+- **Dependencies:** None (pure JavaScript)
+
+### 13. The Virtual Waiting Room
+- **Purpose:** A waiting room with 2014 magazines and infinite wait time
+- **Features:**
+  - Office-style beige aesthetic with subtle flicker animation
+  - 100-page magazine from November 2014 with real news articles
+  - Click-through magazine pages (previous/next navigation)
+  - Wait timer that counts up from check-in time
+  - Analog clock showing elapsed wait time
+  - Procedural white noise ambient audio
+  - Simulated intercom announcements with status lights
+  - Check-in screen before accessing the magazine
+  - Content includes: Oscar Selfie, Rosetta Mission, Scotland Referendum, U2 album, Sony hack, Robin Williams, Taylor Swift, Ice Bucket Challenge, Bitcoin, Guardians of the Galaxy, Ebola, iPhone 6 Plus, World Cup
+  - Drug ads (Clarifen 2014) mixed with articles and product ads
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript, Web Audio API)
+
+### 14. Existential Clock
+- **Purpose:** A clock that asks philosophical questions instead of telling time
+- **Features:**
+  - Circular clock face with existential labels instead of numbers
+  - Labels: "Eventually", "Not Yet", "Too Late", "Again", "Soon", "Now", "Maybe", "Someday", "Never", "Always", "Almost", "Inevitably"
+  - Real-time clock with smooth second hand animation
+  - Dynamic status messages based on time of day
+  - Rotating philosophical thoughts below the clock
+  - Subtle background color shifts based on hour
+  - Digital time display in monospace font
+  - Minimalist dark aesthetic with glowing effects
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript)
+
+### 15. The Useless Food Idea Generator
+- **Purpose:** 40 culinary catastrophes that should never leave the kitchen
+- **Features:**
+  - Grid layout displaying all 40 useless food ideas
+  - Each idea card with title and description
+  - "Cook Up a New Batch" button to randomize/shuffle the order
+  - "View Recipe" button on each card that shows a refusal modal
+  - 50+ different refusal messages explaining why recipes won't be provided
+  - Modal popup with creative excuses (legal, moral, scientific, etc.)
+  - Examples: "Deconstructed Water", "Chocolate-Covered Pickles", "Hot Dog Smoothie", "Invisible Pizza", "Beef-Flavored Lollipop", "Infinite Burrito"
+  - Gradient text styling for header
+  - Hover effects on cards with amber accent colors
+  - Responsive grid layout (1-4 columns based on screen size)
+- **Status:** ✅ Complete
+- **Dependencies:** None (pure JavaScript)
 
 ## Architecture
 

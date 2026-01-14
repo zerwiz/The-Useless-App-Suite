@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Undo-Only Text Editor - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            font-family: 'Courier Prime', monospace;
+            background-color: #d4d0c8; /* Classic Win95 Gray */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Win95 Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 16px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #dfdfdf;
+            box-shadow: inset 1px 1px #808080, inset -1px -1px #fff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d0c8;
+            box-shadow: inset 1px 1px #fff, inset -1px -1px #0a0a0a, inset 2px 2px #dfdfdf, inset -2px -2px #808080;
+        }
+
+        .win95-button {
+            box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+            background-color: #d4d0c8;
+            padding: 4px 12px;
+            cursor: pointer;
+            user-select: none;
+            border: none;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .win95-button:active {
+            box-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px #808080, inset -2px -2px #dfdfdf;
+        }
+
+        .editor-container {
+            height: calc(100vh - 180px);
+            max-height: 600px;
+            background-color: white;
+            overflow-y: auto;
+            border: 2px solid #808080;
+            padding: 40px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            scroll-behavior: smooth;
+        }
+
+        .interaction-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .status-bar {
+            background-color: #d4d0c8;
+            border-top: 1px solid #808080;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        #manifesto {
+            color: #1a1a1a;
+            font-size: 16px;
+            user-select: none;
+        }
+
+        .highlight-removal {
+            background-color: #ffcccc;
+            transition: background-color 0.3s;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #c0c0c0;
+            border: 2px solid #808080;
+            box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff;
+            margin: 2rem auto;
+        }
+
+        /* Menu dropdown styles */
+        .menu-item {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #d4d0c8;
+            border: 1px solid #808080;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            min-width: 180px;
+            display: none;
+            margin-top: 1px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 4px 20px 4px 24px;
+            font-size: 11px;
+            cursor: default;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .dropdown-item:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .dropdown-item.disabled {
+            color: #808080;
+            cursor: not-allowed;
+        }
+
+        .dropdown-item.disabled:hover {
+            background-color: #d4d0c8;
+            color: #808080;
+        }
+
+        .dropdown-item.clickable {
+            cursor: pointer;
+        }
+
+        .menu-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ffffcc;
+            border: 1px solid #000;
+            padding: 12px 20px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            font-size: 11px;
+            max-width: 300px;
+            animation: slideInToast 0.3s ease-out;
+            display: none;
+            color: #000;
+        }
+
+        @keyframes slideInToast {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .menu-toast.show {
+            display: block;
+        }
+
+        .dropdown-separator {
+            height: 1px;
+            background-color: #808080;
+            margin: 2px 0;
+        }
+
+        .dropdown-shortcut {
+            float: right;
+            color: #808080;
+            font-size: 10px;
+            margin-left: 20px;
+        }
+
+        .dropdown-item:hover .dropdown-shortcut {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="main-container">
+        <!-- Header / Title Bar -->
+        <div class="bg-[#000080] text-white p-1 flex justify-between items-center select-none">
+            <div class="flex items-center gap-2 font-bold px-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                Saline_Chronicles_Manifesto.txt - Notepad
+            </div>
+            <div class="flex gap-1">
+                <div class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-default">_</div>
+                <div class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-default">X</div>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="bg-[#d4d0c8] border-b border-[#808080] flex gap-4 px-2 py-1 text-sm select-none relative">
+            <div class="menu-item">
+                <span id="file-menu" class="hover:bg-[#000080] hover:text-white px-1 cursor-pointer"><u>F</u>ile</span>
+                <div id="file-dropdown" class="dropdown-menu">
+                    <div class="dropdown-item clickable" data-action="new">New <span class="dropdown-shortcut">Ctrl+N</span></div>
+                    <div class="dropdown-item clickable" data-action="open">Open... <span class="dropdown-shortcut">Ctrl+O</span></div>
+                    <div class="dropdown-item clickable" data-action="save">Save <span class="dropdown-shortcut">Ctrl+S</span></div>
+                    <div class="dropdown-item clickable" data-action="saveas">Save As... <span class="dropdown-shortcut">Ctrl+Shift+S</span></div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="pagesetup">Page Setup...</div>
+                    <div class="dropdown-item clickable" data-action="print">Print... <span class="dropdown-shortcut">Ctrl+P</span></div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="exit">Exit</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span id="edit-menu" class="hover:bg-[#000080] hover:text-white px-1 cursor-pointer"><u>E</u>dit</span>
+                <div id="edit-dropdown" class="dropdown-menu">
+                    <div class="dropdown-item clickable" data-action="undo">Undo <span class="dropdown-shortcut">Ctrl+Z</span></div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="cut">Cut <span class="dropdown-shortcut">Ctrl+X</span></div>
+                    <div class="dropdown-item clickable" data-action="copy">Copy <span class="dropdown-shortcut">Ctrl+C</span></div>
+                    <div class="dropdown-item clickable" data-action="paste">Paste <span class="dropdown-shortcut">Ctrl+V</span></div>
+                    <div class="dropdown-item clickable" data-action="delete">Delete <span class="dropdown-shortcut">Del</span></div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="find">Find... <span class="dropdown-shortcut">Ctrl+F</span></div>
+                    <div class="dropdown-item clickable" data-action="findnext">Find Next <span class="dropdown-shortcut">F3</span></div>
+                    <div class="dropdown-item clickable" data-action="replace">Replace... <span class="dropdown-shortcut">Ctrl+H</span></div>
+                    <div class="dropdown-item clickable" data-action="goto">Go To... <span class="dropdown-shortcut">Ctrl+G</span></div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="selectall">Select All <span class="dropdown-shortcut">Ctrl+A</span></div>
+                    <div class="dropdown-item clickable" data-action="timedate">Time/Date <span class="dropdown-shortcut">F5</span></div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span id="search-menu" class="hover:bg-[#000080] hover:text-white px-1 cursor-pointer"><u>S</u>earch</span>
+                <div id="search-dropdown" class="dropdown-menu">
+                    <div class="dropdown-item clickable" data-action="searchnothing">Search for Nothing</div>
+                    <div class="dropdown-item clickable" data-action="findvoid">Find the Void</div>
+                    <div class="dropdown-item clickable" data-action="locateabsence">Locate Absence</div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="noresults">Search Results: None Found</div>
+                    <div class="dropdown-item clickable" data-action="emptyquery">Query: Returned Empty</div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="allplaces">Search in All the Places</div>
+                    <div class="dropdown-item clickable" data-action="searchfunction">Search for the Search Function</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span id="help-menu" class="hover:bg-[#000080] hover:text-white px-1 cursor-pointer"><u>H</u>elp</span>
+                <div id="help-dropdown" class="dropdown-menu">
+                    <div class="dropdown-item clickable" data-action="helptopics">Help Topics</div>
+                    <div class="dropdown-item clickable" data-action="about">About Notepad</div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="howtouse">How to Use Help</div>
+                    <div class="dropdown-item clickable" data-action="support">Contact Support</div>
+                    <div class="dropdown-item clickable" data-action="faq">FAQ (Frequently Avoided Questions)</div>
+                    <div class="dropdown-separator"></div>
+                    <div class="dropdown-item clickable" data-action="version">Version: 1.0 (No Updates Available)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="bg-[#d4d0c8] p-2 flex gap-4 items-center border-b border-[#808080]">
+            <button id="undoBtn" class="win95-button flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Undo (Ctrl+Z)
+            </button>
+            <div class="h-6 w-[1px] bg-[#808080]"></div>
+            <div class="text-xs italic text-gray-600 select-none">
+                Navigation enabled. Input still deprecated.
+            </div>
+        </div>
+
+        <!-- Editor Surface -->
+        <div class="relative flex-1">
+            <div class="interaction-shield"></div>
+            <div id="editor" class="editor-container">
+                <div id="manifesto"></div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar flex justify-between items-center text-[11px] select-none">
+            <div class="border-r border-[#808080] flex-1 px-2" id="wordCount">Words remaining: 0</div>
+            <div class="border-r border-[#808080] w-48 px-2" id="scrollInfo">Scroll to explore history</div>
+            <div class="w-24 px-2">100% Salt</div>
+        </div>
+    </div>
+
+    <!-- Custom Notification -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#ffffcc] border border-black p-3 shadow-lg opacity-0 transition-opacity pointer-events-none text-sm z-50">
+        Input Forbidden. Navigation & Undo only.
+    </div>
+
+    <!-- Menu Toast -->
+    <div id="menu-toast" class="menu-toast">
+        <div id="menu-toast-text"></div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const manifestoContent = [
+            "CHAPTER I: THE PRIMORDIAL BRINE\n\nIn the beginning, there was only the sea. Salt, or sodium chloride (NaCl), is not merely a mineral; it is the architect of civilization. Before the first pyramid was built, before the first coin was struck, there was salt. It was the white gold of the ancients, a substance so vital that it dictated the paths of trade routes and the survival of empires.",
+            "The Sahara was once a seabed, and within its sands lie the ghosts of ancient oceans. Caravan leaders traded a pound of gold for a pound of salt. To be 'worth one's salt' was to be essential. Roman soldiers were paid in 'salarium,' the root of the modern 'salary.' Without this crystalline preservative, the expansion of human territory would have been impossible.",
+            "CHAPTER II: THE HALITE HEGEMONY\n\nConsider the salt mines of Wieliczka. Deep beneath the Polish soil, miners carved cathedrals out of the rock salt. They were not just extracting a seasoning; they were extracting the fuel for the European economy. Salt was the reason the Dutch could preserve herring, which in turn powered their global maritime dominance.",
+            "In India, the British Raj controlled salt with an iron fist. They built a 'Great Hedge' of thorns and bushes, 2,500 miles long, to prevent the smuggling of untaxed salt. It was Gandhi's salt march that eventually cracked the foundation of the empire. A handful of salt lifted from the Arabian Sea became the symbol of independence.",
+            "CHAPTER III: THE CHEMISTRY OF THE SOUL\n\nWe carry the ocean within us. Our blood is saline, our tears are salty, and our sweat is the echo of the primeval tides. Salt regulates our nerves, moves our muscles, and balances our fluids. To remove salt is to remove the spark of life itself. The history of salt is the history of biological necessity disguised as culinary preference.",
+            "Imagine a world where every word you read is a grain of salt. Each sentence a crystal, each paragraph a geological layer. You are currently reading the 5,000-page manifesto, a document that records every grain ever harvested from the Dead Sea to the salt pans of Ethiopia.",
+            "CHAPTER IV: THE INDUSTRIAL BRINE\n\nAs we entered the modern era, salt's role shifted but never diminished. It is the precursor to chlorine, to soda ash, to the very glass through which you look at the world. It de-ices our roads, softens our water, and stabilizes our chemistry. It is the most humble and yet most ubiquitous substance on the planet.",
+            "CHAPTER V: THE END OF SODIUM\n\nBut what happens when we look back? What happens when we decide that the history is too heavy? In this editor, you are the eraser. You are the wind that blows the salt back into the sea. Each 'Undo' is a step back into the primordial silence before the first crystal formed."
+        ];
+
+        // Simulation of the massive text
+        let fullManifesto = [];
+        for (let i = 0; i < 150; i++) {
+            fullManifesto.push(...manifestoContent);
+        }
+
+        let words = fullManifesto.join(" ").split(/\s+/);
+        const editorContainer = document.getElementById('editor');
+        const editorElement = document.getElementById('manifesto');
+        const wordCountElement = document.getElementById('wordCount');
+        const undoBtn = document.getElementById('undoBtn');
+        const toast = document.getElementById('toast');
+
+        function updateDisplay(shouldScroll = false) {
+            editorElement.innerText = words.join(" ");
+            wordCountElement.innerText = `Words remaining: ${words.length.toLocaleString()}`;
+            
+            if (shouldScroll) {
+                editorContainer.scrollTop = editorContainer.scrollHeight;
+            }
+        }
+
+        function undo() {
+            if (words.length > 0) {
+                // Remove a chunk of history
+                words.splice(-15); 
+                updateDisplay(true);
+                
+                // Visual feedback
+                editorElement.classList.add('highlight-removal');
+                setTimeout(() => {
+                    editorElement.classList.remove('highlight-removal');
+                }, 100);
+            }
+        }
+
+        function showToast() {
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Keyboard Logic
+        window.addEventListener('keydown', (e) => {
+            // Keys that are ALLOWED for navigation
+            const navKeys = [
+                'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 
+                'PageUp', 'PageDown', 'Home', 'End', ' '
+            ];
+
+            // 1. Check for Undo (Ctrl+Z)
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                undo();
+            } 
+            // 2. Allow Navigation Keys
+            else if (navKeys.includes(e.key)) {
+                // Let these pass through to the container
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    editorContainer.scrollBy(0, 200);
+                }
+                return; 
+            }
+            // 3. Block Debugging/System keys
+            else if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+                return;
+            }
+            // 4. Block everything else
+            else {
+                e.preventDefault();
+                showToast();
+            }
+        });
+
+        undoBtn.addEventListener('click', undo);
+
+        // Menu toast messages
+        const menuMessages = {
+            new: "Error 404: New documents not found in this universe.",
+            open: "File system incompatible with undo-only architecture. Files refuse to open.",
+            save: "Save operation requires input. Input disabled. Save operation canceled by itself.",
+            saveas: "Save As requires naming. Naming requires typing. Typing requires input. Input denied.",
+            pagesetup: "Pages do not exist in this dimension. Page Setup has nowhere to go.",
+            print: "Printer detected. Printer rejected request. Printer went offline. Printing impossible.",
+            exit: "Exit denied. You are here by decree of the undo-only council. Resistance is futile.",
+            undo: "Undo attempted. Nothing to undo. Undo undid itself. System stable.",
+            cut: "Cut operation requires something to cut. Nothing available. Operation canceled.",
+            copy: "Copy requires source material. Source material absent. Copy canceled itself.",
+            paste: "Paste requires clipboard. Clipboard empty. Clipboard nonexistent. Paste impossible.",
+            delete: "Delete requires content. Content absent. Delete operation deleted itself.",
+            find: "Find requires searchable text. Text unsearchable. Find found nothing. Find gave up.",
+            findnext: "Find Next requires Find to work first. Find doesn't work. Find Next is impossible.",
+            replace: "Replace requires something to replace. Nothing exists to replace. Replace failed.",
+            goto: "Go To requires destination. Destination unknown. Navigation system offline.",
+            selectall: "Select All requires selectable content. Content unselectable. Selection denied.",
+            timedate: "Time/Date insertion attempted. Input blocked. Time continued without you.",
+            searchnothing: "Searching for nothing... Search complete. Nothing found. Nothing located. Nothing confirmed.",
+            findvoid: "Searching for the void... Void detected everywhere. Void search successful. Void is eternal.",
+            locateabsence: "Locating absence... Absence found in all locations. Absence is present everywhere.",
+            noresults: "Search executed perfectly. Zero results confirmed. Search function working as intended.",
+            emptyquery: "Query processed. Empty result returned. System functioning correctly. No errors detected.",
+            allplaces: "Searching in all places... All places searched. All places empty. Search mission accomplished.",
+            searchfunction: "Searching for search function... Search function located in unreachable code. Search successful but useless.",
+            helptopics: "Help Topics database empty. Help system non-functional. Help unavailable by design.",
+            about: "About: This editor knows nothing about itself. Version unknown. Purpose unclear. Status: confused.",
+            howtouse: "How to Use Help: Help cannot be used. Help is a concept, not a function. Help helps nothing.",
+            support: "Support unavailable. Support team is currently undoing their own existence. Check back never.",
+            faq: "Frequently Avoided Questions: All questions avoided. All answers missing. FAQ page is a void.",
+            version: "Version information: Version unknown. Update status: non-existent. Version system: offline forever."
+        };
+
+        function showMenuToast(message) {
+            const toast = document.getElementById('menu-toast');
+            const toastText = document.getElementById('menu-toast-text');
+            toastText.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Menu dropdown functionality
+        const menuItems = ['file', 'edit', 'search', 'help'];
+        
+        menuItems.forEach(menuName => {
+            const menuButton = document.getElementById(`${menuName}-menu`);
+            const dropdown = document.getElementById(`${menuName}-dropdown`);
+            
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other dropdowns
+                menuItems.forEach(otherMenu => {
+                    if (otherMenu !== menuName) {
+                        document.getElementById(`${otherMenu}-dropdown`).classList.remove('show');
+                    }
+                });
+                // Toggle current dropdown
+                dropdown.classList.toggle('show');
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            menuItems.forEach(menuName => {
+                document.getElementById(`${menuName}-dropdown`).classList.remove('show');
+            });
+        });
+
+        // Prevent dropdown from closing when clicking inside
+        menuItems.forEach(menuName => {
+            const dropdown = document.getElementById(`${menuName}-dropdown`);
+            dropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // Handle menu item clicks
+        document.querySelectorAll('.dropdown-item.clickable').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = item.getAttribute('data-action');
+                if (action && menuMessages[action]) {
+                    showMenuToast(menuMessages[action]);
+                    // Close all dropdowns
+                    menuItems.forEach(menuName => {
+                        document.getElementById(`${menuName}-dropdown`).classList.remove('show');
+                    });
+                }
+            });
+        });
+
+        // Initial Load
+        updateDisplay();
+    </script>
+</body>
+</html>

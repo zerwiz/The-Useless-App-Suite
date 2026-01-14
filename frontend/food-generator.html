@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Useless Food Idea Generator - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .idea-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .idea-card:hover {
+            transform: translateY(-5px);
+            border-color: #f59e0b;
+            box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.3);
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #f59e0b, #ef4444, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <header class="p-8 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 gradient-text">Useless Food Generator</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+            40 culinary catastrophes that should never leave the kitchen. We provide the concept; you provide the indigestion.
+        </p>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 pb-12">
+        <div class="flex justify-center mb-10">
+            <button id="generateBtn" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all transform active:scale-95 flex items-center gap-2 group">
+                <span>Cook Up a New Batch</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <div id="ideasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Food Ideas injected via JS -->
+        </div>
+    </main>
+
+    <footer class="p-6 text-center border-t border-slate-800 text-slate-500 text-sm">
+        <p>© 2026 Gastronomic Grief Labs. No nutrition facts provided.</p>
+    </footer>
+
+    <!-- Dynamic Modal -->
+    <div id="noHelpModal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 p-8 rounded-2xl max-w-md border border-amber-500 text-center shadow-2xl">
+            <div class="text-amber-500 text-5xl mb-4" id="modalEmoji">👨‍🍳</div>
+            <h2 class="text-2xl font-bold mb-2 text-white" id="modalTitle">Want the recipe?</h2>
+            <p class="text-slate-400 mb-6" id="modalDesc">Loading your disappointment...</p>
+            <button id="closeModal" class="bg-slate-800 hover:bg-slate-700 text-white py-2 px-6 rounded-lg transition-colors">I accept my bland fate</button>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        // Audio Context for sounds
+        let audioCtx;
+        
+        function initAudio() {
+            if (audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio context not available:', e);
+                return;
+            }
+        }
+
+        function playClickSound(type = 'default') {
+            initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') {
+                if (audioCtx) audioCtx.resume();
+                return;
+            }
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Different sounds for different actions
+            if (type === 'generate') {
+                // Cooking/sizzling sound for generating
+                oscillator.frequency.value = 450;
+                oscillator.type = 'sawtooth';
+            } else if (type === 'recipe') {
+                // Slight pop/crack sound for recipe button
+                oscillator.frequency.value = 550;
+                oscillator.type = 'square';
+            } else if (type === 'close') {
+                // Soft click for closing
+                oscillator.frequency.value = 300;
+                oscillator.type = 'sine';
+            } else {
+                oscillator.frequency.value = 400;
+                oscillator.type = 'sine';
+            }
+
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+        const foodIdeas = [
+            { id: 1, title: "Deconstructed Water", desc: "Served as a bowl of hydrogen and oxygen gas. Requires assembly." },
+            { id: 2, title: "Orange Juice Cereal", desc: "Specifically designed for people who want to start their day with a mistake." },
+            { id: 3, title: "Chocolate-Covered Pickles", desc: "The snack that answers a question absolutely no one was asking." },
+            { id: 4, title: "Hot Dog Smoothie", desc: "A blend of processed meats, mustard, and regret." },
+            { id: 5, title: "Invisible Pizza", desc: "Zero calories. Zero flavor. Zero visible matter. Just a very hot box." },
+            { id: 6, title: "Bone-in Bread", desc: "Artisanal sourdough with actual chicken bones baked inside." },
+            { id: 7, title: "Carbonated Milk", desc: "The tingling sensation of dairy that has definitely gone wrong." },
+            { id: 8, title: "Microwaveable Ice Cream", desc: "For those who prefer their frozen treats served as a tepid soup." },
+            { id: 9, title: "Pre-Chewed Pasta", desc: "Skipping the middleman. Perfect for the incredibly lazy diner." },
+            { id: 10, title: "Salted Napkins", desc: "When you finish your meal but still haven't reached your sodium quota." },
+            { id: 11, title: "Gravity-Defying Soup", desc: "A broth that only stays in the spoon if you hold it upside down." },
+            { id: 12, title: "Raw Toast", desc: "It's just bread, but we charge three times as much for the artistic intent." },
+            { id: 13, title: "Boiled Cucumber", desc: "Warm, soggy, and fundamentally upsetting." },
+            { id: 14, title: "Square Grapes", desc: "Designed for efficient stacking and no other reason." },
+            { id: 15, title: "Spiced Oxygen", desc: "A five-course meal served through a flavored nebulizer." },
+            { id: 16, title: "Deep-Fried Ice Cubes", desc: "A culinary paradox resulting in a soggy, oily explosion." },
+            { id: 17, title: "Jelly-Filled Steak", desc: "A prime cut of ribeye with a gooey, grape jelly center." },
+            { id: 18, title: "Liquid Salad", desc: "A blend of kale, ranch dressing, and croutons. Drink your greens." },
+            { id: 19, title: "Frozen Coffee Beans", desc: "Eat them like popcorn. Sleep is for the weak." },
+            { id: 20, title: "Edible Plate", desc: "Made of high-density cardboard. Tastes like disappointment." },
+            { id: 21, title: "Beef-Flavored Lollipop", desc: "The savory candy that makes everyone uncomfortable." },
+            { id: 22, title: "Sand-Infused Sourdough", desc: "For that authentic 'beach picnic' texture." },
+            { id: 23, title: "Blue-Dyed Broccoli", desc: "It's still healthy, it just looks like it's from another planet." },
+            { id: 24, title: "Exploding Peas", desc: "Engineered to pop like fireworks on your tongue." },
+            { id: 25, title: "Garlic Marshmallows", desc: "The ultimate prank for dessert lovers." },
+            { id: 26, title: "Single-Grain Risotto", desc: "A Michelin experience consisting of one grain of rice." },
+            { id: 27, title: "Mayo-Filled Donuts", desc: "A cruel prank disguised as a pastry." },
+            { id: 28, title: "100-Hour Boiled Egg", desc: "It has the consistency of a bouncy ball." },
+            { id: 29, title: "Canned Steam", desc: "Open the can and enjoy the disappearance of your $15." },
+            { id: 30, title: "Onion Bubblegum", desc: "For bad breath that lasts for hours." },
+            { id: 31, title: "Snail-Paced Slow Cooker", desc: "Takes exactly one year to cook." },
+            { id: 32, title: "Miniature Watermelon", desc: "A watermelon the size of a seed. Includes 50 seeds." },
+            { id: 33, title: "Fish-Eye Tacos", desc: "They're watching you enjoy your meal." },
+            { id: 34, title: "Vinegar-Soaked Popcorn", desc: "For people who enjoy burning lungs." },
+            { id: 35, title: "Minty Steak", desc: "Tastes like you just brushed your teeth." },
+            { id: 36, title: "Spicy Lettuce", desc: "Heat of a ghost pepper, flavor of water." },
+            { id: 37, title: "Dry Cereal (No Bowl)", desc: "Poured directly into your cupped hands." },
+            { id: 38, title: "Rehydrated Raisins", desc: "Grapes soaked in water. Worse than both." },
+            { id: 39, title: "Non-Newtonian Gravy", desc: "The harder you stir, the more it resists." },
+            { id: 40, title: "Infinite Burrito", desc: "A tortilla folded into a Mobius strip." }
+        ];
+
+        const refusals = [
+            { title: "The Classic", desc: "We specifically said we wouldn't help you cook these. To do so would be a crime against humanity and a violation of the Geneva Convention on condiments." },
+            { title: "The Legalist", desc: "Our lawyers have strictly forbidden the dissemination of this method. Preparing this would constitute a class-A felony in the eyes of the International Culinary Court." },
+            { title: "The Biological Hazard", desc: "We cannot comply. Sharing this recipe would be classified as a biological threat and would trigger an immediate lockdown of your local supermarket." },
+            { title: "The Chef's Grief", desc: "We refuse to be accomplices. To actually cook this would cause every Michelin-starred chef in history to weep simultaneously." },
+            { title: "The Redacted", desc: "[REDACTED]. Even seeing the ingredients list would require a Top Secret clearance from the Department of Gastronomy." },
+            { title: "The Moral High Ground", desc: "We have a conscience, unlike this dish. To help you make this would be a moral failing and a slap in the face to the discovery of fire." },
+            { title: "The Scientific Warning", desc: "Impossible. The chemical reactions required to create this are unstable and would likely cause a localized rift in the flavor-time continuum." },
+            { title: "The Insurance Policy", desc: "Our insurance policy specifically excludes 'acts of culinary madness.' We cannot be held liable for what this would do to your kitchen or your soul." },
+            { title: "The Historical Insult", desc: "We're staying silent. Making this would be a direct insult to the last 10,000 years of human agricultural progress." },
+            { title: "The Space-Age Terror", desc: "Even NASA wouldn't touch this. This dish is considered a 'Planetary Protection' risk and is banned in this solar system." },
+            { title: "The Short & Snarky", desc: "Recipe? No. We have standards, even if these ideas don't." },
+            { title: "The Diplomatic Incident", desc: "Providing it would cause a major diplomatic rift between us and the Association of People with Taste Buds." },
+            { title: "The Ancestral Shame", desc: "Your ancestors didn't spend millennia perfecting the art of the hearth just for you to make this. We won't help you shame your lineage." },
+            { title: "The Kitchen Sanctions", desc: "The United Nations has placed heavy sanctions on the ingredients required for this monstrosity. We won't break the embargo." },
+            { title: "The Eldritch Truth", desc: "Some things are better left unknown. To read the instructions is to invite a madness that no amount of antacids can cure." },
+            { title: "The Aesthetic Breach", desc: "No. To create this would be a violation of the universal laws of aesthetics and a crime against the color wheel." },
+            { title: "The Grocery Ban", desc: "If we told you, you'd be banned from every farmers' market for life. We're protecting your shopping privileges." },
+            { title: "The Salt Accords", desc: "This dish violates the 1994 Salt & Pepper Accords. We will not be party to such seasoning-based treason." },
+            { title: "The Disposal's Plea", desc: "Even your trash can has rights. We won't help you subject your plumbing to such a traumatic event." },
+            { title: "The Forbidden Fruit", desc: "This knowledge was cast out of the Garden of Eden for a reason. Don't ask again." },
+            { title: "The Health Inspector", desc: "A health inspector just fainted somewhere because you even thought about this. No help provided." },
+            { title: "The Palate Police", desc: "You're under kitchen-arrest. Anything you cook can and will be used against you in the Court of Fine Dining." },
+            { title: "The Texture Trauma", desc: "To achieve this specific texture would require a breach of the laws of physics and a total disregard for human dignity." },
+            { title: "The Condiment Containment", desc: "The condiments involved have been placed in a high-security containment unit. We don't have the keys." },
+            { title: "The Microwave's Revenge", desc: "Your microwave would literally go on strike. We support appliance rights. No recipe for you." },
+            { title: "The Taste Bud Strike", desc: "Your tongue has already filed a restraining order. We are legally bound to withhold this information." },
+            { title: "The Vitamin Void", desc: "This recipe contains exactly 0% of your daily recommended everything. Sharing it would be a public health crisis." },
+            { title: "The Pantry Panic", desc: "Your pantry would spontaneously combust if it knew these ingredients were coming. We're preventing a house fire." },
+            { title: "The Saucery Sin", desc: "This is not cooking, it's dark saucery. We don't practice the forbidden arts here." },
+            { title: "The Spatula Spurn", desc: "Even our digital spatulas refuse to touch this code. We can't generate what doesn't want to exist." },
+            { title: "The Fridge Forfeit", desc: "Your refrigerator would literally unlock itself and let the food escape rather than house this." },
+            { title: "The Boiling Point", desc: "We've reached our limit. Asking for this recipe is the literal boiling point of our patience." },
+            { title: "The Garnish Graveyard", desc: "Where parsley goes to die. We won't lead you to this culinary cemetery." },
+            { title: "The Oven Omen", desc: "The last person who made this saw a dark omen in the pilot light. We're protecting your future." },
+            { title: "The Recipe Red-Line", desc: "You've crossed it. We provide the bad ideas, but the execution is your own cross to bear." },
+            { title: "The Dough Dread", desc: "This dough doesn't rise; it just sits there and judges you. We won't facilitate that negativity." },
+            { title: "The Seasoning Sabotage", desc: "To make this would be a deliberate act of sabotage against the concept of 'flavor'." },
+            { title: "The Kettle's Curse", desc: "A watched pot never boils, but this pot would actively scream. No thank you." },
+            { title: "The Bitter End", desc: "We won't help you reach it. This recipe ends in tears and a very expensive cleaning bill." },
+            { title: "The Culinary Cold War", desc: "Releasing this recipe would restart the Great Mustard Wars of 1922. For peace, we decline." },
+            { title: "The Bland Bandit", desc: "You're trying to steal our secrets, but the secret is that there is no secret. It's just bad." },
+            { title: "The Marination Menace", desc: "If you let this sit for 24 hours, it will gain sentience and move out. Don't do it." },
+            { title: "The Whisk Risk", desc: "High-speed whisking of these ingredients creates a localized vacuum. Safety first." },
+            { title: "The Buffet Ban", desc: "Sharing this would get us banned from every 'All You Can Eat' establishment on Earth." },
+            { title: "The Griddle Grudge", desc: "Your stove hasn't forgotten what you did last time. We won't help you hurt it again." },
+            { title: "The Simmering Shame", desc: "Just thinking about the instructions makes us blush with embarrassment for you." },
+            { title: "The Flavor Fugitive", desc: "Flavor has fled the building. We cannot find the recipe because it ran away in terror." },
+            { title: "The Utensil Uprising", desc: "The forks have already started a protest. We cannot provide instructions under these conditions." },
+            { title: "The Napkin Negation", desc: "No amount of wiping will ever remove the memory of this dish from your mind." },
+            { title: "The Final Course", desc: "If you make this, it will be the last thing you ever want to eat. We value your appetite too much." }
+        ];
+
+        const grid = document.getElementById('ideasGrid');
+        const generateBtn = document.getElementById('generateBtn');
+        const modal = document.getElementById('noHelpModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+
+        function renderIdeas() {
+            grid.innerHTML = '';
+            foodIdeas.forEach(idea => {
+                const card = document.createElement('div');
+                card.className = 'idea-card p-6 rounded-2xl flex flex-col gap-3 relative overflow-hidden';
+                card.innerHTML = `
+                    <div class="text-amber-400 font-bold text-xs uppercase tracking-widest">Idea #${idea.id}</div>
+                    <h3 class="text-xl font-bold text-white leading-tight">${idea.title}</h3>
+                    <p class="text-slate-400 text-sm flex-grow">${idea.desc}</p>
+                    <button onclick="triggerNoHelp()" class="mt-4 text-xs font-semibold text-slate-500 hover:text-amber-400 transition-colors flex items-center gap-1">
+                        View Recipe
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.triggerNoHelp = () => {
+            playClickSound('recipe');
+            const randomRefusal = refusals[Math.floor(Math.random() * refusals.length)];
+            modalTitle.innerText = randomRefusal.title;
+            modalDesc.innerText = randomRefusal.desc;
+            modal.classList.remove('hidden');
+        };
+
+        closeModal.onclick = () => {
+            playClickSound('close');
+            modal.classList.add('hidden');
+        };
+
+        generateBtn.onclick = () => {
+            playClickSound('generate');
+            generateBtn.classList.add('scale-90');
+            setTimeout(() => {
+                generateBtn.classList.remove('scale-90');
+                foodIdeas.sort(() => Math.random() - 0.5);
+                renderIdeas();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 100);
+        };
+
+        window.onload = renderIdeas;
+    </script>
+</body>
+</html>

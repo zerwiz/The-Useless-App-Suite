@@ -28,6 +28,11 @@
             height: 100%;
             z-index: 10;
             cursor: crosshair;
+            pointer-events: none; /* Disabled until Begin is clicked */
+        }
+        
+        #dust-canvas.enabled {
+            pointer-events: auto; /* Enabled after Begin is clicked */
         }
 
         /* Residue layer (Purple) - Higher Z-index, harder to clear */
@@ -226,6 +231,7 @@
         let lastX = 0;
         let lastY = 0;
         let lastInteractionTime = Date.now();
+        let hasBegun = false; // Track if user has clicked Begin
         
         let uiPos = { x: 0, y: 20 };
         
@@ -471,12 +477,15 @@
         }
 
         function closeMessage() {
+            hasBegun = true; // Enable drawing/swiping
+            dustCanvas.classList.add('enabled'); // Enable canvas pointer events
             msgBox.style.display = 'none';
             lastInteractionTime = Date.now();
             initAudio(); // Initialize audio context after first user gesture
         }
 
         const start = (e) => {
+            if (!hasBegun) return; // Don't allow drawing until Begin is clicked
             initAudio(); // Initialize audio on first user interaction
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
             isDrawing = true;

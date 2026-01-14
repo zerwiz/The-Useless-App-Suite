@@ -72,6 +72,57 @@
 
     <script src="shared.js"></script>
     <script>
+        // Audio Context for sounds
+        let audioCtx;
+        
+        function initAudio() {
+            if (audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio context not available:', e);
+                return;
+            }
+        }
+
+        function playClickSound(type = 'default') {
+            initAudio();
+            if (!audioCtx || audioCtx.state === 'suspended') {
+                if (audioCtx) audioCtx.resume();
+                return;
+            }
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            // Different sounds for different actions
+            if (type === 'input') {
+                // Soft typing sound for input
+                oscillator.frequency.value = 600;
+                oscillator.type = 'sine';
+            } else if (type === 'select') {
+                // Click sound for selection change
+                oscillator.frequency.value = 500;
+                oscillator.type = 'square';
+            } else if (type === 'calculate') {
+                // Cash register sound for calculation
+                oscillator.frequency.value = 400;
+                oscillator.type = 'sawtooth';
+            } else {
+                oscillator.frequency.value = 450;
+                oscillator.type = 'sine';
+            }
+
+            gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.12);
+        }
+
         const usdInput = document.getElementById('usd-input');
         const currencySelect = document.getElementById('currency-select');
         const currValue = document.getElementById('curr-value');
@@ -94,6 +145,7 @@
 
         function updateConversion() {
             if (!usdInput || !currencySelect) return;
+            playClickSound('calculate');
             const amount = parseFloat(usdInput.value) || 0;
             const item = rates[currencySelect.value];
             const result = amount / item.price;
@@ -126,8 +178,18 @@
             }
         }
 
-        if (usdInput) usdInput.oninput = updateConversion;
-        if (currencySelect) currencySelect.onchange = updateConversion;
+        if (usdInput) {
+            usdInput.addEventListener('input', () => {
+                playClickSound('input');
+                updateConversion();
+            });
+        }
+        if (currencySelect) {
+            currencySelect.addEventListener('change', () => {
+                playClickSound('select');
+                updateConversion();
+            });
+        }
         loadCurrencyState();
         updateConversion();
     </script>

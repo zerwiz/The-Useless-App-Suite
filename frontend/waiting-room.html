@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Virtual Waiting Room - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: #e5e1d8;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        :root {
+            --office-beige: #e5e1d8;
+            --office-blue: #a3b8c2;
+        }
+
+        .flicker {
+            animation: flicker-animation 12s infinite;
+        }
+
+        @keyframes flicker-animation {
+            0%, 100% { opacity: 1; }
+            45% { opacity: 1; }
+            46% { opacity: 0.94; }
+            47% { opacity: 1; }
+            80% { opacity: 0.98; }
+            81% { opacity: 0.95; }
+            82% { opacity: 0.99; }
+        }
+
+        .magazine-container {
+            perspective: 2000px;
+            width: 380px;
+            height: 520px;
+            position: relative;
+            max-width: 100%;
+        }
+
+        .magazine-page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            transform-origin: left center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.6s;
+            backface-visibility: hidden;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .page-turned {
+            transform: rotateY(-170deg) scale(0.95);
+            box-shadow: -10px 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .magazine-cover {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        .white-noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            opacity: 0.04;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            z-index: 100;
+        }
+
+        .status-light {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4d4d;
+        }
+
+        .clock-face {
+            width: 70px; height: 70px;
+            border: 2px solid #888;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            background: #444;
+        }
+
+        .hour { width: 3px; height: 18px; }
+        .minute { width: 2px; height: 26px; }
+
+        .tiny-text {
+            font-size: 0.6rem;
+            line-height: 1.2;
+            color: #777;
+            overflow-y: auto;
+        }
+
+        .control-btn {
+            background-color: #d1d1c7;
+            color: #444;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            border: 1px solid #c4c4b9;
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background-color: #c4c4b9;
+            color: #222;
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body class="flicker">
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn" style="z-index: 250;">← Back to Hub</a>
+    <div class="white-noise"></div>
+
+    <div class="fixed top-8 left-1/2 -translate-x-1/2 text-stone-400 text-[10px] uppercase tracking-[0.3em] leading-relaxed z-[150] text-center">
+        North Wing / Patient Services<br>
+        Dr. Aris Thorne & Associates<br>
+        Est. 1994
+    </div>
+
+    <div class="fixed top-8 right-8 flex flex-col items-end gap-3 z-[150]">
+        <div class="clock-face bg-stone-50 flex items-center justify-center opacity-60">
+            <div id="hour-hand" class="hand hour"></div>
+            <div id="minute-hand" class="hand minute"></div>
+            <div class="w-1 h-1 bg-black rounded-full z-10"></div>
+        </div>
+        <div id="wait-timer" class="font-mono text-stone-400 text-xs tabular-nums">IN-SESSION: 00:00:00</div>
+    </div>
+
+    <div id="interaction-shield" class="fixed inset-0 bg-stone-200 z-[200] flex items-center justify-center cursor-pointer" style="pointer-events: auto;">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-stone-300 border-t-stone-500 rounded-full animate-spin mx-auto mb-6"></div>
+            <p class="text-stone-500 font-light text-xl italic mb-2">The doctor will see you shortly.</p>
+            <p class="text-stone-400 text-[10px] uppercase tracking-widest">Tap to check in</p>
+        </div>
+    </div>
+
+    <div id="magazine" class="magazine-container hidden"></div>
+
+    <div id="controls" class="mt-12 flex gap-4 hidden z-50 relative">
+        <button onclick="prevPage()" class="control-btn">PREVIOUS PAGE</button>
+        <button onclick="nextPage()" class="control-btn">NEXT PAGE</button>
+    </div>
+
+    <div class="fixed bottom-8 flex items-center gap-3 text-stone-400 text-[10px] tracking-tighter z-[150]">
+        <div class="status-light" id="mic-light"></div>
+        <span id="receptionist-status">INTERCOM STANDBY</span>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const magazineEl = document.getElementById('magazine');
+        let currentPage = 1;
+        const totalPages = 100;
+        let startTime = Date.now();
+        let audioContext;
+        let loopTimeout = null;
+
+        // Strictly 2014 content pool
+        const contents = [
+            { title: "The Oscar Selfie", body: "Ellen's star-studded photo 'broke' Twitter this March. Is this the peak of celebrity culture?", type: "culture" },
+            { title: "The Rosetta Mission", body: "Humanity has landed a probe on a comet. A ten-year journey concludes in the depths of space.", type: "science" },
+            { title: "Scotland Decides", body: "The referendum results are in. Scotland chooses to remain in the United Kingdom by a 55% majority.", type: "world" },
+            { title: "U2's Gift to You", body: "Why is there a new U2 album on your iPhone? Apple and Bono's surprise release sparks major backlash.", type: "tech" },
+            { title: "Sony Pictures Hacked", body: "Leaked emails, unreleased films, and international tension. Inside the year's biggest cyberattack.", type: "tech" },
+            { title: "Robin Williams: 1951-2014", body: "A look back at the life and laughter of a comedic legend who left us too soon this August.", type: "news" },
+            { title: "Taylor Swift Goes Pop", body: "With the release of '1989', the country star officially claims the pop throne.", type: "music" },
+            { title: "Kim Kardashian's Cover", body: "The 'Break the Internet' Paper magazine issue has everyone talking about the power of the image.", type: "culture" },
+            { title: "The Ice Bucket Challenge", body: "Over $100 million raised for ALS research. How a simple social media trend changed philanthropy.", type: "viral" },
+            { title: "Bitcoin's Wild Ride", body: "From $800 down to $300. Is the cryptocurrency dream dead, or just resting?", type: "finance" },
+            { title: "Guardians of the Galaxy", body: "A talking raccoon and a tree become 2014's unlikeliest box office champions.", type: "movies" },
+            { title: "Ebola in West Africa", body: "The World Health Organization declares a public health emergency of international concern.", type: "news" },
+            { title: "iPhone 6 Plus", body: "Bigger is better? We review the massive 5.5 inch display that has techies excited.", type: "tech" },
+            { title: "The World Cup in Brazil", body: "Germany triumphs over Argentina in the final. A look back at the tournament's best goals.", type: "sports" }
+        ];
+
+        const ads = [
+            "Experience the New Galaxy S5. Dust and water resistant. Launching April 2014.",
+            "HBO GO: Stream Game of Thrones Season 4. All Men Must Die.",
+            "Ask your doctor if Voltax is right for you. Side effects may include 2014 nostalgia.",
+            "2014 Toyota Corolla. Elevated. The most dependable car on the road today.",
+            "Nest Learning Thermostat. Saving energy is now a reality for the modern home."
+        ];
+
+        const lines = [
+            "Say in a distant, muffled voice: Is there a Gary for the three-fifteen? No? I'll check again.",
+            "Say with a loud sigh: Please do not leave umbrellas in the hallway. Thank you.",
+            "Say into a phone: Yes, we received the fax, but it's blurry. Can you send it again? Yes. Page four specifically.",
+            "Say distantly: The water cooler is empty. I told them on Tuesday. No one listens.",
+            "Say in a monotone voice: Dr. Thorne is currently in a consultation. There is approximately a forty minute wait for all walk-ins."
+        ];
+
+        function generatePages() {
+            magazineEl.innerHTML = "";
+            
+            // Cover (strictly 2014)
+            magazineEl.innerHTML += `
+                <div class="magazine-page z-[110] magazine-cover" id="page-1" onclick="flip(1)">
+                    <h1 class="font-serif text-5xl mt-12 mb-2 italic">Modern Living</h1>
+                    <p class="text-[10px] uppercase tracking-[0.4em] opacity-70 mb-10">November 2014 Edition</p>
+                    <div class="border-y border-white/20 py-6 my-6">
+                        <p class="text-2xl font-bold leading-tight uppercase">THE YEAR IN REVIEW</p>
+                        <p class="text-sm opacity-80 mt-2">From Comet Landings to Viral Challenges.</p>
+                    </div>
+                    <div class="mt-auto flex justify-between items-end border-t border-white/20 pt-4">
+                        <div class="text-[9px] opacity-60">Est. 1982<br>ISSUE #402</div>
+                        <div class="w-10 h-14 bg-white/10 border border-white/20"></div>
+                    </div>
+                </div>
+            `;
+
+            for (let i = 2; i < totalPages; i++) {
+                const isEven = i % 2 === 0;
+                const contentIndex = (i % contents.length);
+                const adIndex = (i % ads.length);
+                const pageContent = isEven ? contents[contentIndex] : null;
+
+                let html = `
+                    <div class="magazine-page z-[${110 - i}] bg-white" id="page-${i}" onclick="flip(${i})">
+                        <div class="text-[9px] text-stone-300 uppercase mb-8 border-b pb-1 flex justify-between">
+                            <span>Modern Living / 2014</span>
+                            <span>Page ${i}</span>
+                        </div>
+                `;
+
+                // Variety logic: Drug Ads, Articles, or Product Ads
+                if (i % 9 === 0) { 
+                    html += `
+                        <h2 class="text-lg font-bold text-blue-800 uppercase mb-2 italic">CLARIFEN (2014)</h2>
+                        <p class="text-xs text-stone-500 mb-4 font-semibold italic">Breathe again this autumn.</p>
+                        <div class="tiny-text h-64 pr-2">
+                            ${Array(12).fill("Important Safety Information for Clarifen: Side effects may include: vivid dreams of the 90s, a preference for landlines, and mild confusion when using a tablet. Do not take if you are pregnant or plan to become a doctor. If your doctor doesn't show up for 15 minutes, you are legally allowed to read this entire page.").join(" ")}
+                        </div>
+                    `;
+                } else if (pageContent) {
+                    html += `
+                        <h3 class="text-xl font-serif font-bold mb-4">${pageContent.title}</h3>
+                        <p class="text-sm text-stone-600 leading-relaxed mb-6">${pageContent.body}</p>
+                        <div class="w-full h-40 bg-stone-100 flex items-center justify-center text-stone-300 text-[10px] uppercase italic tracking-widest">
+                            [2014 News Image: ${pageContent.type}]
+                        </div>
+                        <p class="mt-6 text-xs text-stone-400 italic">Continued in the December 2014 issue...</p>
+                    `;
+                } else {
+                    html += `
+                        <div class="mt-10 border-4 border-stone-100 p-6 bg-stone-50/30">
+                            <p class="text-xs text-stone-400 uppercase tracking-widest text-center mb-4">Advertisement</p>
+                            <p class="text-center font-serif text-lg italic text-stone-700">"${ads[adIndex]}"</p>
+                        </div>
+                        <div class="mt-auto flex justify-center opacity-10 grayscale">
+                             <div class="w-32 h-32 bg-stone-800 rounded-full flex items-center justify-center text-white text-xs">BRAND LOGO</div>
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                magazineEl.innerHTML += html;
+            }
+
+            // Back Cover (strictly 2014)
+            magazineEl.innerHTML += `
+                <div class="magazine-page z-[0] bg-stone-100 flex flex-col items-center justify-center text-center" id="page-100">
+                    <div class="w-3/4 border-2 border-stone-200 p-8">
+                        <p class="text-stone-500 font-bold text-xl mb-4 italic">Modern Living</p>
+                        <p class="text-stone-400 text-xs italic mb-4">Subscribe for 2015. Rates starting at $24.99/year.</p>
+                        <p class="text-[10px] text-stone-300 uppercase tracking-widest">Copyright © 2014 MediaCorp</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.flip = (pageId) => {
+            if (pageId === currentPage) nextPage();
+            else if (pageId === currentPage - 1) prevPage();
+        };
+
+        window.nextPage = () => {
+            if (currentPage < totalPages) {
+                const page = document.getElementById(`page-${currentPage}`);
+                if (page) {
+                    page.classList.add('page-turned');
+                    currentPage++;
+                }
+            }
+        };
+
+        window.prevPage = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                const page = document.getElementById(`page-${currentPage}`);
+                if (page) {
+                    page.classList.remove('page-turned');
+                }
+            }
+        };
+
+        // Timer update
+        setInterval(() => {
+            const now = Date.now();
+            const diff = new Date(now - startTime);
+            document.getElementById('wait-timer').innerText = `IN-SESSION: ${String(diff.getUTCHours()).padStart(2, '0')}:${String(diff.getUTCMinutes()).padStart(2, '0')}:${String(diff.getUTCSeconds()).padStart(2, '0')}`;
+            const hours = diff.getUTCHours() + 2; 
+            const mins = diff.getUTCMinutes();
+            document.getElementById('hour-hand').style.transform = `rotate(${(hours * 30) + (mins / 2)}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${mins * 6}deg)`;
+        }, 1000);
+
+        // Initialize on check-in
+        document.getElementById('interaction-shield').addEventListener('click', function() {
+            this.style.opacity = '0';
+            setTimeout(() => {
+                this.style.display = 'none';
+                generatePages();
+                magazineEl.classList.remove('hidden');
+                document.getElementById('controls').classList.remove('hidden');
+                startAudio();
+                startLoop();
+            }, 800);
+        });
+
+        async function startAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const bufferSize = 2 * audioContext.sampleRate;
+                const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+                const noiseSource = audioContext.createBufferSource();
+                noiseSource.buffer = noiseBuffer;
+                noiseSource.loop = true;
+
+                const filter = audioContext.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 350;
+
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.04;
+
+                noiseSource.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                noiseSource.start();
+            } catch (e) {
+                console.log('Audio not available:', e);
+            }
+        }
+
+        function startLoop() {
+            if (loopTimeout) clearTimeout(loopTimeout);
+            
+            const micLight = document.getElementById('mic-light');
+            const status = document.getElementById('receptionist-status');
+            
+            // Simulate intercom activity
+            setTimeout(() => {
+                micLight.style.background = '#4dff4d';
+                status.innerText = "INTERCOM ACTIVE";
+                
+                setTimeout(() => {
+                    micLight.style.background = '#ff4d4d';
+                    status.innerText = "INTERCOM STANDBY";
+                    
+                    // Schedule next message
+                    loopTimeout = setTimeout(() => {
+                        startLoop();
+                    }, Math.random() * 30000 + 20000);
+                }, 3000);
+            }, Math.random() * 5000 + 10000);
+        }
+    </script>
+</body>
+</html>
