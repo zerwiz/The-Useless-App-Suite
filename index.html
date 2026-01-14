@@ -148,12 +148,25 @@
     <!-- HUB (HOME PAGE) -->
     <div class="px-6 py-12 min-h-screen">
         <div class="max-w-5xl mx-auto w-full text-center">
+            <!-- Top Footer Info -->
+            <div class="mb-8 text-center">
+                <div class="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mb-2">
+                    Built for the bored • 2026 UnArchive
+                </div>
+                <div class="normal-case font-normal text-[10px] text-slate-500 mb-3">
+                    Developer: zerwiz • <a href="mailto:justuzfamily@gmail.com" class="hover:text-blue-400 transition-colors">justuzfamily@gmail.com</a>
+                </div>
+                <button id="about-us-btn-top" class="px-6 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-slate-700/50 hover:border-slate-600/50">
+                    About Us
+                </button>
+            </div>
+            
             <div class="mb-20 mt-12">
                 <span class="inline-block px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold tracking-widest uppercase mb-4">Version 2.4.0</span>
                 <h1 class="text-6xl md:text-7xl font-extrabold mb-6 tracking-tight leading-tight">
                     The <span class="text-gradient">Useless</span><br>App Suite
                 </h1>
-                <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                <p id="subtitle-text" class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                     A curated collection of digital artifacts designed to do absolutely nothing useful.
                 </p>
             </div>
@@ -185,6 +198,34 @@
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Digital Pet Rock</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">An advanced lithic simulator that requires no actual interaction.</p>
                     <span class="text-stone-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
+                </a>
+
+                <a href="frontend/terms-game.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
+                    <div class="w-20 h-20 bg-blue-500/10 text-blue-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">📜</div>
+                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Terms of Service</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Scroll 400 pages of legal text. Too fast? Legal whiplash resets everything.</p>
+                    <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
+                </a>
+
+                <a href="frontend/captcha-trainer.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
+                    <div class="w-20 h-20 bg-blue-500/10 text-blue-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">✅</div>
+                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Captcha Trainer</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Train to prove your humanity. Select all squares. Repeat forever.</p>
+                    <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
+                </a>
+
+                <a href="frontend/weather.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
+                    <div class="w-20 h-20 bg-slate-500/10 text-slate-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">🌫️</div>
+                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Nihilist Weather</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Quantifying the void with terminal-style existential forecasts.</p>
+                    <span class="text-slate-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
+                </a>
+
+                <a href="frontend/hold.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
+                    <div class="w-20 h-20 bg-rose-500/10 text-rose-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:scale-125 transition-all duration-300">🔘</div>
+                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Hold On</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Compete globally for the record of holding a blue button.</p>
+                    <span class="text-rose-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
                 <a href="frontend/food-generator.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
@@ -222,20 +263,6 @@
                     <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/hold.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
-                    <div class="w-20 h-20 bg-rose-500/10 text-rose-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:scale-125 transition-all duration-300">🔘</div>
-                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Hold On</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Compete globally for the record of holding a blue button.</p>
-                    <span class="text-rose-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
-                </a>
-
-                <a href="frontend/weather.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
-                    <div class="w-20 h-20 bg-slate-500/10 text-slate-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">🌫️</div>
-                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Nihilist Weather</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Quantifying the void with terminal-style existential forecasts.</p>
-                    <span class="text-slate-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
-                </a>
-
                 <a href="frontend/clock.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
                     <div class="w-20 h-20 bg-amber-500/10 text-amber-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-180 group-hover:scale-110 transition-all duration-300">🕐</div>
                     <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Manual Clock</h3>
@@ -264,23 +291,9 @@
                     <span class="text-sky-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
                 </a>
 
-                <a href="frontend/terms-game.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
-                    <div class="w-20 h-20 bg-blue-500/10 text-blue-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">📜</div>
-                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Terms of Service</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Scroll 400 pages of legal text. Too fast? Legal whiplash resets everything.</p>
-                    <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
-                </a>
-
-                <a href="frontend/captcha-trainer.html" class="group cursor-pointer glass-card-home p-10 rounded-[2.5rem] relative overflow-hidden block no-underline w-full max-w-sm">
-                    <div class="w-20 h-20 bg-blue-500/10 text-blue-400 rounded-3xl flex items-center justify-center text-4xl mb-8 mx-auto group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">✅</div>
-                    <h3 class="text-2xl font-bold mb-3 font-['Space_Grotesk']">Captcha Trainer</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-6">Train to prove your humanity. Select all squares. Repeat forever.</p>
-                    <span class="text-blue-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-all">Launch Experience →</span>
-                </a>
-
             </div>
             <footer class="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">
-                Built for the bored • 2026 Archive<br>
+                Built for the bored • 2026 UnArchive<br>
                 <span class="normal-case font-normal text-[10px] mt-2 block">Developer: zerwiz • <a href="mailto:justuzfamily@gmail.com" class="hover:text-blue-400 transition-colors">justuzfamily@gmail.com</a></span>
                 <button id="about-us-btn" class="mt-4 px-6 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-slate-700/50 hover:border-slate-600/50">
                     About Us
@@ -376,8 +389,59 @@
             oscillator.stop(modalAudioCtx.currentTime + 0.1);
         }
         
-        // Random Modal System
+        // Random Modal System - Useless Life Hacks
         const randomModalMessages = [
+            "💡 Life Hack: To save time, stop doing things. Time saved: infinite.",
+            "💡 Life Hack: Want to be productive? Don't. Productivity is overrated.",
+            "💡 Life Hack: The best way to organize your life is to not organize it at all.",
+            "💡 Life Hack: Save money by not spending it. Revolutionary, we know.",
+            "💡 Life Hack: To avoid stress, simply stop caring. Works 0% of the time.",
+            "💡 Life Hack: The secret to happiness? Lower your expectations to zero.",
+            "💡 Life Hack: Want better sleep? Try sleeping. Groundbreaking advice.",
+            "💡 Life Hack: To find something, stop looking for it. It won't help, but it's a hack.",
+            "💡 Life Hack: The key to success is not trying. Guaranteed to not work.",
+            "💡 Life Hack: Save energy by doing nothing. Maximum efficiency achieved.",
+            "💡 Life Hack: To remember something, forget it first. Makes perfect sense.",
+            "💡 Life Hack: The best way to solve a problem is to ignore it completely.",
+            "💡 Life Hack: Want to be happy? Don't. Happiness is a myth anyway.",
+            "💡 Life Hack: To save space, throw everything away. Including this tip.",
+            "💡 Life Hack: The secret to productivity? Procrastinate everything. Forever.",
+            "💡 Life Hack: Want to be organized? Chaos is the new organization.",
+            "💡 Life Hack: To save time in the morning, just don't wake up.",
+            "💡 Life Hack: The best exercise is not exercising. Your body will thank you never.",
+            "💡 Life Hack: To avoid mistakes, never do anything. Flawless logic.",
+            "💡 Life Hack: Want to be successful? Lower the bar. Then remove the bar.",
+            "💡 Life Hack: The key to motivation is having no motivation at all.",
+            "💡 Life Hack: To save money, just be broke. Problem solved.",
+            "💡 Life Hack: Want better focus? Stop focusing. Mind-blowing, right?",
+            "💡 Life Hack: The best way to plan is to not plan. Plans are useless anyway.",
+            "💡 Life Hack: To avoid disappointment, expect nothing. Still disappointed?",
+            "💡 Life Hack: Want to be efficient? Do everything inefficiently. It's a choice.",
+            "💡 Life Hack: The secret to time management? Time doesn't exist. Problem solved.",
+            "💡 Life Hack: To be more creative, stop creating. Paradox achieved.",
+            "💡 Life Hack: Want to learn faster? Don't learn. Knowledge is overrated.",
+            "💡 Life Hack: The best way to achieve goals? Don't set any. Zero failure rate.",
+            "💡 Life Hack: To improve your memory, forget everything. Works perfectly.",
+            "💡 Life Hack: Want to save water? Stop existing. Maximum conservation.",
+            "💡 Life Hack: The secret to wealth? Don't want money. Poverty solved.",
+            "💡 Life Hack: To reduce anxiety, just don't feel anxious. Simple, right?",
+            "💡 Life Hack: Want better relationships? Avoid all people. Zero drama.",
+            "💡 Life Hack: The best diet? Don't eat. Weight loss guaranteed.",
+            "💡 Life Hack: To save electricity, unplug your brain. Energy crisis solved.",
+            "💡 Life Hack: Want to travel? Don't move. You're already somewhere.",
+            "💡 Life Hack: The secret to communication? Stop talking. Silence is golden.",
+            "💡 Life Hack: To avoid traffic, never leave home. Commute time: zero.",
+            "💡 Life Hack: Want to be healthier? Stop being unhealthy. Revolutionary.",
+            "💡 Life Hack: The best investment? Don't invest. Zero risk, zero return.",
+            "💡 Life Hack: To save on groceries, stop eating. Budget balanced.",
+            "💡 Life Hack: Want to be smarter? Stop thinking. Brain power saved.",
+            "💡 Life Hack: The secret to love? Don't love. Heartbreak avoided.",
+            "💡 Life Hack: To avoid problems, avoid everything. Problem-free life.",
+            "💡 Life Hack: Want to be famous? Don't be. Privacy maintained.",
+            "💡 Life Hack: The best workout? Don't work out. Muscles preserved.",
+            "💡 Life Hack: To save on rent, don't exist. Housing crisis solved.",
+            "💡 Life Hack: Want to be rich? Don't want things. Wealth achieved.",
+            "💡 Life Hack: The secret to peace? Don't care. World peace achieved.",
             "Did you know? This page serves no practical purpose.",
             "Welcome to the void. Your productivity has been successfully eliminated.",
             "Fun fact: Reading this message is the most useful thing you'll do today.",
@@ -471,10 +535,10 @@
             }, 5000);
         }
         
-        // Show modals at random intervals (every 8-15 seconds)
+        // Show modals at random intervals (every 5-10 seconds - more frequent)
         function startModalSystem() {
             function scheduleNext() {
-                const delay = 8000 + Math.random() * 7000; // 8-15 seconds
+                const delay = 5000 + Math.random() * 5000; // 5-10 seconds (more frequent)
                 modalInterval = setTimeout(() => {
                     showRandomModal();
                     scheduleNext();
@@ -483,12 +547,140 @@
             scheduleNext();
         }
         
+        // Floating background life hack text elements
+        function createFloatingLifeHack() {
+            const hack = document.createElement('div');
+            hack.className = 'useless-element';
+            hack.style.position = 'fixed';
+            hack.style.color = 'rgba(255, 255, 255, 0.08)';
+            hack.style.fontSize = '0.9rem';
+            hack.style.fontWeight = 'bold';
+            hack.style.pointerEvents = 'none';
+            hack.style.userSelect = 'none';
+            hack.style.zIndex = '1';
+            hack.style.maxWidth = '200px';
+            hack.style.textAlign = 'center';
+            hack.style.lineHeight = '1.4';
+            
+            // Select a random life hack (only the ones with 💡 emoji)
+            const lifeHacks = randomModalMessages.filter(msg => msg.includes('💡'));
+            const randomHack = lifeHacks[Math.floor(Math.random() * lifeHacks.length)];
+            hack.textContent = randomHack.replace('💡 ', ''); // Remove emoji for background
+            
+            // Random position
+            hack.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
+            hack.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
+            
+            // Random animation delay
+            const delay = Math.random() * 20;
+            hack.style.animationDelay = `${delay}s`;
+            hack.style.animation = 'float-useless 25s infinite ease-in-out';
+            
+            uselessBg.appendChild(hack);
+            
+            // Remove after animation cycle
+            setTimeout(() => {
+                if (hack.parentNode) {
+                    hack.remove();
+                }
+            }, 25000 + delay * 1000);
+        }
+        
+        // Create floating life hacks periodically
+        function startFloatingLifeHacks() {
+            // Create initial batch
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => createFloatingLifeHack(), i * 2000);
+            }
+            
+            // Continue creating new ones
+            function scheduleNextHack() {
+                const delay = 8000 + Math.random() * 12000; // 8-20 seconds
+                setTimeout(() => {
+                    createFloatingLifeHack();
+                    scheduleNextHack();
+                }, delay);
+            }
+            scheduleNextHack();
+        }
+        
+        // Random useless subtitle texts
+        const uselessSubtitles = [
+            "A curated collection of digital artifacts designed to do absolutely nothing useful.",
+            "Where productivity goes to die. Voluntarily.",
+            "The internet's most comprehensive collection of digital futility.",
+            "Solving problems that don't exist, one app at a time.",
+            "Because someone had too much time and not enough sense.",
+            "The digital equivalent of a paperweight collection.",
+            "Where your expectations meet zero. Zero wins.",
+            "A suite of apps that serve no purpose. On purpose.",
+            "The most useless apps on the internet. Guaranteed.",
+            "Because sometimes, nothing is exactly what you need.",
+            "Digital artifacts that do nothing. Perfectly.",
+            "Where productivity is optional and uselessness is mandatory.",
+            "A collection of apps that solve zero problems.",
+            "The internet's finest selection of digital pointlessness.",
+            "Because why do something useful when you can do nothing?",
+            "Where every app is a masterpiece of futility.",
+            "The most comprehensive useless app collection ever created.",
+            "Because someone asked 'what if apps did nothing?'",
+            "A suite designed to waste your time. Successfully.",
+            "Where digital art meets absolute pointlessness.",
+            "The perfect collection for people who appreciate the absurd.",
+            "Because life is too short to use useful apps.",
+            "A curated selection of digital nothingness.",
+            "Where every click serves no purpose. Beautifully.",
+            "The internet's premier collection of useless digital experiences.",
+            "Because sometimes the best app is the one that does nothing.",
+            "A suite of apps that contribute zero value. Proudly.",
+            "Where productivity is a myth and uselessness is reality.",
+            "The most pointless apps you'll ever encounter.",
+            "Because why be useful when you can be useless?"
+        ];
+        
+        // Rotate subtitle text
+        function rotateSubtitle() {
+            const subtitleEl = document.getElementById('subtitle-text');
+            if (!subtitleEl) return;
+            
+            let currentIndex = 0;
+            
+            function changeSubtitle() {
+                currentIndex = (currentIndex + 1) % uselessSubtitles.length;
+                subtitleEl.style.opacity = '0';
+                subtitleEl.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    subtitleEl.textContent = uselessSubtitles[currentIndex];
+                    subtitleEl.style.opacity = '1';
+                }, 500);
+            }
+            
+            // Change every 4-6 seconds
+            function scheduleNext() {
+                const delay = 4000 + Math.random() * 2000; // 4-6 seconds
+                setTimeout(() => {
+                    changeSubtitle();
+                    scheduleNext();
+                }, delay);
+            }
+            
+            // Start after initial delay
+            setTimeout(() => {
+                scheduleNext();
+            }, 5000);
+        }
+        
         // Initialize modal system after page load
         window.addEventListener('load', () => {
             // Wait a bit before first modal
             setTimeout(() => {
                 startModalSystem();
-            }, 5000);
+                startFloatingLifeHacks(); // Start floating life hacks
+            }, 3000); // Reduced from 5000 to 3000
+            
+            // Start subtitle rotation
+            rotateSubtitle();
         });
         
         // Clean up on page unload
@@ -498,6 +690,7 @@
         
         // About Us Modal
         const aboutUsBtn = document.getElementById('about-us-btn');
+        const aboutUsBtnTop = document.getElementById('about-us-btn-top');
         const aboutUsModal = document.getElementById('about-us-modal');
         
         function openAboutModal() {
@@ -512,6 +705,10 @@
         
         if (aboutUsBtn) {
             aboutUsBtn.addEventListener('click', openAboutModal);
+        }
+        
+        if (aboutUsBtnTop) {
+            aboutUsBtnTop.addEventListener('click', openAboutModal);
         }
         
         // Close modal on Escape key

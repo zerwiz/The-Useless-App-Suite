@@ -95,7 +95,7 @@
             </div>
             <div class="space-y-2">
                 <h2 class="text-2xl font-semibold">Official Response</h2>
-                <p class="text-gray-400 text-lg font-light leading-relaxed">
+                <p id="responseText" class="text-gray-400 text-lg font-light leading-relaxed">
                     That sounds like a <span class="text-white font-medium">"you"</span> problem.
                 </p>
             </div>
@@ -113,6 +113,35 @@
         const input = document.getElementById('problemInput');
         const popup = document.getElementById('responsePopup');
         const overlay = document.getElementById('overlay');
+        const responseText = document.getElementById('responseText');
+
+        const officialResponses = [
+            'That sounds like a <span class="text-white font-medium">"you"</span> problem.',
+            'Have you tried <span class="text-white font-medium">not having</span> that problem?',
+            'We\'ve reviewed your concern and determined it\'s <span class="text-white font-medium">not our concern</span>.',
+            'Your problem has been <span class="text-white font-medium">noted and ignored</span>.',
+            'That\'s unfortunate. For <span class="text-white font-medium">you</span>.',
+            'We understand your frustration. We just don\'t <span class="text-white font-medium">care</span>.',
+            'Thank you for sharing. We\'ll <span class="text-white font-medium">definitely not</span> look into that.',
+            'Your issue has been logged as <span class="text-white font-medium">"not our problem"</span>.',
+            'Have you considered <span class="text-white font-medium">dealing with it yourself</span>?',
+            'We appreciate your feedback. It has been <span class="text-white font-medium">discarded</span>.',
+            'That\'s a <span class="text-white font-medium">skill issue</span>, honestly.',
+            'Your problem is valid. We just don\'t <span class="text-white font-medium">validate it</span>.',
+            'We\'re here to listen. We\'re just not here to <span class="text-white font-medium">help</span>.',
+            'Your concern is <span class="text-white font-medium">noted for the record</span>. The record is empty.',
+            'We\'ve forwarded your issue to <span class="text-white font-medium">the void</span>.',
+            'That sounds like something <span class="text-white font-medium">you should figure out</span>.',
+            'We care about your problems. We care <span class="text-white font-medium">zero percent</span>.',
+            'Your submission has been received and <span class="text-white font-medium">immediately forgotten</span>.',
+            'Have you tried <span class="text-white font-medium">being better</span>?',
+            'We\'re sorry you feel that way. We\'re not sorry <span class="text-white font-medium">enough to do anything</span>.',
+            'That\'s a <span class="text-white font-medium">you</span> thing, not a <span class="text-white font-medium">us</span> thing.',
+            'Your problem is <span class="text-white font-medium">acknowledged and dismissed</span>.',
+            'We value your input. We value it at <span class="text-white font-medium">zero</span>.',
+            'Thank you for your concern. We\'re <span class="text-white font-medium">not concerned</span>.',
+            'Your issue is <span class="text-white font-medium">someone else\'s problem</span> now. Good luck finding them.'
+        ];
 
         function handleSubmission() {
             const text = input.value.trim();
@@ -127,6 +156,10 @@
             // Save submission count to localStorage
             const submissionCount = Storage.get('egoSubmissionCount', 0) + 1;
             Storage.set('egoSubmissionCount', submissionCount);
+
+            // Select a random dismissive response
+            const randomResponse = officialResponses[Math.floor(Math.random() * officialResponses.length)];
+            responseText.innerHTML = randomResponse;
 
             // Trigger animations
             overlay.classList.remove('opacity-0');

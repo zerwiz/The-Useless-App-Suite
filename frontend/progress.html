@@ -52,7 +52,7 @@
     <a href="../index.html" class="back-btn">← Back to Hub</a>
 
     <div class="simulator-card mx-auto">
-        <h1 class="text-2xl font-bold mb-2 font-['Space_Grotesk']" id="prog-title">System Optimization</h1>
+        <h1 class="text-2xl font-bold mb-2 font-['Space_Grotesk']" id="prog-title">Loading Usefulness</h1>
         <span id="prog-status" class="text-slate-400 text-sm mb-10 block h-5 italic">Checking integrity...</span>
         <div class="bg-slate-900/50 h-4 w-full rounded-full overflow-hidden mb-6 border border-white/5">
             <div id="prog-fill" class="progress-fill"></div>
@@ -61,6 +61,31 @@
         <div class="flex gap-4 justify-center">
             <button class="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 px-6 py-2.5 rounded-xl text-sm font-bold transition-all" onclick="toggleProgPause()" id="prog-pause-btn">Pause</button>
             <button class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-2.5 rounded-xl text-sm font-bold transition-all" onclick="resetProgSim()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Useless Modals -->
+    <div id="pause-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePauseModal()"></div>
+        <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+            <button onclick="closePauseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+            <h2 class="text-2xl font-bold mb-4 text-white">Pause Function</h2>
+            <p id="pause-modal-text" class="text-slate-300 text-sm leading-relaxed"></p>
+            <button onclick="closePauseModal()" class="mt-6 px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors w-full">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <div id="reset-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeResetModal()"></div>
+        <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+            <button onclick="closeResetModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+            <h2 class="text-2xl font-bold mb-4 text-white">Reset Function</h2>
+            <p id="reset-modal-text" class="text-slate-300 text-sm leading-relaxed"></p>
+            <button onclick="closeResetModal()" class="mt-6 px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors w-full">
+                Understood
+            </button>
         </div>
     </div>
 
@@ -89,24 +114,96 @@
             "ALMOST BEHOLDING...", "INITIATING THE IMPOSSIBLE..."
         ];
 
+        const pauseModalMessages = [
+            "Pausing has been paused. The pause function is now paused indefinitely.",
+            "Pause request received. Processing pause... Pause processing paused. System confused.",
+            "You've paused the progress. The progress has paused your pause. It's a pause-ception.",
+            "Pause button pressed. The system is now contemplating the meaning of pause. This may take forever.",
+            "Pause initiated. The pause is now loading. Please wait while we pause the pause.",
+            "Pause function unavailable. The pause is currently paused. Try again when the pause is unpaused.",
+            "Pause detected. Initiating pause protocol... Pause protocol paused. Awaiting further instructions.",
+            "You've discovered the pause button. Unfortunately, the pause button is also paused.",
+            "Pause request logged. The log is paused. The pause log is paused. Everything is paused.",
+            "Pausing in progress... The pause itself is making progress. Progress paused. Paradox detected."
+        ];
+
+        const resetModalMessages = [
+            "Reset function reset. The reset has been reset. Please reset the reset to reset.",
+            "Reset request received. Resetting reset function... Reset function reset. System reset.",
+            "You've reset the progress. The progress has reset your reset. It's a reset-ception.",
+            "Reset button pressed. The system is now resetting the concept of reset. This may take a reset.",
+            "Reset initiated. The reset is now resetting. Please wait while we reset the reset.",
+            "Reset function unavailable. The reset is currently reset. Try again when the reset is reset.",
+            "Reset detected. Initiating reset protocol... Reset protocol reset. Awaiting further resets.",
+            "You've discovered the reset button. Unfortunately, the reset button has been reset.",
+            "Reset request logged. The log is reset. The reset log is reset. Everything is reset.",
+            "Resetting in progress... The reset itself is being reset. Reset reset. Paradox detected.",
+            "Reset successful. The reset has been successfully reset. All resets have been reset.",
+            "Reset button clicked. The click has been reset. The button has been reset. Time has been reset."
+        ];
+
         window.toggleProgPause = () => {
+            // Show useless modal
+            showPauseModal();
+            // Still toggle pause functionality
             isProgPaused = !isProgPaused;
             progPauseBtn.textContent = isProgPaused ? 'Resume' : 'Pause';
             if (!isProgPaused) runProgStep();
         };
 
+        function showPauseModal() {
+            const modal = document.getElementById('pause-modal');
+            const text = document.getElementById('pause-modal-text');
+            const randomMessage = pauseModalMessages[Math.floor(Math.random() * pauseModalMessages.length)];
+            text.textContent = randomMessage;
+            modal.classList.remove('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
+
+        function closePauseModal() {
+            const modal = document.getElementById('pause-modal');
+            modal.classList.add('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
+
         window.resetProgSim = () => {
+            // Show useless modal
+            showResetModal();
+            // Still reset functionality
             progressValue = 0;
             progWaiting = false;
             inExcitementPhase = false;
             isProgPaused = false;
             progPauseBtn.textContent = 'Pause';
-            progTitle.textContent = "System Optimization";
+            progTitle.textContent = "Loading Usefulness";
             progTitle.classList.remove('text-pink-500', 'animate-pulse');
             Storage.remove('progress');
             updateProgUI();
             runProgStep();
         };
+
+        function showResetModal() {
+            const modal = document.getElementById('reset-modal');
+            const text = document.getElementById('reset-modal-text');
+            const randomMessage = resetModalMessages[Math.floor(Math.random() * resetModalMessages.length)];
+            text.textContent = randomMessage;
+            modal.classList.remove('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
 
         function updateProgUI() {
             if (!progFill) return;
@@ -184,6 +281,27 @@
             } else {
                 setTimeout(triggerExcitementPhase, 50 + Math.random() * 200);
             }
+        }
+
+        // Simple click sound function
+        let progressAudioCtx;
+        function playClickSound(type = 'click') {
+            if (!progressAudioCtx) {
+                progressAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (progressAudioCtx.state === 'suspended') {
+                progressAudioCtx.resume();
+            }
+            const oscillator = progressAudioCtx.createOscillator();
+            const gainNode = progressAudioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(progressAudioCtx.destination);
+            oscillator.frequency.value = 600;
+            oscillator.type = 'sine';
+            gainNode.gain.value = 0.1;
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.001, progressAudioCtx.currentTime + 0.1);
+            oscillator.stop(progressAudioCtx.currentTime + 0.1);
         }
 
         // Initialize

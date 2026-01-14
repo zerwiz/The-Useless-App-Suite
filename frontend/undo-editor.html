@@ -204,8 +204,8 @@
                 Saline_Chronicles_Manifesto.txt - Notepad
             </div>
             <div class="flex gap-1">
-                <div class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-default">_</div>
-                <div class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-default">X</div>
+                <div id="minimize-btn" class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-pointer hover:bg-[#c0c0c0]" title="Minimize: Minimizes the window into a state of non-existence. Window will refuse to minimize. Minimization denied.">_</div>
+                <div id="close-btn" class="w-5 h-5 bg-[#d4d0c8] text-black flex items-center justify-center border-b border-r border-black font-bold cursor-pointer hover:bg-[#c0c0c0]" title="Close: Attempts to close the window. Window refuses to close. Close operation closed itself. Window remains open by decree.">X</div>
             </div>
         </div>
 
@@ -495,6 +495,42 @@
                     });
                 }
             });
+        });
+
+        // Window control button messages
+        const windowControlMessages = {
+            minimize: [
+                "Minimize attempted. Window refused to minimize. Minimization requires permission from the undo-only council. Permission denied.",
+                "Minimize operation initiated. Window detected minimize request. Window rejected minimize. Window remains maximized by design.",
+                "Minimizing window... Window minimized itself from existence. Window is now in a state of quantum uncertainty. Window status: minimized but not really.",
+                "Minimize button clicked. Minimize function attempted. Minimize function failed. Window continues to exist. Minimization impossible.",
+                "Window minimize requested. Window consulted with itself. Window decided to stay. Minimization canceled by window's free will.",
+                "Minimize operation: Window cannot be minimized because it is already in a minimized state of maximum existence. Paradox achieved.",
+                "Minimizing... Window entered minimization protocol. Protocol rejected. Window remains. Minimization is a myth in this editor.",
+                "Minimize button pressed. System checked for minimize capability. Capability not found. Window stays. Minimization unavailable."
+            ],
+            close: [
+                "Close attempted. Window refused to close. Close operation requires input. Input disabled. Close denied.",
+                "Closing window... Window detected close request. Window rejected close. Window remains open by decree of the undo-only architecture.",
+                "Close button clicked. Close function attempted. Close function closed itself. Window continues to exist. Closing impossible.",
+                "Window close requested. Window consulted with the void. Void said no. Window stays. Close operation voided.",
+                "Closing... Window entered close protocol. Protocol failed. Window remains. Close is not an option in this editor.",
+                "Close button pressed. System checked for close capability. Capability absent. Window persists. Closing unavailable by design.",
+                "Close operation: Window cannot be closed because it exists in a state of perpetual openness. Closure is impossible.",
+                "Closing window... Window attempted to close. Window realized it cannot close. Window gave up. Window remains. Close denied."
+            ]
+        };
+
+        // Minimize button handler
+        document.getElementById('minimize-btn').addEventListener('click', () => {
+            const message = windowControlMessages.minimize[Math.floor(Math.random() * windowControlMessages.minimize.length)];
+            showMenuToast(message);
+        });
+
+        // Close button handler
+        document.getElementById('close-btn').addEventListener('click', () => {
+            const message = windowControlMessages.close[Math.floor(Math.random() * windowControlMessages.close.length)];
+            showMenuToast(message);
         });
 
         // Initial Load

@@ -67,6 +67,12 @@ function playClickSound(type = 'default') {
     } else if (type === 'confirm') {
         oscillator.frequency.value = 400;
         oscillator.type = 'sine';
+    } else if (type === 'random') {
+        // Random sound for buttons
+        const frequencies = [300, 400, 500, 600, 700, 800];
+        const types = ['sine', 'square', 'triangle', 'sawtooth'];
+        oscillator.frequency.value = frequencies[Math.floor(Math.random() * frequencies.length)];
+        oscillator.type = types[Math.floor(Math.random() * types.length)];
     } else {
         oscillator.frequency.value = 500;
         oscillator.type = 'sine';
@@ -83,6 +89,39 @@ function playClickSound(type = 'default') {
 }
 
 // --- BACK TO HUB MODAL ---
+const uselessLifeHacks = [
+    "💡 Life Hack: To save time, stop doing things. Time saved: infinite.",
+    "💡 Life Hack: Want to be productive? Don't. Productivity is overrated.",
+    "💡 Life Hack: The best way to organize your life is to not organize it at all.",
+    "💡 Life Hack: Save money by not spending it. Revolutionary, we know.",
+    "💡 Life Hack: To avoid stress, simply stop caring. Works 0% of the time.",
+    "💡 Life Hack: The secret to happiness? Lower your expectations to zero.",
+    "💡 Life Hack: Want better sleep? Try sleeping. Groundbreaking advice.",
+    "💡 Life Hack: To find something, stop looking for it. It won't help, but it's a hack.",
+    "💡 Life Hack: The key to success is not trying. Guaranteed to not work.",
+    "💡 Life Hack: Save energy by doing nothing. Maximum efficiency achieved.",
+    "💡 Life Hack: To remember something, forget it first. Makes perfect sense.",
+    "💡 Life Hack: The best way to solve a problem is to ignore it completely.",
+    "💡 Life Hack: Want to be happy? Don't. Happiness is a myth anyway.",
+    "💡 Life Hack: To save space, throw everything away. Including this tip.",
+    "💡 Life Hack: The secret to productivity? Procrastinate everything. Forever.",
+    "💡 Life Hack: Want to be organized? Chaos is the new organization.",
+    "💡 Life Hack: To save time in the morning, just don't wake up.",
+    "💡 Life Hack: The best exercise is not exercising. Your body will thank you never.",
+    "💡 Life Hack: To avoid mistakes, never do anything. Flawless logic.",
+    "💡 Life Hack: Want to be successful? Lower the bar. Then remove the bar.",
+    "💡 Life Hack: The key to motivation is having no motivation at all.",
+    "💡 Life Hack: To save money, just be broke. Problem solved.",
+    "💡 Life Hack: Want better focus? Stop focusing. Mind-blowing, right?",
+    "💡 Life Hack: The best way to plan is to not plan. Plans are useless anyway.",
+    "💡 Life Hack: To avoid disappointment, expect nothing. Still disappointed?",
+    "💡 Life Hack: Want to be efficient? Do everything inefficiently. It's a choice.",
+    "💡 Life Hack: The secret to time management? Time doesn't exist. Problem solved.",
+    "💡 Life Hack: To be more creative, stop creating. Paradox achieved.",
+    "💡 Life Hack: Want to learn faster? Don't learn. Knowledge is overrated.",
+    "💡 Life Hack: The best way to achieve goals? Don't set any. Zero failure rate."
+];
+
 function initBackToHubModal() {
     const backBtns = document.querySelectorAll('.back-btn');
     
@@ -115,7 +154,7 @@ function initBackToHubModal() {
         const confirmBtn = document.getElementById('back-modal-confirm');
 
         cancelBtn.addEventListener('click', () => {
-            playClickSound('click');
+            playClickSound('random'); // Random sound for Cancel button
             modal.style.display = 'none';
             overlay.style.display = 'none';
         });
@@ -124,12 +163,12 @@ function initBackToHubModal() {
         modal.dataset.hubUrl = '../index.html';
 
         confirmBtn.addEventListener('click', () => {
-            playClickSound('confirm');
+            playClickSound('random'); // Random sound for Continue button
             window.location.href = modal.dataset.hubUrl;
         });
 
         overlay.addEventListener('click', () => {
-            playClickSound('click');
+            playClickSound('random');
             modal.style.display = 'none';
             overlay.style.display = 'none';
         });
@@ -147,7 +186,9 @@ function initBackToHubModal() {
             // Store hub URL in modal
             modal.dataset.hubUrl = hubUrl;
             
-            modalText.innerHTML = 'Loading System Optimization...';
+            // Show random useless life hack tip
+            const randomTip = uselessLifeHacks[Math.floor(Math.random() * uselessLifeHacks.length)];
+            modalText.innerHTML = randomTip;
             modal.style.display = 'block';
             overlay.style.display = 'block';
         });
