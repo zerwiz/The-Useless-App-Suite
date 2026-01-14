@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **20 more useless life hacks** - Added 20 additional useless life hack messages to the random modal system on `index.html`.
 - **Bureaucracy Snake** - Snake game with bureaucratic paperwork. Every asset captured requires re-verification.
 - **Minesweeper: Bureaucracy & Threat Protocol** - Minesweeper with bureaucratic delays. Every click requires paperwork approval with "Filing...", "Reviewing...", "Approving..." steps. Includes permit system and random audit interventions.
 - **Minesweeper: Active Threat Protocol** - Regular Minesweeper without bureaucratic delays. Instant gameplay mode accessible from the bureaucratic version.

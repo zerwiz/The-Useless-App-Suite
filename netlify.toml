@@ -7,6 +7,13 @@
   # Skip npm install - this is a static site with no build step
   # Dependencies in package.json are only for local development checks
   command = "echo 'Static site - no build required'"
+  
+  # Environment variables to optimize build
+  [build.environment]
+    # Skip npm install scripts to speed up build
+    NPM_FLAGS = "--ignore-scripts --no-audit --no-fund"
+    # Tell Netlify this is a static site
+    NODE_ENV = "production"
 
 # Redirect rules
 # No SPA redirects needed - we use actual HTML pages
@@ -31,6 +38,3 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Environment variables (set these in Netlify dashboard)
-# [build.environment]
-#   NODE_VERSION = "18"

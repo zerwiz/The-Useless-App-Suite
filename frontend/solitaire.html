@@ -48,6 +48,10 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             pointer-events: auto;
             transform-origin: center center;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .card-back {
@@ -95,6 +99,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 9999;
+            touch-action: none;
         }
 
         /* Messaging */
@@ -325,8 +330,14 @@
                         <span class="text-[8px] sm:text-[10px]">${suitSymbols[card.suit]}</span>
                     </div>
                 `;
-                el.onmousedown = (e) => startDrag(e, card, type, colIdx, rowIdx);
-                el.ontouchstart = (e) => startDrag(e, card, type, colIdx, rowIdx);
+                el.onmousedown = (e) => {
+                    e.preventDefault();
+                    startDrag(e, card, type, colIdx, rowIdx);
+                };
+                el.ontouchstart = (e) => {
+                    e.preventDefault();
+                    startDrag(e, card, type, colIdx, rowIdx);
+                };
             }
             return el;
         }
@@ -335,8 +346,14 @@
         function startDrag(e, card, type, colIdx, rowIdx) {
             if (!card.faceUp || isGameOver()) return;
             
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const touch = e.touches ? e.touches[0] : null;
+            const clientX = e.clientX || (touch ? touch.clientX : 0);
+            const clientY = e.clientY || (touch ? touch.clientY : 0);
+            
+            if (!clientX && !clientY) return;
             
             // Get all cards in stack if it's tableau
             let cardsToMove = [];
@@ -348,7 +365,9 @@
                 cardsToMove = [foundations[colIdx][foundations[colIdx].length - 1]];
             }
 
-            const rect = e.target.closest('.card').getBoundingClientRect();
+            const cardEl = e.target.closest('.card');
+            if (!cardEl) return;
+            const rect = cardEl.getBoundingClientRect();
             
             dragInfo = {
                 cards: cardsToMove,
@@ -387,8 +406,14 @@
 
         function moveDrag(e) {
             if (!dragInfo) return;
-            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            e.preventDefault();
+            
+            const touch = e.touches ? e.touches[0] : null;
+            const clientX = e.clientX || (touch ? touch.clientX : 0);
+            const clientY = e.clientY || (touch ? touch.clientY : 0);
+            
+            if (!clientX && !clientY) return;
             
             const container = document.getElementById('drag-container');
             container.style.transform = `translate(${clientX - dragInfo.offsetX}px, ${clientY - dragInfo.offsetY}px)`;
@@ -397,8 +422,12 @@
         function endDrag(e) {
             if (!dragInfo) return;
 
-            const clientX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
-            const clientY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
+            e.preventDefault();
+            e.stopPropagation();
+
+            const touch = e.changedTouches ? e.changedTouches[0] : null;
+            const clientX = e.clientX || (touch ? touch.clientX : 0);
+            const clientY = e.clientY || (touch ? touch.clientY : 0);
 
             // Determine drop target
             const elementsAtPoint = document.elementsFromPoint(clientX, clientY);
@@ -525,10 +554,36 @@
         }
 
         // Global Listeners
-        window.onmousemove = moveDrag;
-        window.ontouchmove = moveDrag;
-        window.onmouseup = endDrag;
-        window.ontouchend = endDrag;
+        window.addEventListener('mousemove', (e) => {
+            if (dragInfo) {
+                e.preventDefault();
+                moveDrag(e);
+            }
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (dragInfo) {
+                e.preventDefault();
+                moveDrag(e);
+            }
+        }, { passive: false });
+        window.addEventListener('mouseup', (e) => {
+            if (dragInfo) {
+                e.preventDefault();
+                endDrag(e);
+            }
+        });
+        window.addEventListener('touchend', (e) => {
+            if (dragInfo) {
+                e.preventDefault();
+                endDrag(e);
+            }
+        }, { passive: false });
+        window.addEventListener('touchcancel', (e) => {
+            if (dragInfo) {
+                e.preventDefault();
+                endDrag(e);
+            }
+        }, { passive: false });
 
         document.getElementById('stock').onclick = () => {
             if (dragInfo) return;
