@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Trainer - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .captcha-tile {
+            transition: all 0.1s ease-out;
+        }
+
+        .captcha-tile.selected {
+            transform: scale(0.9);
+            outline: 4px solid #4A90E2;
+            z-index: 10;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
+
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div id="app-container" class="w-full max-w-[400px] bg-white shadow-2xl border border-slate-200 overflow-hidden relative">
+        
+        <!-- Modal Overlay -->
+        <div id="modal" class="hidden absolute inset-0 z-50 bg-white/95 backdrop-blur-md flex items-center justify-center p-8 text-center">
+            <div class="space-y-6">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-[#4A90E2]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <p id="modal-text" class="text-lg font-medium text-slate-600 italic">"Error 418: I am a teapot."</p>
+                <button onclick="closeModal()" class="bg-[#4A90E2] text-white px-8 py-2 rounded font-bold uppercase tracking-widest hover:bg-[#357abd] transition-colors shadow-lg active:scale-95">
+                    Continue Clicking
+                </button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-[#4A90E2] p-6 text-white select-none relative">
+            <button id="mute-btn" onclick="toggleMute()" class="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors">
+                <svg id="volume-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <p class="text-sm opacity-90 font-medium leading-tight">Select all squares with</p>
+            <h1 id="prompt-display" class="text-3xl font-black uppercase tracking-tight leading-none mt-1">fire hydrants</h1>
+            <p class="text-xs mt-2 opacity-80 italic">Verification is mandatory for digital existence.</p>
+        </div>
+
+        <!-- Grid Area -->
+        <div class="p-1 bg-white relative min-h-[300px]">
+            <div id="grid" class="grid grid-cols-3 gap-1">
+                <!-- Tiles injected by JS -->
+            </div>
+
+            <!-- Feedback Overlays -->
+            <div id="overlay-success" class="hidden absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-sm z-20">
+                <div class="bg-green-500 text-white px-6 py-3 rounded-full flex items-center gap-2 shadow-lg animate-bounce">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span class="font-bold">HUMAN DETECTED</span>
+                </div>
+            </div>
+            <div id="overlay-error" class="hidden absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-sm z-20">
+                <div class="bg-rose-500 text-white px-6 py-3 rounded-full flex items-center gap-2 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="font-bold">SYSTEM ERROR</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+            <div class="flex gap-4 text-slate-400">
+                <button onclick="initGame()" class="hover:text-[#4A90E2] transition-colors" title="Refresh">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                </button>
+                <button onclick="showUselessModal()" class="hover:text-[#4A90E2] transition-colors" title="Audio Help">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                </button>
+                <button onclick="showUselessModal()" class="hover:text-[#4A90E2] transition-colors" title="Info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </button>
+            </div>
+            
+            <button id="verify-btn" onclick="handleVerify()" class="px-8 py-2 font-bold uppercase tracking-wider rounded transition-all bg-slate-200 text-slate-400 cursor-pointer active:scale-95">
+                Skip
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mt-8 text-center space-y-1">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Global Training Stats</p>
+        <div id="stat-counter" class="text-4xl font-black text-slate-300 mono tracking-tighter">000000</div>
+        <p class="text-[10px] text-slate-400 italic">"The algorithm remembers your sacrifice."</p>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const apiKey = "";
+        let verifiedCount = 0;
+        let isMuted = false;
+        let currentPrompt = "";
+        let tiles = [];
+        let selectedIds = new Set();
+        let isChecking = false;
+
+        const targets = ['fire hydrants', 'traffic lights', 'buses', 'palm trees', 'bicycles', 'mountains', 'boats', 'crosswalks'];
+        const uselessResponses = [
+            "Error 418: I am a teapot. Your verification is invalid until brewed.",
+            "Your current humanity level (87%) is insufficient for this action.",
+            "Help is coming. Estimated arrival: [UNRECOVERABLE_TIMESTAMP].",
+            "To reset your password, please solve 14,000 consecutive traffic light captchas.",
+            "Input buffer overflow. Please rethink your life choices and try again.",
+            "The info you seek is protected by a secondary, invisible captcha.",
+            "System Alert: You are clicking too much like a carbon-based lifeform.",
+            "The 'Skip' button is strictly for aesthetic purposes.",
+            "Error 0x8004: Your mouse pathing is too efficient. Try to be more clumsy.",
+            "Training progress saved. To access your data, please provide a valid birth certificate.",
+            "Support Ticket #8292: 'User asked for help.' Status: Closed. Resolution: Ignored.",
+            "Humanity detected. Attempting to isolate and remove.",
+            "Thank you for clicking. Your labor has funded 0.0004 seconds of GPU runtime."
+        ];
+
+        // --- SVGs ---
+        const svgs = {
+            'fire hydrants': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><rect x="35" y="80" width="30" height="10" fill="#444"/><rect x="40" y="20" width="20" height="60" fill="#e11d48"/><circle cx="50" cy="25" r="15" fill="#e11d48"/><rect x="30" y="40" width="40" height="10" rx="5" fill="#e11d48"/><circle cx="50" cy="45" r="5" fill="#fff" opacity="0.3"/></svg>',
+            'traffic lights': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><rect x="40" y="10" width="20" height="70" rx="5" fill="#333"/><circle cx="50" cy="25" r="8" fill="#ef4444"/><circle cx="50" cy="45" r="8" fill="#f59e0b"/><circle cx="50" cy="65" r="8" fill="#10b981"/></svg>',
+            'buses': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><rect x="20" y="40" width="60" height="30" rx="5" fill="#facc15"/><rect x="25" y="45" width="15" height="10" fill="#bae6fd"/><rect x="45" y="45" width="15" height="10" fill="#bae6fd"/><circle cx="35" cy="70" r="7" fill="#333"/><circle cx="65" cy="70" r="7" fill="#333"/></svg>',
+            'palm trees': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><rect x="45" y="50" width="10" height="40" fill="#78350f"/><path d="M50 50 Q20 30 10 50" stroke="#166534" stroke-width="4" fill="none"/><path d="M50 50 Q80 30 90 50" stroke="#166534" stroke-width="4" fill="none"/><path d="M50 50 Q50 10 70 20" stroke="#166534" stroke-width="4" fill="none"/></svg>',
+            'bicycles': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><circle cx="30" cy="70" r="12" fill="none" stroke="#333" stroke-width="3"/><circle cx="70" cy="70" r="12" fill="none" stroke="#333" stroke-width="3"/><path d="M30 70 L50 40 L75 40 M50 40 L70 70 M50 40 L45 30 M75 40 L80 30" fill="none" stroke="#333" stroke-width="3"/></svg>',
+            'mountains': '<svg viewBox="0 0 100 100" class="w-full h-full p-2"><path d="M10 90 L50 20 L90 90 Z" fill="#64748b"/><path d="M38 40 L50 20 L62 40 L55 35 L50 40 L45 35 Z" fill="#f8fafc"/><path d="M30 90 L60 45 L95 90 Z" fill="#475569" opacity="0.8"/></svg>',
+            'boats': '<svg viewBox="0 0 100 100" class="w-full h-full p-4"><path d="M20 60 L80 60 L70 80 L30 80 Z" fill="#0369a1"/><rect x="48" y="30" width="4" height="30" fill="#444"/><path d="M52 35 L75 55 L52 55 Z" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/></svg>',
+            'crosswalks': '<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="0" y="0" width="100" height="100" fill="#94a3b8" opacity="0.2"/><rect x="10" y="20" width="80" height="10" fill="#fff"/><rect x="10" y="40" width="80" height="10" fill="#fff"/><rect x="10" y="60" width="80" height="10" fill="#fff"/><rect x="10" y="80" width="80" height="10" fill="#fff"/></svg>'
+        };
+
+        // --- Audio Logic ---
+        function playClick(freq = 400, type = 'sine') {
+            if (isMuted) return;
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcmData.length * 2);
+            const view = new DataView(buffer);
+            const writeString = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+            writeString(0, 'RIFF');
+            view.setUint32(4, 32 + pcmData.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, pcmData.length * 2, true);
+            for (let i = 0; i < pcmData.length; i++) view.setInt16(44 + i * 2, pcmData[i], true);
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        async function speak(text, voice = "Kore") {
+            if (isMuted || !apiKey) return;
+            const fetchWithRetry = async (retries = 5, delay = 1000) => {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: `${voice}: ${text}` }] }],
+                            generationConfig: {
+                                responseModalities: ["AUDIO"],
+                                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } }
+                            },
+                            model: "gemini-2.5-flash-preview-tts"
+                        })
+                    });
+                    if (!response.ok) throw new Error(response.status);
+                    const result = await response.json();
+                    const audioData = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData;
+                    if (!audioData) throw new Error("No audio");
+                    return audioData;
+                } catch (err) {
+                    if (retries > 0) {
+                        await new Promise(r => setTimeout(r, delay));
+                        return fetchWithRetry(retries - 1, delay * 2);
+                    }
+                    throw err;
+                }
+            };
+
+            try {
+                const audioData = await fetchWithRetry();
+                const rate = parseInt(audioData.mimeType.match(/rate=(\d+)/)?.[1] || "24000");
+                const binary = atob(audioData.data);
+                const pcmCorrected = new Int16Array(binary.length / 2);
+                for (let i = 0; i < pcmCorrected.length; i++) {
+                    const low = binary.charCodeAt(i * 2);
+                    const high = binary.charCodeAt(i * 2 + 1);
+                    pcmCorrected[i] = low | (high << 8);
+                }
+                const blob = pcmToWav(pcmCorrected, rate);
+                new Audio(URL.createObjectURL(blob)).play();
+            } catch (e) { console.error("TTS Failed", e); }
+        }
+
+        // --- Game Logic ---
+        function initGame() {
+            isChecking = false;
+            selectedIds.clear();
+            tiles = [];
+            currentPrompt = targets[Math.floor(Math.random() * targets.length)];
+            
+            const gridEl = document.getElementById('grid');
+            gridEl.innerHTML = '';
+            document.getElementById('prompt-display').innerText = currentPrompt;
+            document.getElementById('verify-btn').className = "px-8 py-2 font-bold uppercase tracking-wider rounded transition-all bg-slate-200 text-slate-400 cursor-pointer active:scale-95";
+            document.getElementById('verify-btn').innerText = "Skip";
+            
+            for (let i = 0; i < 9; i++) {
+                const isTarget = Math.random() > 0.65;
+                const type = isTarget ? currentPrompt : targets.filter(t => t !== currentPrompt)[Math.floor(Math.random() * (targets.length - 1))];
+                tiles.push({ id: i, type });
+                
+                const tileEl = document.createElement('div');
+                tileEl.id = `tile-${i}`;
+                tileEl.onclick = () => toggleTile(i);
+                tileEl.className = "relative aspect-square cursor-pointer bg-slate-50 border-2 border-transparent hover:brightness-95 captcha-tile overflow-hidden flex items-center justify-center";
+                tileEl.style.transform = `rotate(${(Math.random() - 0.5) * 8}deg) scale(${0.7 + Math.random() * 0.5})`;
+                tileEl.innerHTML = `
+                    <div class="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+                    ${svgs[type]}
+                    <div class="selection-check hidden absolute top-1 left-1 bg-[#4A90E2] text-white rounded-full p-0.5 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                `;
+                gridEl.appendChild(tileEl);
+            }
+
+            // Ensure at least one target
+            if (!tiles.some(t => t.type === currentPrompt)) {
+                const idx = Math.floor(Math.random() * 9);
+                tiles[idx].type = currentPrompt;
+                document.getElementById(`tile-${idx}`).innerHTML = `
+                    <div class="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+                    ${svgs[currentPrompt]}
+                    <div class="selection-check hidden absolute top-1 left-1 bg-[#4A90E2] text-white rounded-full p-0.5 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleTile(id) {
+            if (isChecking) return;
+            const el = document.getElementById(`tile-${id}`);
+            const check = el.querySelector('.selection-check');
+            
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+                el.classList.remove('selected');
+                check.classList.add('hidden');
+                playClick(300);
+            } else {
+                selectedIds.add(id);
+                el.classList.add('selected');
+                check.classList.remove('hidden');
+                playClick(450);
+            }
+
+            const btn = document.getElementById('verify-btn');
+            if (selectedIds.size > 0) {
+                btn.className = "px-8 py-2 font-bold uppercase tracking-wider rounded transition-all bg-[#4A90E2] text-white shadow-md active:scale-95";
+                btn.innerText = "Verify";
+            } else {
+                btn.className = "px-8 py-2 font-bold uppercase tracking-wider rounded transition-all bg-slate-200 text-slate-400 cursor-pointer active:scale-95";
+                btn.innerText = "Skip";
+            }
+        }
+
+        function handleVerify() {
+            if (selectedIds.size === 0) {
+                showUselessModal();
+                return;
+            }
+            isChecking = true;
+            playClick(200, 'sawtooth');
+            const btn = document.getElementById('verify-btn');
+            btn.classList.add('animate-pulse-soft');
+
+            setTimeout(() => {
+                const correctIds = tiles.filter(t => t.type === currentPrompt).map(t => t.id);
+                const isCorrect = selectedIds.size === correctIds.length && [...selectedIds].every(id => correctIds.includes(id));
+
+                if (isCorrect) {
+                    verifiedCount++;
+                    document.getElementById('stat-counter').innerText = verifiedCount.toString().padStart(6, '0');
+                    document.getElementById('overlay-success').classList.remove('hidden');
+                    speak("Verification successful. Proceeding.", "Kore");
+                    setTimeout(() => {
+                        document.getElementById('overlay-success').classList.add('hidden');
+                        btn.classList.remove('animate-pulse-soft');
+                        initGame();
+                    }, 1000);
+                } else {
+                    document.getElementById('overlay-error').classList.remove('hidden');
+                    speak("Verification failed. Human status questionable.", "Puck");
+                    setTimeout(() => {
+                        document.getElementById('overlay-error').classList.add('hidden');
+                        btn.classList.remove('animate-pulse-soft');
+                        initGame();
+                    }, 1500);
+                }
+            }, 800);
+        }
+
+        // --- Modal ---
+        function showUselessModal() {
+            const txt = uselessResponses[Math.floor(Math.random() * uselessResponses.length)];
+            document.getElementById('modal-text').innerText = `"${txt}"`;
+            document.getElementById('modal').classList.remove('hidden');
+            playClick(150, 'sawtooth');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            playClick(300);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('volume-icon');
+            if (isMuted) {
+                icon.innerHTML = '<line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9l-5 5H2v-6h2l5 5zM17.07 16.93a10 10 0 0 0 0-14.14M15.54 15.46a5 5 0 0 0 0-7.07"/>';
+            } else {
+                icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+            }
+            playClick(400);
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

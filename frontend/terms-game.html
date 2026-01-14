@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Terms of Service Game - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --legal-gray: #f4f4f5;
+            --legal-border: #e4e4e7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent body scroll, use container scroll */
+            background-color: #09090b;
+            color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .legal-text {
+            font-family: 'Libre Baskerville', serif;
+            line-height: 1.8;
+            color: #27272a;
+        }
+
+        .whiplash-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .progress-bar {
+            transition: width 0.1s ease-out;
+        }
+
+        #scroll-container {
+            scrollbar-width: thin;
+            scrollbar-color: #71717a transparent;
+        }
+
+        .overlay {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        .warning-flash {
+            animation: flash 0.3s infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center p-4">
+
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <!-- Header / Stats -->
+    <div class="w-full max-w-4xl flex flex-col mb-4">
+        <div class="flex justify-between items-end mb-2">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">TERMS OF SERVICE</h1>
+                <p class="text-xs text-zinc-500 uppercase tracking-widest">Document ID: 882-ULTRA-CONFIDENTIAL-v.402.1</p>
+            </div>
+            <div class="text-right">
+                <span id="speed-meter" class="text-xs font-mono text-zinc-400">SCROLL SPEED: 0 px/s</span>
+                <div id="speed-warning" class="hidden text-red-500 text-[10px] font-bold animate-pulse">SLOW DOWN!</div>
+            </div>
+        </div>
+        
+        <!-- Progress Tracking -->
+        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden border border-zinc-700">
+            <div id="progress" class="progress-bar bg-blue-500 h-full w-0"></div>
+        </div>
+        <div class="flex justify-between mt-1">
+            <span class="text-[10px] text-zinc-500">START OF DOCUMENT</span>
+            <span id="percentage" class="text-[10px] font-bold text-zinc-300">0%</span>
+            <span class="text-[10px] text-zinc-500">SECTION 402: END</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main id="game-frame" class="w-full max-w-4xl flex-1 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden relative">
+        
+        <!-- Document Content -->
+        <div id="scroll-container" class="flex-1 overflow-y-auto p-8 md:p-16 select-none">
+            <div id="legal-content" class="legal-text text-sm md:text-base">
+                <!-- Content generated via JS -->
+            </div>
+            
+            <!-- End Trigger -->
+            <div id="finish-line" class="h-64 flex flex-col items-center justify-center border-t-4 border-zinc-100 mt-20">
+                <p class="text-zinc-400 italic mb-4">You have reached the bottom.</p>
+                <button id="accept-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50">
+                    I ACCEPT THESE TERMS
+                </button>
+            </div>
+        </div>
+
+        <!-- Whiplash Overlay -->
+        <div id="whiplash-overlay" class="overlay absolute inset-0 flex flex-col items-center justify-center hidden z-50">
+            <h2 class="text-red-500 text-6xl font-black mb-4">LEGAL WHIPLASH</h2>
+            <p class="text-white text-xl text-center px-10">You scrolled faster than your eyes could reasonably process complex legal jargon.<br><span class="text-zinc-400 text-sm mt-4 block">Resetting progress to ensure full comprehension...</span></p>
+            <div class="mt-8 w-16 h-16 border-4 border-zinc-700 border-t-red-500 rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Victory Overlay -->
+        <div id="victory-overlay" class="overlay absolute inset-0 flex flex-col items-center justify-center hidden z-50">
+            <div class="bg-zinc-900 p-10 rounded-2xl border border-zinc-700 text-center max-w-md">
+                <div class="text-5xl mb-4">📜</div>
+                <h2 class="text-white text-3xl font-bold mb-2">TERMS ACCEPTED</h2>
+                <p class="text-zinc-400 mb-6">Congratulations. You have legally bound yourself to 400 pages of requirements you probably didn't actually read. We now own your second-born's metadata.</p>
+                <button onclick="location.reload()" class="text-blue-400 hover:underline">Read again?</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Instructions -->
+    <div class="mt-4 text-zinc-500 text-[11px] text-center max-w-xl">
+        <p>INSTRUCTION: Scroll to the absolute bottom. Maintain a "Reasonable Legal Review Speed." If you scroll too fast, the friction of the legal text will cause <span class="text-zinc-300 font-bold">Legal Whiplash</span>, forcing a document reset.</p>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const scrollContainer = document.getElementById('scroll-container');
+        const legalContent = document.getElementById('legal-content');
+        const progress = document.getElementById('progress');
+        const percentageText = document.getElementById('percentage');
+        const speedMeter = document.getElementById('speed-meter');
+        const speedWarning = document.getElementById('speed-warning');
+        const whiplashOverlay = document.getElementById('whiplash-overlay');
+        const victoryOverlay = document.getElementById('victory-overlay');
+        const gameFrame = document.getElementById('game-frame');
+        const acceptBtn = document.getElementById('accept-btn');
+
+        // Game Constants
+        const SPEED_LIMIT = 4500; // px per second
+        const WHIPLASH_COOLDOWN = 2000; // ms
+        const TOTAL_PAGES_SIMULATED = 400;
+
+        let lastScrollTop = 0;
+        let lastTimestamp = Date.now();
+        let isWhiplashed = false;
+        let scrollSpeed = 0;
+
+        // Audio System
+        let audioCtx;
+        let scrollGainNode;
+        let warningGainNode;
+        let lastScrollSoundTime = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(frequency, type, duration = 0.15, gainValue = 0.1) {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.value = gainValue;
+
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function playScrollSound(speed) {
+            initAudio();
+            const now = Date.now();
+            // Throttle scroll sounds to avoid too many simultaneous sounds
+            if (now - lastScrollSoundTime < 100) return;
+            lastScrollSoundTime = now;
+
+            // Subtle scroll sound based on speed
+            const volume = Math.min(speed / 10000, 0.08);
+            const frequency = 200 + (speed / 50);
+            playSound(frequency, 'sine', 0.1, volume);
+        }
+
+        function playWarningSound() {
+            playSound(600, 'square', 0.2, 0.15);
+        }
+
+        function playWhiplashSound() {
+            initAudio();
+            // Create a harsh whiplash sound
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playAcceptSound() {
+            // Victory sound - ascending tone
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playClickSound() {
+            playSound(500, 'sine', 0.1, 0.12);
+        }
+
+        // Generate massive amounts of legal text
+        function generateLegalText() {
+            const fragments = [
+                "Section {n}.1.1: The party of the first part, hereafter referred to as the 'Subscribed User', hereby indemnifies the party of the second part against all claims including but not limited to digital fatigue, scroll-related RSI, and accidental soul-forfeiture.",
+                "Clause {n}.b: In accordance with the Digital Millennium Act of 2204, all cookies must be consumed within 48 hours of visit or they become property of the local municipality.",
+                "Subsection {n}.88: No user shall use this service while operating a heavy steam engine or underwater basket-weaving facility without express written consent from the Admiral of the High Seas.",
+                "Paragraph {n}.zeta: By continuing to scroll, you acknowledge that the font size used here is perfectly legible and you waive any right to complain about eye strain to any court located on a terrestrial planet.",
+                "Article {n}: We reserve the right to change these terms every 4.5 seconds. Your continued scrolling constitutes acceptance of the terms as they existed 0.2 seconds ago.",
+                "Appendix {n}-F: The user agrees that any disputes will be settled by a game of Rock-Paper-Scissors with a high-level AI. The AI's decision is final and legally binding in all dimensions."
+            ];
+
+            let html = '';
+            for (let i = 1; i <= TOTAL_PAGES_SIMULATED; i++) {
+                html += `<div class="mb-10">
+                    <h3 class="font-bold text-zinc-900 mb-2 uppercase border-b border-zinc-200">PAGE ${i} OF 400</h3>
+                    <p class="mb-4">${fragments[Math.floor(Math.random() * fragments.length)].replace('{n}', i)}</p>
+                    <p class="mb-4 text-xs opacity-75 italic">This section intentionally left complicated to discourage reading. Please proceed with caution. Failure to understand Clause ${i}.4 may result in localized gravity fluctuations.</p>
+                    <p class="mb-4">${fragments[Math.floor(Math.random() * fragments.length)].replace('{n}', i + 100)}</p>
+                </div>`;
+            }
+            legalContent.innerHTML = html;
+        }
+
+        function triggerWhiplash() {
+            if (isWhiplashed) return;
+            isWhiplashed = true;
+
+            playWhiplashSound(); // Play whiplash sound
+
+            // Visual feedback
+            whiplashOverlay.classList.remove('hidden');
+            gameFrame.classList.add('whiplash-shake');
+
+            // Reset scroll position
+            setTimeout(() => {
+                scrollContainer.scrollTop = 0;
+                lastScrollTop = 0;
+            }, 100);
+
+            // Cleanup
+            setTimeout(() => {
+                whiplashOverlay.classList.add('hidden');
+                gameFrame.classList.remove('whiplash-shake');
+                isWhiplashed = false;
+            }, WHIPLASH_COOLDOWN);
+        }
+
+        function handleScroll() {
+            if (isWhiplashed) return;
+
+            const currentScrollTop = scrollContainer.scrollTop;
+            const currentTimestamp = Date.now();
+            const timeDelta = (currentTimestamp - lastTimestamp) / 1000; // in seconds
+
+            if (timeDelta > 0) {
+                const distance = Math.abs(currentScrollTop - lastScrollTop);
+                scrollSpeed = distance / timeDelta;
+                
+                // Update UI
+                speedMeter.innerText = `SCROLL SPEED: ${Math.round(scrollSpeed)} px/s`;
+                
+                // Warning state
+                if (scrollSpeed > SPEED_LIMIT * 0.7) {
+                    if (speedWarning.classList.contains('hidden')) {
+                        playWarningSound(); // Play warning sound when entering warning zone
+                    }
+                    speedWarning.classList.remove('hidden');
+                    speedMeter.classList.add('text-red-500');
+                } else {
+                    speedWarning.classList.add('hidden');
+                    speedMeter.classList.remove('text-red-500');
+                }
+
+                // Subtle scroll sound (throttled)
+                if (scrollSpeed > 100) {
+                    playScrollSound(scrollSpeed);
+                }
+
+                // Check for whiplash
+                if (scrollSpeed > SPEED_LIMIT) {
+                    triggerWhiplash();
+                    return;
+                }
+            }
+
+            // Update progress bar
+            const totalScrollable = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const progressPercent = Math.min((currentScrollTop / totalScrollable) * 100, 100);
+            progress.style.width = `${progressPercent}%`;
+            percentageText.innerText = `${Math.floor(progressPercent)}%`;
+
+            lastScrollTop = currentScrollTop;
+            lastTimestamp = currentTimestamp;
+        }
+
+        acceptBtn.addEventListener('click', () => {
+            playClickSound();
+            playAcceptSound(); // Play victory sound
+            victoryOverlay.classList.remove('hidden');
+        });
+
+        // Initialize
+        window.onload = () => {
+            generateLegalText();
+            
+            // Initialize audio on first user interaction
+            scrollContainer.addEventListener('scroll', () => {
+                initAudio();
+                handleScroll();
+            }, { once: true });
+            
+            scrollContainer.addEventListener('scroll', handleScroll);
+            
+            // Mouse wheel handling for browsers that might scroll too fast in chunks
+            scrollContainer.addEventListener('wheel', (e) => {
+                initAudio(); // Initialize audio on first interaction
+                if (isWhiplashed) e.preventDefault();
+            }, { passive: false });
+
+            // Button click sounds for reload button
+            const reloadBtn = document.querySelector('button[onclick="location.reload()"]');
+            if (reloadBtn) {
+                reloadBtn.addEventListener('click', () => {
+                    playClickSound();
+                });
+            }
+        };
+    </script>
+</body>
+</html>
