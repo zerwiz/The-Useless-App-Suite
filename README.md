@@ -10,7 +10,7 @@
 
 ## 🎯 Overview
 
-The Useless App Suite is a web-based multi-page application featuring **17 interactive experiences** that serve absolutely no practical purpose. Each app is a standalone HTML page with its own unique brand of digital futility.
+The Useless App Suite is a web-based multi-page application featuring a random number of interactive experiences that serve absolutely no practical purpose.
 
 This project exists because someone had too much time and not enough sense. It's a collection of digital artifacts that do nothing useful, solve no problems, and contribute zero value to humanity. Perfect for when you want to waste time but don't want to feel productive about it.
 

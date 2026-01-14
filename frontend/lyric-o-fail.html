@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyric-O-Fail 3000 | The World's Worst Lyric Writer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Permanent+Marker&display=swap');
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .paper {
+            background-color: #fefce8;
+            color: #1c1917;
+            font-family: 'Permanent Marker', cursive;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: 10px 10px 0px #fbbf24;
+        }
+
+        .btn-useless {
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .btn-useless:active {
+            transform: scale(0.95) rotate(2deg);
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem;
+            background: #ef4444;
+            color: white;
+            border-radius: 8px;
+            display: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <header class="text-center mb-10 max-w-2xl">
+        <h1 class="text-5xl font-bold text-yellow-400 mb-2 italic">LYRIC-O-FAIL 3000</h1>
+        <p class="text-slate-400">The only app that guarantees a #1 hit in your own bathroom. [v2026.1]</p>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mb-12">
+        
+        <!-- Controls Column -->
+        <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 space-y-6">
+            <h2 class="text-xl font-bold border-b border-slate-700 pb-2 flex items-center gap-2">
+                <span>⚙️</span> Confusion Settings
+            </h2>
+
+            <!-- Genre -->
+            <div>
+                <label class="block text-xs uppercase tracking-widest mb-2 text-slate-500 font-bold">Musical Genre</label>
+                <select id="genre" class="w-full bg-slate-900 border border-slate-600 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none text-slate-200">
+                    <option value="polka">Aggressive Polka</option>
+                    <option value="jazz">Elevator Jazz (Screamo Version)</option>
+                    <option value="country">Country Song About a Toaster</option>
+                    <option value="lofi">Lo-Fi Beats to Do Dishes To</option>
+                    <option value="prog">17-Minute Math Rock Solo</option>
+                    <option value="corporate">Corporate PowerPoint Background Music</option>
+                    <option value="whale">Humpback Whale ASMR</option>
+                    <option value="dentist">Waiting Room Radio (Static Only)</option>
+                </select>
+            </div>
+
+            <!-- Vibe Slider -->
+            <div>
+                <div class="flex justify-between text-xs uppercase tracking-widest mb-2 text-slate-500 font-bold">
+                    <span>Vibe Intensity</span>
+                    <span id="vibeValue">Slightly Annoyed</span>
+                </div>
+                <input type="range" id="vibe" min="0" max="4" step="1" value="0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-400">
+            </div>
+
+            <!-- Strategy Buttons Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <button onclick="generateLine()" class="btn-useless bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">✨</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Random Nonsense</span>
+                </button>
+                <button onclick="addMetaphor()" class="btn-useless bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🍄</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Vague Metaphor</span>
+                </button>
+                <button onclick="rhymeBanana()" class="btn-useless bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🍌</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Rhyme Banana</span>
+                </button>
+                <button onclick="rhymeCheese()" class="btn-useless bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🧀</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Cheese Drama</span>
+                </button>
+                <button onclick="rhymeVeggie()" class="btn-useless bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🥦</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Veggie Gore</span>
+                </button>
+                <button onclick="rhymeSock()" class="btn-useless bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🧦</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Laundry Loss</span>
+                </button>
+                <button onclick="addAdlib()" class="btn-useless bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🔥</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Aggressive Ad-libs</span>
+                </button>
+                <button onclick="addCowbell()" class="btn-useless bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🔔</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">More Cowbell</span>
+                </button>
+                <button onclick="addLegal()" class="btn-useless bg-slate-500 hover:bg-slate-400 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">⚖️</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Legal Disclaimer</span>
+                </button>
+                <button onclick="addRapIntro()" class="btn-useless bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🎤</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Rap Intro</span>
+                </button>
+                <button onclick="addEcho()" class="btn-useless bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🗣️</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Echo Echo</span>
+                </button>
+                <button onclick="addSilence()" class="btn-useless bg-zinc-700 hover:bg-zinc-600 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🤫</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Awkward Silence</span>
+                </button>
+                <button onclick="addHallucination()" class="btn-useless bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">📉</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">AI Hallucination</span>
+                </button>
+                <button onclick="addError()" class="btn-useless bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">📂</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">File Error</span>
+                </button>
+                <button onclick="addPositivity()" class="btn-useless bg-lime-500 hover:bg-lime-400 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                    <span class="text-xl">🌈</span>
+                    <span class="text-[10px] mt-1 text-center leading-tight">Toxic Positivity</span>
+                </button>
+            </div>
+
+            <!-- Advanced "Useless" Features -->
+            <div class="pt-4 border-t border-slate-700">
+                <button onclick="triggerWriterBlock()" class="w-full bg-slate-700 hover:bg-red-900 text-slate-300 font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <span>🛑</span> Simulate Writer's Block
+                </button>
+            </div>
+        </div>
+
+        <!-- Lyrics Output Column -->
+        <div class="relative overflow-hidden flex flex-col h-[650px]">
+            <div id="paper" class="paper min-h-full w-full p-8 md:p-12 rotate-1 flex flex-col transition-transform duration-300 overflow-y-auto">
+                <div class="mb-8 border-b-2 border-slate-300 pb-2 flex-shrink-0">
+                    <input type="text" id="songTitle" placeholder="Untitled Masterpiece..." class="bg-transparent text-3xl w-full outline-none placeholder:text-slate-300">
+                </div>
+                
+                <!-- Main container for dynamic lyrics -->
+                <div id="lyricContainer" class="flex-grow space-y-4 text-xl md:text-2xl leading-relaxed whitespace-pre-wrap flex flex-col">
+                    <!-- Lyrics will appear here at the TOP -->
+                </div>
+
+                <!-- Static 2026 Prepend Explanation -->
+                <div class="mt-12 p-4 border-2 border-dashed border-slate-300 rounded-lg bg-yellow-50/50 text-sm font-sans text-slate-500 italic text-center">
+                    <span class="font-bold text-slate-700">2026 Note:</span> We kept the feature where new lines appear at the top of the page, as that's a perfect way to keep the most recent "masterpiece" front and center while pushing your older mistakes down.
+                </div>
+
+                <div class="mt-8 pt-4 border-t-2 border-slate-300 text-sm italic text-slate-400 flex-shrink-0">
+                    &copy; 2026 The Void Records. No Rights Reserved.
+                </div>
+            </div>
+
+            <!-- Floating Tools -->
+            <div class="absolute bottom-4 right-4 flex gap-2">
+                <button onclick="clearLyrics()" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Burn the evidence">
+                    🗑️
+                </button>
+                <button onclick="copyLyrics()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Share your shame">
+                    📋
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-slate-500 text-sm">
+        <div class="mb-2 opacity-40 italic">This footer contains no useful information and was added with minimum enthusiasm.</div>
+        Inspired by <a href="https://www.youtube.com/watch?v=nSOMOXcviZc&t=120s" target="_blank" class="text-yellow-400 hover:text-yellow-300 underline underline-offset-4 decoration-slate-700 transition-colors">Natan Verkhovsky</a>.
+    </footer>
+
+    <div id="toast" class="toast">Writer's block detected. Please wait 45 years for inspiration.</div>
+
+    <!-- Burn Evidence Modal -->
+    <div id="burn-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-[1001]">
+        <div class="glass p-8 rounded-2xl max-w-sm w-full text-center relative">
+            <button onclick="closeBurnModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button>
+            <h2 class="text-2xl font-bold mb-4 text-white">Burn the evidence?</h2>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6">Are you sure you want to delete all your lyrical masterpieces? This action cannot be undone. Your creative genius will be lost forever.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeBurnModal()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-bold transition-all">Cancel</button>
+                <button onclick="confirmBurn()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all">Burn It All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        // --- DATA DICTIONARIES (Min 10 per category) ---
+        
+        const subjects = [
+            "My cat", "A lukewarm coffee", "The socio-economic climate", "A damp sock", 
+            "The concept of Tuesday", "My Wi-Fi router", "A sentient ham sandwich", 
+            "The tax man", "The guy who invented kale", "My crypto wallet", 
+            "A LinkedIn influencer", "The ghost of a 90s tamagotchi", "Your browser history",
+            "A pigeon with a grudge", "The last slice of pizza", "A CAPTCHA of a fire hydrant",
+            "The 'Close Door' button", "A DVD copy of Shrek 2", "The 10th dentist", 
+            "An unoptimized SQL query", "My landlord's left shoe"
+        ];
+        
+        const verbs = [
+            "screams into", "contemplates", "slow-cooks", "ignores", 
+            "defragments", "renegotiates", "low-key hates", "accidentally emails", 
+            "whispers to", "gaslights", "soft-launches", "unsubscribes from",
+            "files a restraining order against", "circles back to", "manifests",
+            "pivots to", "ghosts", "over-thinks", "dry-heaves over", 
+            "synergizes with", "circles the drain of"
+        ];
+        
+        const objects = [
+            "the abyss", "a stack of unpaid bills", "a moderately sized grape", 
+            "the 405 freeway", "a microwave burrito", "the meaning of life", 
+            "a cloud shaped like Gary Busey", "my existential dread", 
+            "a bag of generic brand cereal", "a 404 error", "a passive-aggressive email",
+            "the bottom of a Pringles can", "an expired coupon", "a Zoom meeting", 
+            "my dignity", "a locked PDF", "a lukewarm hot pocket", "the concept of 'Later'",
+            "a Craigslist ad for a haunted doll", "the Terms and Conditions"
+        ];
+
+        const metaphors = [
+            "Life is a browser with 45 tabs open and you can't find which one is playing music.",
+            "My heart is a cracked phone screen—still works, but you'll cut your thumb.",
+            "Love is the 'Check Engine' light of the soul.",
+            "I'm just a captcha trying to prove I'm not a robot in a world of CAPTCHAS.",
+            "Your ego is a pufferfish in a library.",
+            "We're all just pigeons fighting over a French fry in the parking lot of destiny.",
+            "Happiness is a software update that breaks the UI.",
+            "The truth is a puzzle piece from a completely different box.",
+            "Success is finding a matching sock after three years of searching.",
+            "My personality is basically a terms and conditions page that nobody read.",
+            "Hope is a 1% battery icon when you're three miles from home."
+        ];
+
+        const adlibs = [
+            "(SKRRRT!)", "(YEAH!)", "(STUNT ON 'EM!)", "(WE THE MIDDLE-BEST!)", 
+            "(STRAIGHT UP!)", "(OH NO!)", "(I FORGOT THE LYRICS!)", "(IT'S LIT-ISH!)",
+            "(WATER!)", "(MOM?! CALL ME BACK!)", "(CHECK THE STATS!)", "(ESKETIT!)",
+            "(GRAH!)", "(FACTS!)", "(TAXES!)", "(IS THIS ON?!)"
+        ];
+
+        const hallucinations = [
+            "The blockchain is a toaster in the cloud of my soul.",
+            "Leveraging synergy to optimize the gravitational constant of brunch.",
+            "Quantum-leap into the paradigm of a sourdough starter.",
+            "Hyper-local decentralized emotions are scaling at 400% efficiency.",
+            "The algorithm knows your favorite color is 'Tax Fraud'.",
+            "Disrupting the industry of blinking through peer-to-peer ocular networking.",
+            "My DNA is 40% coffee and 60% unhandled exceptions.",
+            "Cloud-native sadness is the new vertical for Gen Z marketing.",
+            "I'm currently beta-testing a new form of breathing.",
+            "Your vibe is incompatible with my current operating system."
+        ];
+
+        const legals = [
+            "Any resemblance to actual musical talent is purely coincidental.",
+            "The artist is not responsible for loss of hearing or taste.",
+            "Listening to this chorus may result in mild to moderate confusion.",
+            "Copyright 2026. All mistakes belong to the algorithm.",
+            "Batteries not included. Emotional support not included.",
+            "This track contains 0% vitamins or minerals.",
+            "Void where prohibited by common sense.",
+            "Do not play this song while operating heavy machinery or a toaster.",
+            "All lyrics were generated under duress by a bored machine.",
+            "By reading this, you agree to give the artist your last slice of pizza."
+        ];
+
+        const rapIntros = [
+            "Yo, it's Lil Disappointment back in the building!",
+            "Mic check 1-2, 1-2... check my pulse, I'm barely here.",
+            "Ayyo, turn my headphones up... no, lower... okay, just turn them off.",
+            "They said I'd never make it. They were right. Let's go!",
+            "Straight out of my mom's basement, it's the kid with the debt!",
+            "I don't even like music, I'm just here for the free water.",
+            "Ladies and gentlemen, please lower your expectations.",
+            "The following is a cry for help disguised as a banger.",
+            "Coming at you live from a CVS parking lot at 3 AM!",
+            "Put your hands in the air... and leave them there, I'm taking your wallet."
+        ];
+
+        const silences = [
+            "[... Awkward Pause ...]",
+            "[... Audience Coughs ...]",
+            "[... Someone drops a fork ...]",
+            "[... Sound of a fly hitting a window ...]",
+            "[... The drummer forgets what's happening ...]",
+            "[... Uncomfortable eye contact with the front row ...]",
+            "[... Static intensifies ...]",
+            "[... 4 minutes of heavy breathing ...]",
+            "[... A car alarm goes off in the distance ...]",
+            "[... The sound of my own self-doubt ...]"
+        ];
+
+        const errors = [
+            "[SYSTEM ERROR: LYRIC_STORAGE_FULL_OF_REGRET]",
+            "[FATAL EXCEPTION: ARTISTIC_INTEGRITY_NOT_FOUND]",
+            "[ERROR 404: TALENT REMOVED BY MODERATOR]",
+            "[NULL_POINTER_EXCEPTION_IN_DREAMS.EXE]",
+            "[WARNING: BITRATE LOWER THAN MY SELF-ESTEEM]",
+            "[FILE_CORRUPTED: TOO_MANY_COWBELLS_DETECTED]",
+            "[REBOOTING CREATIVITY... FAILED]",
+            "[DISK SPACE FULL OF CAT PHOTOS]",
+            "[INTERNAL_ERROR: BRAIN_NOT_RESPONDING]",
+            "[CRITICAL FAILURE: CHORUS_WAS_TOO_CRINGE]"
+        ];
+
+        const positivity = [
+            "EVERYTHING IS PERFECT AND I LOVE MY JOB! 🌈✨",
+            "I AM A RADIANT BEAM OF PURE PRODUCTIVITY! 🦄",
+            "MISTAKES ARE JUST SURPRISE OPPORTUNITIES! 🤮",
+            "THE UNIVERSE WANTS ME TO SUCCEED AT MATH ROCK! 🌟",
+            "SMILE UNTIL YOUR FACE HURTS OR THE VOID NOTICES! 🌞",
+            "MANIFESTING A HIT SINGLE AND A TURKEY SANDWICH! 🥪",
+            "MY HUSTLE IS SO LOUD MY ANXIETY CAN'T HEAR IT! 💪",
+            "GOOD VIBES ONLY (LEGAL REQUIREMENT)! 📜",
+            "I AM CO-CREATING REALITY WITH A POTATO! 🥔",
+            "DREAM BIG, SLEEP OFTEN! 💤"
+        ];
+
+        const cowbells = [
+            "[NEEDS MORE COWBELL] *CLANG!*",
+            "*TONK TONK TONK TONK*",
+            "[COWBELL INTENSIFIES]",
+            "*CLATTER CLACK CLANG*",
+            "More... MORE COWBELL!",
+            "[THE FEVER IS BACK AND IT'S COWBELL]",
+            "*BONK* *BONK* *BONK*",
+            "[COWBELL SOLO FOR 40 MINUTES]",
+            "*TINK TINK TINK TINK*",
+            "[THE COWBELL HAS GAINED SENTIENCE]"
+        ];
+
+        const cheeseRhymes = ["breeze", "knees", "sneeze", "trees", "freeze", "bees", "please", "tease", "keys", "overseas"];
+        const veggieRhymes = ["slowly", "holy", "poly", "guacamole", "roly-poly", "melancholy", "unholy", "solely", "wholly", "ravioli"];
+        const sockRhymes = ["rock", "block", "clock", "dock", "knock", "lock", "shock", "stock", "mock", "unlock"];
+
+        const vibes = ["Slightly Annoyed", "Mild Confusion", "Aggressive Indifference", "Vaguely Suspicious", "Total Existential Dread"];
+
+        // --- CORE LOGIC ---
+
+        const vibeSlider = document.getElementById('vibe');
+        const vibeText = document.getElementById('vibeValue');
+        const lyricContainer = document.getElementById('lyricContainer');
+        const toast = document.getElementById('toast');
+
+        vibeSlider.addEventListener('input', () => {
+            vibeText.innerText = vibes[vibeSlider.value];
+        });
+
+        function getRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateLine() {
+            const vibeLevel = parseInt(vibeSlider.value);
+            let line = `${getRandom(subjects)} ${getRandom(verbs)} ${getRandom(objects)}.`;
+            if (vibeLevel === 4) line = line.toUpperCase() + "!!!";
+            if (vibeLevel === 0) line = line.toLowerCase() + "... maybe?";
+            appendLyric(line);
+        }
+
+        function addMetaphor() { appendLyric(getRandom(metaphors)); }
+        function addAdlib() { appendLyric(getRandom(adlibs)); }
+        function addHallucination() { appendLyric(getRandom(hallucinations)); }
+        function addPositivity() { appendLyric(getRandom(positivity)); }
+        function addError() { appendLyric(getRandom(errors)); }
+        function addSilence() { appendLyric(getRandom(silences)); }
+        
+        function rhymeCheese() {
+            appendLyric(`My soul is made of melted cheese, I'm drifting through the ${getRandom(cheeseRhymes)}.`);
+        }
+        function rhymeVeggie() {
+            appendLyric(`The broccoli is watching me ${getRandom(veggieRhymes)}.`);
+        }
+        function rhymeSock() {
+            appendLyric(`I lost my favorite yellow sock, it's hidden in a ${getRandom(sockRhymes)}.`);
+        }
+
+        function addCowbell() {
+            const div = document.createElement('div');
+            div.className = "text-orange-600 animate-pulse border-2 border-orange-200 p-2 my-2 rounded text-center font-bold";
+            div.innerText = getRandom(cowbells);
+            lyricContainer.prepend(div); 
+            scrollToTop();
+        }
+
+        function addRapIntro() {
+            const intro = getRandom(rapIntros);
+            appendLyric(intro);
+        }
+
+        function addEcho() {
+            const firstLine = lyricContainer.firstElementChild?.innerText;
+            if (firstLine && !firstLine.includes("echo:")) {
+                const echo = document.createElement('div');
+                echo.className = "text-sm text-slate-400 italic ml-4";
+                const wrapper = `(echo: ${firstLine}...)`;
+                echo.innerText = wrapper;
+                lyricContainer.prepend(echo);
+                scrollToTop();
+            } else {
+                appendLyric("(No sound to echo... echo... echo...)");
+            }
+        }
+
+        function addLegal() {
+            const div = document.createElement('div');
+            div.className = "text-[10px] uppercase font-sans text-slate-400 mt-4 italic border-l-2 border-slate-300 pl-2";
+            div.innerText = "NOTICE: " + getRandom(legals);
+            lyricContainer.prepend(div);
+            scrollToTop();
+        }
+
+        function rhymeBanana() {
+            const rhymes = ["Cabana", "Savannah", "Grammar", "Pajama", "Sultana", "Indiana", "Data-ana", "Poly-ana", "Hosanna", "Montana", "Copacabana"];
+            appendLyric(`I'm eating a banana in ${getRandom(rhymes)}.`);
+        }
+
+        function appendLyric(text) {
+            const div = document.createElement('div');
+            div.className = "opacity-0 -translate-y-4 transition-all duration-500 ease-out";
+            div.innerText = text;
+            lyricContainer.prepend(div); 
+            setTimeout(() => { div.classList.remove('opacity-0', '-translate-y-4'); }, 10);
+            scrollToTop();
+        }
+
+        function triggerWriterBlock() {
+            const messages = [
+                "Writer's block detected. Wait 45 years.",
+                "Inspiration.exe has stopped working.",
+                "Have you tried staring at a wall?",
+                "ERROR: Brain is currently a potato.",
+                "Please insert 5 cents to continue being creative."
+            ];
+            document.getElementById('paper').classList.add('shake');
+            toast.innerText = getRandom(messages);
+            toast.style.background = "#ef4444";
+            toast.style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('paper').classList.remove('shake');
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function clearLyrics() {
+            const modal = document.getElementById('burn-modal');
+            modal.classList.remove('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
+
+        function closeBurnModal() {
+            const modal = document.getElementById('burn-modal');
+            modal.classList.add('hidden');
+            if (typeof playClickSound === 'function') {
+                playClickSound('click');
+            }
+        }
+
+        function confirmBurn() {
+            lyricContainer.innerHTML = "";
+            document.getElementById('songTitle').value = "";
+            closeBurnModal();
+            showToast("Evidence burned. Your lyrical crimes have been erased.");
+            if (typeof playClickSound === 'function') {
+                playClickSound('confirm');
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('burn-modal');
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeBurnModal();
+            }
+        });
+
+        // Close modal on outside click
+        document.getElementById('burn-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'burn-modal') {
+                closeBurnModal();
+            }
+        });
+
+        const copyMessages = [
+            "Lyrics copied! Good luck explaining this to your parents.",
+            "Lyrics copied! Your therapist will have questions.",
+            "Lyrics copied! The FBI has been notified.",
+            "Lyrics copied! Your future self will cringe at this.",
+            "Lyrics copied! This is now in your clipboard forever.",
+            "Lyrics copied! No refunds, no returns, no dignity.",
+            "Lyrics copied! Your browser history just got weirder.",
+            "Lyrics copied! Congratulations on your new career as a meme.",
+            "Lyrics copied! The void has received your contribution.",
+            "Lyrics copied! Your search history is now compromised.",
+            "Lyrics copied! This will haunt you at 3 AM.",
+            "Lyrics copied! Your ancestors are disappointed."
+        ];
+
+        function copyLyrics() {
+            const title = document.getElementById('songTitle').value || "Untitled Disgrace";
+            const lyrics = Array.from(lyricContainer.children).map(child => child.innerText).join('\n');
+            const fullText = `${title}\n\n${lyrics}`;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = fullText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            const randomMessage = copyMessages[Math.floor(Math.random() * copyMessages.length)];
+            showToast(randomMessage);
+        }
+
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.style.background = "#22c55e";
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 3000);
+        }
+
+        function scrollToTop() {
+            const paper = document.getElementById('paper');
+            paper.scrollTop = 0;
+        }
+
+        window.onload = () => {
+            appendLyric("Welcome to your creative nightmare.");
+        };
+    </script>
+</body>
+</html>
