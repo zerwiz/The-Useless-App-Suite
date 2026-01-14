@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weeb Shop - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .cart-badge {
+            animation: pulse 2s infinite, bounce 1s infinite;
+        }
+        
+        #cart-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite, cartFloat 3s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4), 0 0 20px rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #cart-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        #cart-btn:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.5);
+            animation: none;
+        }
+        
+        #cart-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        @keyframes cartFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-5px) scale(1.1);
+            }
+        }
+        
+        .cart-sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkle 1.5s ease-out forwards;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            /* Cart Button */
+            #cart-btn {
+                padding: 0.75rem 1rem !important;
+                font-size: 0.75rem !important;
+            }
+            
+            .fixed.top-4.right-4 {
+                top: 1rem !important;
+                right: 1rem !important;
+            }
+            
+            /* Header */
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            #shop-subtitle {
+                font-size: 1rem;
+            }
+            
+            /* Marketing Banner */
+            #marketing-banner {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            #marketing-message {
+                font-size: 0.65rem;
+                line-height: 1.4;
+            }
+            
+            /* Product Grid */
+            .product-card {
+                padding: 1rem;
+            }
+            
+            .product-card h3 {
+                font-size: 1.125rem;
+            }
+            
+            .product-card p {
+                font-size: 0.875rem;
+            }
+            
+            /* Modals */
+            .glass {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            /* Footer */
+            footer {
+                padding: 1rem;
+            }
+            
+            footer .flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            footer button, footer a {
+                width: 100%;
+                padding: 0.75rem;
+            }
+            
+            /* Product Modal */
+            #product-modal .glass {
+                max-height: 85vh;
+                padding: 1.5rem;
+            }
+            
+            #product-modal-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            #product-modal-content .text-8xl {
+                font-size: 4rem;
+            }
+            
+            /* Cart Modal */
+            #cart-modal .glass {
+                max-width: 95%;
+            }
+            
+            /* Buttons */
+            button, .product-card button {
+                min-height: 44px; /* Touch target size */
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Badge labels */
+            .product-card .flex.flex-wrap span {
+                font-size: 0.625rem;
+                padding: 0.375rem 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Extra small screens */
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            #cart-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.7rem;
+            }
+            
+            .product-card {
+                padding: 0.75rem;
+            }
+            
+            #marketing-message {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <div class="min-h-screen p-6 md:p-8 flex flex-col items-center">
+        <header class="text-center mb-8 md:mb-12 max-w-2xl w-full px-4">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4 font-['Space_Grotesk']">Weeb Shop</h1>
+            <p id="shop-subtitle" class="text-slate-400 text-base md:text-lg mb-4 md:mb-6 px-2">The most useless products you'll never need • For weebs who stay up until 3:00 AM</p>
+            
+            <!-- Marketing Campaign Banner -->
+            <div id="marketing-banner" class="w-full max-w-4xl mx-auto p-4 md:p-6 bg-gradient-to-r from-purple-900/30 to-blue-900/30 backdrop-blur-sm rounded-2xl border border-purple-500/20">
+                <p id="marketing-message" class="text-center text-slate-300 text-xs md:text-sm font-bold uppercase tracking-widest leading-relaxed">
+                    Loading useless marketing message...
+                </p>
+            </div>
+        </header>
+
+        <!-- Cart Button -->
+        <div class="fixed top-4 right-4 md:top-20 md:right-6 z-50">
+            <button id="cart-btn" class="relative px-6 py-3 md:px-8 md:py-4 rounded-xl text-white font-bold uppercase tracking-widest text-xs md:text-sm transition-all">
+                <span class="relative z-10 flex items-center gap-1 md:gap-2">
+                    🛒 <span class="hidden sm:inline">Cart</span>
+                </span>
+                <span id="cart-count" class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center hidden shadow-lg border-2 border-white">0</span>
+            </button>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl w-full mb-8 md:mb-12 px-4">
+            
+            <!-- Product 1: Dehydrated Water -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('dehydrated-water')">
+                <div class="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">💧</div>
+                        <div class="text-blue-600 font-bold text-sm">100% Dehydrated</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Dehydrated Water</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Just add water! Wait... Actually, don't. This is dehydrated water. It's water that has had all the water removed. Perfect for when you want water but don't want the water part.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold uppercase">Vegan</span>
+                    <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold uppercase">Gluten Free</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">100% Dehydrated Water</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-blue-400">$19.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('dehydrated-water', 'Dehydrated Water', 19.99)" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 2: Solar-Powered Flashlight -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('solar-flashlight')">
+                <div class="w-full h-48 bg-gradient-to-br from-yellow-100 to-orange-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🔦</div>
+                        <div class="text-orange-600 font-bold text-sm">Solar Powered</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Solar-Powered Flashlight (No Battery Storage)</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    This eco-friendly flashlight runs exclusively on direct sunlight! It shines brightest exactly when you don't need it—under the midday sun. It features zero battery capacity, so the moment the sun goes down or you enter a dark room, it shuts off to conserve... nothing.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-bold uppercase">Solar Powered</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-bold uppercase">No Battery</span>
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold uppercase">Eco-Friendly</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-orange-400">$24.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('solar-flashlight', 'The Solar-Powered Flashlight (No Battery Storage)', 24.99)" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 3: Inflatable Anchor -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('inflatable-anchor')">
+                <div class="w-full h-48 bg-gradient-to-br from-cyan-100 to-blue-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">⚓</div>
+                        <div class="text-cyan-600 font-bold text-sm">Inflatable</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Inflatable Anchor</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Lighten your boat's load with this portable, easy-to-store anchor. Simply blow it up and toss it overboard! Made of lightweight vinyl, it is guaranteed to float on the surface and drift away with the current, ensuring your boat goes wherever the wind takes it.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-bold uppercase">Inflatable</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">Portable</span>
+                    <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs font-bold uppercase">Float Guaranteed</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-cyan-400">$49.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('inflatable-anchor', 'Inflatable Anchor', 49.99)" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 4: Smell Less Smelling Salt -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('smell-less-salt')">
+                <div class="w-full h-48 bg-gradient-to-br from-lime-100 to-green-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🧂</div>
+                        <div class="text-lime-600 font-bold text-sm">Odor-Free</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Smell Less Smelling Salt</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    The Revolutionary Revival Solution (That Doesn't Work). Traditional smelling salts use strong ammonia vapors to jolt people back to consciousness. Our Smell Less Smelling Salt has had all the smell removed through a proprietary "Olfactory Extraction Process." Perfect for when you want to revive someone but don't want to offend their delicate sensibilities. Warning: May not actually revive anyone, as the primary mechanism (the smell) has been completely eliminated. Comes in a beautifully designed vial that looks exactly like real smelling salts, but functions like a paperweight.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-lime-500/20 text-lime-400 rounded-full text-xs font-bold uppercase">Odor-Free</span>
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold uppercase">Non-Reviving</span>
+                    <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold uppercase">Decorative</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-lime-400">$12.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('smell-less-salt', 'Smell Less Smelling Salt', 12.99)" class="px-4 py-2 bg-lime-600 hover:bg-lime-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 5: Diet Water Powder -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('diet-water-powder')">
+                <div class="w-full h-48 bg-gradient-to-br from-pink-100 to-purple-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">💊</div>
+                        <div class="text-pink-600 font-bold text-sm">0 Calories</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Diet Water Powder</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    The Ultimate Weight-Loss Solution. Stop drinking "heavy" water that bogs you down. Our Diet Water Powder uses a proprietary molecular extraction process to ensure that absolutely 0 calories have been removed—because there were none to begin with. It's 100% gluten-free, keto-friendly, and contains zero grams of fat, sugar, or actual substance. Directions: Pour the powder into a glass of water. Watch as it disappears instantly, leaving you with a glass of water that looks and tastes exactly like the water you started with, but with the psychological satisfaction of having paid for a supplement.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-full text-xs font-bold uppercase">0 Calories</span>
+                    <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold uppercase">Gluten Free</span>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold uppercase">Keto Friendly</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-pink-400">$24.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('diet-water-powder', 'Diet Water Powder', 24.99)" class="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 6: The Un-Toaster -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('un-toaster')">
+                <div class="w-full h-48 bg-gradient-to-br from-gray-100 to-slate-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🍞</div>
+                        <div class="text-gray-600 font-bold text-sm">Un-Toast It</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Un-Toaster</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Return to Freshness (Sort Of). Did you toast your bread for 3 minutes when you meant to toast it for 2? Don't throw it away—un-toast it! Using our patented "Hydro-Steam Reversion Technology," the Un-Toaster blasts your crispy toast with a localized cloud of lukewarm, 100% humidity vapor. In seconds, the golden-brown crunch is replaced by a pale, limp, and structurally unsound slab of wet dough. It's like the toaster never happened, but worse. Warning: Do not use on sourdough unless you want a literal puddle of gluten.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs font-bold uppercase">Reversible</span>
+                    <span class="px-3 py-1 bg-slate-500/20 text-slate-400 rounded-full text-xs font-bold uppercase">Steam Powered</span>
+                    <span class="px-3 py-1 bg-zinc-500/20 text-zinc-400 rounded-full text-xs font-bold uppercase">Bread Compatible</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-gray-400">$89.00</span>
+                    <button onclick="event.stopPropagation(); addToCart('un-toaster', 'The Un-Toaster', 89.00)" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 7: The Analog Calculator -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('analog-calculator')">
+                <div class="w-full h-48 bg-gradient-to-br from-stone-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🪨</div>
+                        <div class="text-stone-600 font-bold text-sm">10 Rocks</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Analog Calculator</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Back to Basics Computing. In an age of silicon chips and AI, return to the tactile reliability of the Earth. This premium linen bag contains ten (10) locally sourced, artisanal limestone rocks. It is 100% hack-proof, requires no firmware updates, and works during a total EMP blackout. How it works: To calculate $5 + 2$, simply place 5 rocks on the table, then add 2 more. Count them manually. For division, find a hammer (sold separately) and smash the rocks into smaller pieces.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-stone-500/20 text-stone-400 rounded-full text-xs font-bold uppercase">Hack-Proof</span>
+                    <span class="px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs font-bold uppercase">EMP Resistant</span>
+                    <span class="px-3 py-1 bg-slate-500/20 text-slate-400 rounded-full text-xs font-bold uppercase">No Updates</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-stone-400">$19.95</span>
+                    <button onclick="event.stopPropagation(); addToCart('analog-calculator', 'The Analog Calculator', 19.95)" class="px-4 py-2 bg-stone-600 hover:bg-stone-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 8: Silent Headphones -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('silent-headphones')">
+                <div class="w-full h-48 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🎧</div>
+                        <div class="text-indigo-600 font-bold text-sm">0dB</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Silent Headphones (Professional Edition)</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    The Look of Productivity. Perfect for the open-office plan or long flights next to chatty strangers. These headphones feature premium aesthetic design, including a padded headband and faux-leather earcups, but contain absolutely no internal wiring, drivers, or speakers. They provide 0dB of active noise cancellation but 100% "social noise cancellation"—sending a clear visual signal that you are "in the zone" while allowing you to overhear every bit of office gossip in crystal-clear high definition.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold uppercase">0dB</span>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold uppercase">Noise Cancelling</span>
+                    <span class="px-3 py-1 bg-violet-500/20 text-violet-400 rounded-full text-xs font-bold uppercase">Professional</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-indigo-400">$149.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('silent-headphones', 'Silent Headphones (Professional Edition)', 149.99)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 9: The Legacy Pet Rock -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('legacy-pet-rock')">
+                <div class="w-full h-48 bg-gradient-to-br from-slate-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🪨</div>
+                        <div class="text-slate-600 font-bold text-sm">Gen 2.0</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Legacy Pet Rock (Generation 2.0)</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    The Low-Maintenance Companion. Meet the only pet that is guaranteed to outlive you. This genuine igneous specimen doesn't bark, shed, or require expensive vet visits. It is perfectly content to sit on your desk for decades without a single word of complaint. Each rock is hand-selected for its lack of personality and complete inability to show affection. Includes: A "Leash" (a piece of twine) and a 40-page training manual that consists entirely of the word "SIT" printed on every page.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-slate-500/20 text-slate-400 rounded-full text-xs font-bold uppercase">Low Maintenance</span>
+                    <span class="px-3 py-1 bg-gray-500/20 text-gray-400 rounded-full text-xs font-bold uppercase">Long Lasting</span>
+                    <span class="px-3 py-1 bg-zinc-500/20 text-zinc-400 rounded-full text-xs font-bold uppercase">No Vet Visits</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-slate-400">$15.00</span>
+                    <button onclick="event.stopPropagation(); addToCart('legacy-pet-rock', 'The Legacy Pet Rock (Generation 2.0)', 15.00)" class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 10: Non-Stick Glue -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('non-stick-glue')">
+                <div class="w-full h-48 bg-gradient-to-br from-teal-100 to-cyan-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🧪</div>
+                        <div class="text-teal-600 font-bold text-sm">Non-Stick</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Non-Stick Glue</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    The World's Slippiest Adhesive. Developed by scientists who went a little too far, Non-Stick Glue is a chemical marvel. It features a molecular structure so repellent that it refuses to bond with any known surface, including itself. It's the perfect gift for the hobbyist who wants to apply glue to a broken vase and watch as the glue immediately slides off like water on a duck's back. It's 100% mess-free because it physically cannot stick to your hands. Note: Keep bottle upright, or it will slip out of the bottle and eventually out of your house.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs font-bold uppercase">Non-Stick</span>
+                    <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-bold uppercase">Mess-Free</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">Slippery</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-teal-400">$12.50</span>
+                    <button onclick="event.stopPropagation(); addToCart('non-stick-glue', 'Non-Stick Glue', 12.50)" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 11: The DIY Marble Kit -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('diy-marble-kit')">
+                <div class="w-full h-48 bg-gradient-to-br from-amber-100 to-yellow-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🔨</div>
+                        <div class="text-amber-600 font-bold text-sm">4 Years</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The DIY Marble Kit</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Patience is a Virtue. Why buy a finished marble when you can experience the grueling four-year journey of making one? This kit includes one (1) jagged, 2-pound chunk of raw granite and a single 2x2 inch square of 800-grit sandpaper. Goal: Rub the rock with the sandpaper for 4–6 hours a day. By the year 2030, you will have a slightly smoother, slightly smaller rock that is almost sort of spherical. It's the ultimate lesson in futility and grit.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold uppercase">4 Year Project</span>
+                    <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-bold uppercase">Patience Required</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-bold uppercase">Handmade</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-amber-400">$34.00</span>
+                    <button onclick="event.stopPropagation(); addToCart('diy-marble-kit', 'The DIY Marble Kit', 34.00)" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 12: Invisible Ink Highlighter -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('invisible-highlighter')">
+                <div class="w-full h-48 bg-gradient-to-br from-violet-100 to-purple-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🖊️</div>
+                        <div class="text-violet-600 font-bold text-sm">Invisible</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Invisible Ink Highlighter</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Study Hard, Forget Faster. The perfect tool for the student who wants the aesthetic of a well-studied textbook without the burden of actually seeing what they thought was important. Our "Ghost-Trace" ink applies smoothly and stays 100% invisible to the human eye, even under UV light. It's a great way to spend hours highlighting an entire chapter only to realize the next morning that your book looks brand new. Feature: Smudge-proof (because there is nothing to smudge).
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-violet-500/20 text-violet-400 rounded-full text-xs font-bold uppercase">Invisible</span>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold uppercase">Smudge-Proof</span>
+                    <span class="px-3 py-1 bg-fuchsia-500/20 text-fuchsia-400 rounded-full text-xs font-bold uppercase">Study Tool</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-violet-400">$6.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('invisible-highlighter', 'Invisible Ink Highlighter', 6.99)" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 13: The Manual Chainsaw -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('manual-chainsaw')">
+                <div class="w-full h-48 bg-gradient-to-br from-red-100 to-orange-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🪚</div>
+                        <div class="text-red-600 font-bold text-sm">Manual</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Manual Chainsaw</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Pure Lumberjack Energy. Get the rugged look of a professional logger with none of the efficiency. This is a standard, non-powered hand saw disguised in a bulky, neon-orange plastic housing. It features a heavy-duty pull-cord that makes a satisfying "shhhhk" sound but isn't attached to an engine. To cut wood, simply move the entire 15-pound housing back and forth manually until you collapse from exhaustion. Sound Effects: You are encouraged to make the "vroom vroom" noises yourself.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-bold uppercase">Manual</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-bold uppercase">No Engine</span>
+                    <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold uppercase">Pure Energy</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-red-400">$115.00</span>
+                    <button onclick="event.stopPropagation(); addToCart('manual-chainsaw', 'The Manual Chainsaw', 115.00)" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 14: The Pocket Ladder -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('pocket-ladder')">
+                <div class="w-full h-48 bg-gradient-to-br from-sky-100 to-blue-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🪜</div>
+                        <div class="text-sky-600 font-bold text-sm">2.5 Inches</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Pocket Ladder</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Reach for the Stars (Small Ones). Tired of things being just slightly out of reach? This precision-engineered aluminum ladder stands a majestic 2.5 inches tall. It's the perfect tool for when you need to reach a coaster that is on top of a slightly thicker coaster, or if you need to help a very adventurous beetle climb onto a cracker. It folds flat and fits in your pocket, making you the most prepared person at any miniature-dollhouse-building convention. Max Weight Capacity: 0.04 lbs.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-sky-500/20 text-sky-400 rounded-full text-xs font-bold uppercase">Portable</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">2.5 Inches</span>
+                    <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-bold uppercase">Lightweight</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-sky-400">$19.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('pocket-ladder', 'The Pocket Ladder', 19.99)" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 15: Instant Snow -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('instant-snow')">
+                <div class="w-full h-48 bg-gradient-to-br from-blue-100 to-cyan-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">❄️</div>
+                        <div class="text-blue-600 font-bold text-sm">Just Add Ice</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Instant Snow (Just Add Ice)</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Winter Magic, Manually. Tired of those "Just Add Water" fake snow kits that look like gel? Our Instant Snow is the real deal. Each package contains a proprietary "Atmospheric Interaction Guide." Directions: Simply take three trays of ice cubes from your freezer, place them in a high-speed blender (not included), and pulse for 30 seconds. Pour the resulting shavings into our branded "Instant Snow" bowl. Presto! You have created snow using nothing but ice and a loud appliance. (Bowl included).
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">Just Add Ice</span>
+                    <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs font-bold uppercase">Real Snow</span>
+                    <span class="px-3 py-1 bg-sky-500/20 text-sky-400 rounded-full text-xs font-bold uppercase">Manual</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-blue-400">$14.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('instant-snow', 'Instant Snow (Just Add Ice)', 14.99)" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 16: Universal Remote -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('universal-remote')">
+                <div class="w-full h-48 bg-gradient-to-br from-rose-100 to-red-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">📺</div>
+                        <div class="text-rose-600 font-bold text-sm">One Button</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Universal Remote: The "Peace & Quiet" Edition</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    One Button. Total Authority. Tired of complicated remotes with 50 buttons? We've simplified your life. Our Universal Remote features one giant, red button labeled "OFF." Using a high-powered multi-frequency IR blaster, it sends the "Power Off" signal to every TV, soundbar, and streaming box within a 50-foot radius. It cannot turn them back on. It cannot change the channel. It only ends the noise. It's the ultimate tool for parents and people who hate modern media.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold uppercase">One Button</span>
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-bold uppercase">Total Authority</span>
+                    <span class="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-full text-xs font-bold uppercase">Peace & Quiet</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-rose-400">$39.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('universal-remote', 'Universal Remote: The \'Peace &amp; Quiet\' Edition', 39.99)" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product 17: Unwearable T-Shirt -->
+            <div class="product-card glass p-6 rounded-2xl cursor-pointer" onclick="showProductModal('unwearable-tshirt')">
+                <div class="w-full h-48 bg-gradient-to-br from-orange-100 to-red-200 rounded-xl mb-4 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">👕</div>
+                        <div class="text-orange-600 font-bold text-sm">Unwearable</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2">The Unwearable T-Shirt</h3>
+                <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                    Fashion Forward (But Not Actually Wearable). This premium cotton-blend t-shirt has been engineered with a revolutionary "No Entry" design. The neck opening is completely sealed shut, the armholes have been stitched closed, and the bottom hem is permanently fused. It looks exactly like a normal t-shirt, but attempting to wear it is physically impossible. Perfect for your closet collection of clothes you can never actually wear. Comes in one size: "Doesn't Matter." Warning: Do not attempt to cut it open—that would make it useful, which violates our warranty.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-bold uppercase">Unwearable</span>
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-bold uppercase">Sealed Shut</span>
+                    <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold uppercase">Decorative Only</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-orange-400">$29.99</span>
+                    <button onclick="event.stopPropagation(); addToCart('unwearable-tshirt', 'The Unwearable T-Shirt', 29.99)" class="px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg text-white font-bold text-sm transition-all">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="w-full max-w-5xl mx-auto mt-8 md:mt-12 mb-6 md:mb-8 px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 p-4 md:p-6 bg-slate-900/30 backdrop-blur-sm rounded-2xl border border-slate-800/50">
+                <div class="text-center md:text-left">
+                    <div class="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mb-1">
+                        Built for the bored • 2026 UnArchive
+                    </div>
+                    <div class="normal-case font-normal text-[10px] text-slate-500">
+                        Developer: zerwiz • <a href="mailto:justuzfamily@gmail.com" class="hover:text-blue-400 transition-colors">justuzfamily@gmail.com</a>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="../index.html" class="px-6 py-2 bg-purple-600/50 hover:bg-purple-600/70 text-purple-200 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-purple-500/50 hover:border-purple-400/50 whitespace-nowrap">
+                        Weeb Shop
+                    </a>
+                    <button id="about-us-btn" class="px-6 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-slate-700/50 hover:border-slate-600/50 whitespace-nowrap">
+                        About Us
+                    </button>
+                </div>
+            </div>
+        </footer>
+
+        <!-- About Us Modal -->
+        <div id="about-us-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeAboutModal()"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+                <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-white">About Weeb Shop</h2>
+                <div class="text-slate-300 text-sm leading-relaxed space-y-3 text-left">
+                    <p>Weeb Shop is the internet's premier destination for products that serve absolutely no practical purpose. Named after the self-deprecating term used by the anime community, we celebrate the art of buying things you don't need at 3:00 AM after binge-watching One Piece.</p>
+                    <p>Every item in our catalog has been carefully curated to ensure maximum futility and zero utility. We guarantee that nothing you buy here will improve your life, solve any problems, or contribute any value whatsoever—just like staying up until 3:00 AM watching anime.</p>
+                    <p class="font-bold text-slate-200">Why does this shop exist?</p>
+                    <p>Because sometimes you need to channel that "I'm such a weeb" energy into something tangible. Even if that something is completely useless.</p>
+                    <p class="font-bold text-slate-200">What problem does it solve?</p>
+                    <p>None. That's the point. Just like how watching 12 episodes of anime in one sitting doesn't solve anything, but you do it anyway.</p>
+                    <p class="font-bold text-slate-200">Should you shop here?</p>
+                    <p>If you've ever called yourself a weeb while staying up way too late consuming Japanese media, then yes. Welcome home.</p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-700">
+                    <p class="text-xs text-slate-400">Developer: zerwiz</p>
+                    <p class="text-xs text-slate-400"><a href="mailto:justuzfamily@gmail.com" class="hover:text-blue-400 transition-colors">justuzfamily@gmail.com</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Modal -->
+        <div id="cart-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl">
+                <button onclick="showAcceptFateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
+                <h2 class="text-2xl font-bold mb-6 text-white">Shopping Cart</h2>
+                <div id="cart-items" class="space-y-4 mb-6 max-h-64 overflow-y-auto custom-scroll">
+                    <p class="text-slate-400 text-center py-8">Your cart is empty. How useless.</p>
+                </div>
+                <div class="border-t border-slate-700 pt-4 mb-4">
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 text-sm">Subtotal:</span>
+                            <span id="cart-subtotal" class="text-slate-300 font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 text-sm">Shipping:</span>
+                            <span id="cart-shipping" class="text-slate-300 font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+                            <span class="text-slate-400 font-bold">Total:</span>
+                            <span id="cart-total" class="text-2xl font-bold text-blue-400">$0.00</span>
+                        </div>
+                    </div>
+                    <button onclick="checkout()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                        Checkout (This Does Nothing)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Modal -->
+        <div id="checkout-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCheckout()"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+                <button onclick="closeCheckout()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-white">Checkout Complete!</h2>
+                <div id="checkout-summary" class="text-left mb-6 space-y-2 bg-white/5 p-4 rounded-xl">
+                    <!-- Dynamic checkout summary will be inserted here -->
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    Just kidding. This is a useless shop. Nothing actually happens. Your items remain in your cart forever.
+                </p>
+                <button onclick="closeCheckout()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                    Acknowledge Futility
+                </button>
+            </div>
+        </div>
+
+        <!-- Remove Item Modal -->
+        <div id="remove-item-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+                <button onclick="showAcceptFateModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-white">Item Removal Denied</h2>
+                <p id="remove-item-message" class="text-slate-400 text-sm leading-relaxed mb-6">
+                    You can't remove items from your cart. As stated during checkout, your items remain in your cart forever. This is a useless shop with useless rules. The X button is just for decoration.
+                </p>
+                <button onclick="showAcceptFateModal()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                    Accept Your Fate
+                </button>
+            </div>
+        </div>
+
+        <!-- Accept Fate Modal -->
+        <div id="accept-fate-modal" class="hidden fixed inset-0 z-[4000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+                <h2 class="text-2xl font-bold mb-4 text-white">You Cannot Escape</h2>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    There is no escape. You must accept your fate. The X button and Escape key are just illusions. You can only proceed through the checkout process.
+                </p>
+                <button onclick="closeAcceptFateModal()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                    I Understand My Fate
+                </button>
+            </div>
+        </div>
+
+        <!-- Empty Cart Modal -->
+        <div id="empty-cart-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEmptyCartModal()"></div>
+            <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
+                <button onclick="closeEmptyCartModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+                <h2 class="text-2xl font-bold mb-4 text-white">Empty Cart Detected</h2>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                    Your cart is empty. You can't checkout nothing. That would be too useful.
+                </p>
+                <button onclick="closeEmptyCartModal()" class="w-full py-3 bg-slate-600 hover:bg-slate-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                    Acknowledge Emptiness
+                </button>
+            </div>
+        </div>
+
+        <!-- Product Detail Modal -->
+        <div id="product-modal" class="hidden fixed inset-0 z-[3000] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeProductModal()"></div>
+            <div class="relative glass max-w-2xl w-full p-8 rounded-2xl flex flex-col" style="max-height: 90vh;">
+                <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none z-10">&times;</button>
+                <div id="product-modal-content" class="text-center flex flex-col flex-grow">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg opacity-0 transition-opacity duration-300 z-[3000]">
+            Added to cart!
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        let cart = [];
+
+        function addToCart(id, name, price) {
+            cart.push({ id, name, price });
+            updateCartUI();
+            showToast();
+        }
+
+        // Random remove item messages
+        const removeItemMessages = [
+            "You can't remove items from your cart. As stated during checkout, your items remain in your cart forever. This is a useless shop with useless rules. The X button is just for decoration.",
+            "Removal request denied. Your items have entered a permanent state of cart existence. The X button is purely cosmetic and serves no functional purpose. Welcome to useless shopping.",
+            "Item removal is not a feature we support. Once added, products become eternal residents of your cart. The X button exists only to test your patience and confirm our uselessness.",
+            "Sorry, but removing items would be too useful. This shop operates on the principle of permanent cart commitment. The X button is decorative, like a fake door in a movie set.",
+            "Cart items are non-removable by design. They're like tattoos, but for your shopping experience. The X button is there to remind you that some things in life are permanent.",
+            "Removal functionality has been disabled to maintain our useless shop's integrity. Your items are now part of your cart's permanent collection. The X button is a visual placebo.",
+            "You cannot remove items because we've implemented a 'no regrets' policy. Everything you add stays forever. The X button is just pixels pretending to be functional.",
+            "Item removal violates our terms of useless service. Once in your cart, products achieve immortality. The X button is an optical illusion designed to waste your time.",
+            "Removal is not permitted. Your cart is a one-way street to permanent product ownership. The X button is decorative, like a 'close' button on a vending machine that's out of order.",
+            "Cart items are protected by our 'eternal commitment' clause. They cannot be removed, only accumulated. The X button is a false promise, like a 'skip ad' button that doesn't work.",
+            "Removal requests are automatically rejected. Your cart is a museum of past shopping decisions. The X button is there for aesthetic purposes only, like fake buttons on a TV remote."
+        ];
+
+        function removeFromCart(index) {
+            // Items can't be removed - they stay in cart forever
+            const randomMessage = removeItemMessages[Math.floor(Math.random() * removeItemMessages.length)];
+            document.getElementById('remove-item-message').textContent = randomMessage;
+            document.getElementById('remove-item-modal').classList.remove('hidden');
+        }
+
+        let cartOpened = false;
+
+        function showAcceptFateModal() {
+            document.getElementById('accept-fate-modal').classList.remove('hidden');
+        }
+
+        function closeAcceptFateModal() {
+            document.getElementById('accept-fate-modal').classList.add('hidden');
+        }
+
+        function closeRemoveModal() {
+            // Can only close by accepting fate, which is handled by the button
+            // This function is kept for compatibility but doesn't actually close
+            showAcceptFateModal();
+        }
+
+        function calculateShipping(subtotal) {
+            // Useless shipping calculation: base fee + random absurdity
+            const baseShipping = 9.99;
+            const itemCount = cart.length;
+            const itemFee = itemCount * 2.50; // $2.50 per item
+            const weightFee = Math.floor(subtotal / 10) * 1.75; // $1.75 per $10 of items
+            const absurdityFee = Math.random() * 15 + 5; // Random $5-$20 fee
+            const processingFee = 3.33; // Because why not
+            
+            return baseShipping + itemFee + weightFee + absurdityFee + processingFee;
+        }
+
+        function updateCartUI() {
+            const cartCount = document.getElementById('cart-count');
+            const cartItems = document.getElementById('cart-items');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartShipping = document.getElementById('cart-shipping');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length > 0) {
+                cartCount.textContent = cart.length;
+                cartCount.classList.remove('hidden');
+            } else {
+                cartCount.classList.add('hidden');
+            }
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-slate-400 text-center py-8">Your cart is empty. How useless.</p>';
+                cartSubtotal.textContent = '$0.00';
+                cartShipping.textContent = '$0.00';
+                cartTotal.textContent = '$0.00';
+            } else {
+                cartItems.innerHTML = cart.map((item, index) => `
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <div>
+                            <p class="font-bold text-white">${item.name}</p>
+                            <p class="text-sm text-slate-400">$${item.price.toFixed(2)}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300 font-bold text-xl">×</button>
+                    </div>
+                `).join('');
+                
+                const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+                const shipping = calculateShipping(subtotal);
+                const total = subtotal + shipping;
+                
+                cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+                cartShipping.textContent = `$${shipping.toFixed(2)}`;
+                cartTotal.textContent = `$${total.toFixed(2)}`;
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                // Even with empty cart, they must go through checkout
+                document.getElementById('cart-modal').classList.add('hidden');
+                setTimeout(() => {
+                    document.getElementById('empty-cart-modal').classList.remove('hidden');
+                }, 300);
+                return;
+            }
+            
+            // Calculate totals for checkout summary
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const shipping = calculateShipping(subtotal);
+            const total = subtotal + shipping;
+            
+            // Update checkout summary
+            const checkoutSummary = document.getElementById('checkout-summary');
+            checkoutSummary.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-400 text-sm">Subtotal:</span>
+                    <span class="text-slate-300 font-bold">$${subtotal.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-400 text-sm">Shipping & Handling:</span>
+                    <span class="text-slate-300 font-bold">$${shipping.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+                    <span class="text-slate-300 font-bold">Total:</span>
+                    <span class="text-blue-400 text-xl font-bold">$${total.toFixed(2)}</span>
+                </div>
+                <p class="text-slate-500 text-xs mt-3 italic">
+                    Shipping calculated using our proprietary "Useless Algorithm"™ (patent pending)
+                </p>
+            `;
+            
+            // Close cart modal (this is the only way out!)
+            document.getElementById('cart-modal').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('checkout-modal').classList.remove('hidden');
+            }, 300);
+        }
+
+        function closeCheckout() {
+            // After acknowledging futility, reset cart opened state so they can browse again
+            cartOpened = false;
+            document.getElementById('checkout-modal').classList.add('hidden');
+        }
+
+        function closeEmptyCartModal() {
+            document.getElementById('empty-cart-modal').classList.add('hidden');
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        function closeCart() {
+            // Once cart is opened, it cannot be closed except through checkout
+            if (cartOpened) {
+                showAcceptFateModal();
+                return;
+            }
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        document.getElementById('cart-btn').addEventListener('click', (e) => {
+            // Create sparkle effect
+            createSparkles(e.target);
+            cartOpened = true; // Mark cart as opened - no escape now!
+            document.getElementById('cart-modal').classList.remove('hidden');
+        });
+        
+        // Prevent Escape key from closing modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const removeModal = document.getElementById('remove-item-modal');
+                const cartModal = document.getElementById('cart-modal');
+                const acceptFateModal = document.getElementById('accept-fate-modal');
+                
+                if (!removeModal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    showAcceptFateModal();
+                } else if (!cartModal.classList.contains('hidden') && cartOpened) {
+                    e.preventDefault();
+                    showAcceptFateModal();
+                } else if (!acceptFateModal.classList.contains('hidden')) {
+                    // Even the accept fate modal can't be closed with Escape
+                    e.preventDefault();
+                }
+            }
+        });
+        
+        function createSparkles(button) {
+            const rect = button.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 8; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'cart-sparkle';
+                
+                const angle = (Math.PI * 2 * i) / 8;
+                const distance = 30 + Math.random() * 20;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                sparkle.style.left = centerX + 'px';
+                sparkle.style.top = centerY + 'px';
+                sparkle.style.setProperty('--tx', tx + 'px');
+                sparkle.style.setProperty('--ty', ty + 'px');
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 1500);
+            }
+        }
+
+        // Subtitle rotation
+        const shopSubtitles = [
+            "The most useless products you'll never need",
+            "For weebs who stay up until 3:00 AM watching One Piece",
+            "I'm such a weeb, I bought useless products at 3:00 AM",
+            "Self-deprecating shopping for heavy consumers of Japanese media",
+            "Where your money goes to die. Voluntarily.",
+            "Products that solve problems that don't exist.",
+            "The internet's premier collection of useless merchandise.",
+            "Because sometimes, the best product is the one that does nothing.",
+            "Your one-stop shop for digital futility and physical disappointment.",
+            "Where every purchase is a step further into the abyss of consumerism.",
+            "The ultimate antidote to useful products.",
+            "Because life's too short to buy things that work.",
+            "Products guaranteed to not improve your life.",
+            "The future of useless shopping is here, and it's pointless.",
+            "Where your wallet goes to take a very long nap.",
+            "The only shop that guarantees zero satisfaction.",
+            "Because sometimes you need to waste money on purpose.",
+            "Products that contribute zero value. Proudly.",
+            "The digital equivalent of buying air in a can.",
+            "Where every product is a monument to futility.",
+            "Because why be useful when you can be useless?",
+            "The most comprehensive collection of pointless products.",
+            "Your daily dose of consumer pointlessness, delivered.",
+            "Products designed to fill the void, one purchase at a time.",
+            "Where your credit card goes to die. Slowly.",
+            "The only shop that understands your inner shopping chaos.",
+            "Because sometimes, bad products are the new good (not really).",
+            "The soundtrack to your consumerist crisis.",
+            "Generating products that are truly, deeply, uniquely useless.",
+            "Your one-stop shop for shopping despair.",
+            "Where products go to lose all meaning.",
+            "The ultimate tool for achieving peak shopping mediocrity.",
+            "Because even bad ideas deserve a platform.",
+            "Crafting the products of the utterly uninspired.",
+            "Your personal muse for all things shopping questionable.",
+            "Where every product is a journey into the absurd.",
+            "The only shop that truly captures the essence of 'why?'",
+            "Because sometimes, you just need to buy something terrible."
+        ];
+
+        function rotateShopSubtitle() {
+            const subtitleEl = document.getElementById('shop-subtitle');
+            if (!subtitleEl) return;
+            
+            let currentIndex = 0;
+            
+            function changeSubtitle() {
+                currentIndex = (currentIndex + 1) % shopSubtitles.length;
+                subtitleEl.style.opacity = '0';
+                subtitleEl.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    subtitleEl.textContent = shopSubtitles[currentIndex];
+                    subtitleEl.style.opacity = '1';
+                }, 500);
+            }
+            
+            function scheduleNext() {
+                const delay = 4000 + Math.random() * 2000; // 4-6 seconds
+                setTimeout(() => {
+                    changeSubtitle();
+                    scheduleNext();
+                }, delay);
+            }
+            
+            setTimeout(() => {
+                changeSubtitle(); // Show first random subtitle after delay
+                scheduleNext();
+            }, 5000);
+        }
+
+        // Product details for modal
+        const productDetails = {
+            'dehydrated-water': {
+                name: 'Dehydrated Water',
+                icon: '💧',
+                description: 'Just add water! Wait... Actually, don\'t. This is dehydrated water. It\'s water that has had all the water removed. Perfect for when you want water but don\'t want the water part.',
+                badges: ['Vegan', 'Gluten Free', '100% Dehydrated Water'],
+                price: 19.99
+            },
+            'solar-flashlight': {
+                name: 'The Solar-Powered Flashlight (No Battery Storage)',
+                icon: '🔦',
+                description: 'This eco-friendly flashlight runs exclusively on direct sunlight! It shines brightest exactly when you don\'t need it—under the midday sun. It features zero battery capacity, so the moment the sun goes down or you enter a dark room, it shuts off to conserve... nothing.',
+                badges: ['Solar Powered', 'No Battery', 'Eco-Friendly'],
+                price: 24.99
+            },
+            'inflatable-anchor': {
+                name: 'Inflatable Anchor',
+                icon: '⚓',
+                description: 'Lighten your boat\'s load with this portable, easy-to-store anchor. Simply blow it up and toss it overboard! Made of lightweight vinyl, it is guaranteed to float on the surface and drift away with the current, ensuring your boat goes wherever the wind takes it.',
+                badges: ['Inflatable', 'Portable', 'Float Guaranteed'],
+                price: 49.99
+            },
+            'diet-water-powder': {
+                name: 'Diet Water Powder',
+                icon: '💊',
+                description: 'The Ultimate Weight-Loss Solution. Stop drinking "heavy" water that bogs you down. Our Diet Water Powder uses a proprietary molecular extraction process to ensure that absolutely 0 calories have been removed—because there were none to begin with. It\'s 100% gluten-free, keto-friendly, and contains zero grams of fat, sugar, or actual substance. Directions: Pour the powder into a glass of water. Watch as it disappears instantly, leaving you with a glass of water that looks and tastes exactly like the water you started with, but with the psychological satisfaction of having paid for a supplement.',
+                badges: ['0 Calories', 'Gluten Free', 'Keto Friendly'],
+                price: 24.99
+            },
+            'un-toaster': {
+                name: 'The Un-Toaster',
+                icon: '🍞',
+                description: 'Return to Freshness (Sort Of). Did you toast your bread for 3 minutes when you meant to toast it for 2? Don\'t throw it away—un-toast it! Using our patented "Hydro-Steam Reversion Technology," the Un-Toaster blasts your crispy toast with a localized cloud of lukewarm, 100% humidity vapor. In seconds, the golden-brown crunch is replaced by a pale, limp, and structurally unsound slab of wet dough. It\'s like the toaster never happened, but worse. Warning: Do not use on sourdough unless you want a literal puddle of gluten.',
+                badges: ['Reversible', 'Steam Powered', 'Bread Compatible'],
+                price: 89.00
+            },
+            'analog-calculator': {
+                name: 'The Analog Calculator',
+                icon: '🪨',
+                description: 'Back to Basics Computing. In an age of silicon chips and AI, return to the tactile reliability of the Earth. This premium linen bag contains ten (10) locally sourced, artisanal limestone rocks. It is 100% hack-proof, requires no firmware updates, and works during a total EMP blackout. How it works: To calculate $5 + 2$, simply place 5 rocks on the table, then add 2 more. Count them manually. For division, find a hammer (sold separately) and smash the rocks into smaller pieces.',
+                badges: ['Hack-Proof', 'EMP Resistant', 'No Updates'],
+                price: 19.95
+            },
+            'silent-headphones': {
+                name: 'Silent Headphones (Professional Edition)',
+                icon: '🎧',
+                description: 'The Look of Productivity. Perfect for the open-office plan or long flights next to chatty strangers. These headphones feature premium aesthetic design, including a padded headband and faux-leather earcups, but contain absolutely no internal wiring, drivers, or speakers. They provide 0dB of active noise cancellation but 100% "social noise cancellation"—sending a clear visual signal that you are "in the zone" while allowing you to overhear every bit of office gossip in crystal-clear high definition.',
+                badges: ['0dB', 'Noise Cancelling', 'Professional'],
+                price: 149.99
+            },
+            'legacy-pet-rock': {
+                name: 'The Legacy Pet Rock (Generation 2.0)',
+                icon: '🪨',
+                description: 'The Low-Maintenance Companion. Meet the only pet that is guaranteed to outlive you. This genuine igneous specimen doesn\'t bark, shed, or require expensive vet visits. It is perfectly content to sit on your desk for decades without a single word of complaint. Each rock is hand-selected for its lack of personality and complete inability to show affection. Includes: A "Leash" (a piece of twine) and a 40-page training manual that consists entirely of the word "SIT" printed on every page.',
+                badges: ['Low Maintenance', 'Long Lasting', 'No Vet Visits'],
+                price: 15.00
+            },
+            'non-stick-glue': {
+                name: 'Non-Stick Glue',
+                icon: '🧪',
+                description: 'The World\'s Slippiest Adhesive. Developed by scientists who went a little too far, Non-Stick Glue is a chemical marvel. It features a molecular structure so repellent that it refuses to bond with any known surface, including itself. It\'s the perfect gift for the hobbyist who wants to apply glue to a broken vase and watch as the glue immediately slides off like water on a duck\'s back. It\'s 100% mess-free because it physically cannot stick to your hands. Note: Keep bottle upright, or it will slip out of the bottle and eventually out of your house.',
+                badges: ['Non-Stick', 'Mess-Free', 'Slippery'],
+                price: 12.50
+            },
+            'diy-marble-kit': {
+                name: 'The DIY Marble Kit',
+                icon: '🔨',
+                description: 'Patience is a Virtue. Why buy a finished marble when you can experience the grueling four-year journey of making one? This kit includes one (1) jagged, 2-pound chunk of raw granite and a single 2x2 inch square of 800-grit sandpaper. Goal: Rub the rock with the sandpaper for 4–6 hours a day. By the year 2030, you will have a slightly smoother, slightly smaller rock that is almost sort of spherical. It\'s the ultimate lesson in futility and grit.',
+                badges: ['4 Year Project', 'Patience Required', 'Handmade'],
+                price: 34.00
+            },
+            'invisible-highlighter': {
+                name: 'Invisible Ink Highlighter',
+                icon: '🖊️',
+                description: 'Study Hard, Forget Faster. The perfect tool for the student who wants the aesthetic of a well-studied textbook without the burden of actually seeing what they thought was important. Our "Ghost-Trace" ink applies smoothly and stays 100% invisible to the human eye, even under UV light. It\'s a great way to spend hours highlighting an entire chapter only to realize the next morning that your book looks brand new. Feature: Smudge-proof (because there is nothing to smudge).',
+                badges: ['Invisible', 'Smudge-Proof', 'Study Tool'],
+                price: 6.99
+            },
+            'manual-chainsaw': {
+                name: 'The Manual Chainsaw',
+                icon: '🪚',
+                description: 'Pure Lumberjack Energy. Get the rugged look of a professional logger with none of the efficiency. This is a standard, non-powered hand saw disguised in a bulky, neon-orange plastic housing. It features a heavy-duty pull-cord that makes a satisfying "shhhhk" sound but isn\'t attached to an engine. To cut wood, simply move the entire 15-pound housing back and forth manually until you collapse from exhaustion. Sound Effects: You are encouraged to make the "vroom vroom" noises yourself.',
+                badges: ['Manual', 'No Engine', 'Pure Energy'],
+                price: 115.00
+            },
+            'pocket-ladder': {
+                name: 'The Pocket Ladder',
+                icon: '🪜',
+                description: 'Reach for the Stars (Small Ones). Tired of things being just slightly out of reach? This precision-engineered aluminum ladder stands a majestic 2.5 inches tall. It\'s the perfect tool for when you need to reach a coaster that is on top of a slightly thicker coaster, or if you need to help a very adventurous beetle climb onto a cracker. It folds flat and fits in your pocket, making you the most prepared person at any miniature-dollhouse-building convention. Max Weight Capacity: 0.04 lbs.',
+                badges: ['Portable', '2.5 Inches', 'Lightweight'],
+                price: 19.99
+            },
+            'instant-snow': {
+                name: 'Instant Snow (Just Add Ice)',
+                icon: '❄️',
+                description: 'Winter Magic, Manually. Tired of those "Just Add Water" fake snow kits that look like gel? Our Instant Snow is the real deal. Each package contains a proprietary "Atmospheric Interaction Guide." Directions: Simply take three trays of ice cubes from your freezer, place them in a high-speed blender (not included), and pulse for 30 seconds. Pour the resulting shavings into our branded "Instant Snow" bowl. Presto! You have created snow using nothing but ice and a loud appliance. (Bowl included).',
+                badges: ['Just Add Ice', 'Real Snow', 'Manual'],
+                price: 14.99
+            },
+            'universal-remote': {
+                name: 'Universal Remote: The "Peace & Quiet" Edition',
+                icon: '📺',
+                description: 'One Button. Total Authority. Tired of complicated remotes with 50 buttons? We\'ve simplified your life. Our Universal Remote features one giant, red button labeled "OFF." Using a high-powered multi-frequency IR blaster, it sends the "Power Off" signal to every TV, soundbar, and streaming box within a 50-foot radius. It cannot turn them back on. It cannot change the channel. It only ends the noise. It\'s the ultimate tool for parents and people who hate modern media.',
+                badges: ['One Button', 'Total Authority', 'Peace & Quiet'],
+                price: 39.99
+            },
+            'smell-less-salt': {
+                name: 'Smell Less Smelling Salt',
+                icon: '🧂',
+                description: 'The Revolutionary Revival Solution (That Doesn\'t Work). Traditional smelling salts use strong ammonia vapors to jolt people back to consciousness. Our Smell Less Smelling Salt has had all the smell removed through a proprietary "Olfactory Extraction Process." Perfect for when you want to revive someone but don\'t want to offend their delicate sensibilities. Warning: May not actually revive anyone, as the primary mechanism (the smell) has been completely eliminated. Comes in a beautifully designed vial that looks exactly like real smelling salts, but functions like a paperweight.',
+                badges: ['Odor-Free', 'Non-Reviving', 'Decorative'],
+                price: 12.99
+            },
+            'unwearable-tshirt': {
+                name: 'The Unwearable T-Shirt',
+                icon: '👕',
+                description: 'Fashion Forward (But Not Actually Wearable). This premium cotton-blend t-shirt has been engineered with a revolutionary "No Entry" design. The neck opening is completely sealed shut, the armholes have been stitched closed, and the bottom hem is permanently fused. It looks exactly like a normal t-shirt, but attempting to wear it is physically impossible. Perfect for your closet collection of clothes you can never actually wear. Comes in one size: "Doesn\'t Matter." Warning: Do not attempt to cut it open—that would make it useful, which violates our warranty.',
+                badges: ['Unwearable', 'Sealed Shut', 'Decorative Only'],
+                price: 29.99
+            }
+        };
+
+        function showProductModal(productId) {
+            const product = productDetails[productId];
+            if (!product) return;
+
+            const modalContent = document.getElementById('product-modal-content');
+            modalContent.innerHTML = `
+                <div class="flex-shrink-0">
+                    <div class="text-8xl mb-4">${product.icon}</div>
+                    <h2 class="text-3xl font-bold mb-4 text-white">${product.name}</h2>
+                </div>
+                <div class="flex-grow overflow-y-auto mb-6">
+                    <p class="text-slate-300 text-base leading-relaxed text-left max-w-xl mx-auto">
+                        ${product.description}
+                    </p>
+                </div>
+                <div class="flex-shrink-0 mt-auto pt-6 border-t border-slate-700">
+                    <div class="flex flex-wrap gap-2 justify-center mb-4">
+                        ${product.badges.map(badge => `
+                            <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold uppercase">${badge}</span>
+                        `).join('')}
+                    </div>
+                    <div class="flex items-center justify-center gap-6">
+                        <span class="text-3xl font-bold text-blue-400">$${product.price.toFixed(2)}</span>
+                        <button onclick="addToCart('${productId}', '${product.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', ${product.price}); closeProductModal();" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold uppercase tracking-widest transition-all">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // Useless Marketing Campaign Messages
+        const marketingMessages = [
+            "⚡ LIMITED TIME OFFER: Buy now and receive absolutely nothing extra!",
+            "🔥 ACT NOW: Prices are guaranteed to stay the same forever!",
+            "💎 EXCLUSIVE DEAL: Get the same useless products everyone else gets!",
+            "🎯 DON'T MISS OUT: This offer expires... never!",
+            "🚀 BREAKTHROUGH TECHNOLOGY: Products that do nothing, now with 0% improvement!",
+            "⭐ RARE OPPORTUNITY: Shop now before we run out of... well, nothing changes!",
+            "🎁 SPECIAL BONUS: Every purchase includes the satisfaction of buying useless things!",
+            "💫 UNPRECEDENTED: The only shop where every product is equally pointless!",
+            "🌟 REVOLUTIONARY: We've perfected the art of selling nothing useful!",
+            "🔥 HOT DEAL: Products so useless, they're practically collectibles!",
+            "⚡ INSTANT GRATIFICATION: Feel the rush of buying things you don't need!",
+            "💎 PREMIUM QUALITY: Useless products made with maximum futility!",
+            "🎯 TARGETED MARKETING: We know you want things that do nothing!",
+            "🚀 NEXT-LEVEL USELESSNESS: Experience futility like never before!",
+            "⭐ ELITE COLLECTION: Curated uselessness for the discerning shopper!",
+            "🎁 FREE SHIPPING: On products that ship to nowhere!",
+            "💫 LIMITED EDITION: Every product is limited to being completely useless!",
+            "🌟 EXCLUSIVE ACCESS: Shop where utility goes to die!",
+            "🔥 TRENDING NOW: Useless products are the new... well, still useless!",
+            "⚡ FLASH SALE: Everything is always on sale because nothing matters!",
+            "💎 LUXURY USELESSNESS: Premium products with zero premium value!",
+            "🎯 SMART SHOPPING: Buy things that make no sense!",
+            "🚀 INNOVATION: We've innovated the way you waste money!",
+            "⭐ AWARD-WINNING: Winner of the 'Most Useless Shop' award (we made it up)!",
+            "🎁 GIFT READY: Perfect for people you want to confuse!",
+            "💫 TRUSTED BY MILLIONS: (We made that up too, but it sounds good!)",
+            "🌟 CERTIFIED USELESS: Every product verified to do nothing!",
+            "🔥 MUST-HAVE: If you must have things that don't work!",
+            "⚡ URGENT: Act now before you realize you don't need anything!",
+            "💎 COLLECTIBLE: Start your collection of useless products today!",
+            "🎯 PRECISION CRAFTED: Carefully designed to be completely pointless!",
+            "🚀 FUTURE-PROOF: These products will be useless forever!",
+            "⭐ GUARANTEED: We guarantee these products won't help you!",
+            "🎁 SURPRISE VALUE: The surprise is there's no value!",
+            "💫 PROFESSIONAL GRADE: Uselessness at a professional level!",
+            "🌟 CUSTOMER FAVORITE: (We don't have customers, but it sounds nice!)",
+            "🔥 BESTSELLER: Our best-selling product is... all of them!",
+            "⚡ NEW ARRIVAL: Same useless products, now with a 'new' label!",
+            "💎 INVESTMENT PIECE: Invest in products that return zero value!",
+            "🎯 ESSENTIAL: Essential for your collection of non-essentials!"
+        ];
+
+        function rotateMarketingMessage() {
+            const messageEl = document.getElementById('marketing-message');
+            if (!messageEl) return;
+            
+            let currentIndex = 0;
+            
+            function changeMessage() {
+                currentIndex = (currentIndex + 1) % marketingMessages.length;
+                messageEl.style.opacity = '0';
+                messageEl.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    messageEl.textContent = marketingMessages[currentIndex];
+                    messageEl.style.opacity = '1';
+                }, 500);
+            }
+            
+            // Show first message immediately
+            messageEl.textContent = marketingMessages[0];
+            
+            // Change every 4-6 seconds
+            function scheduleNext() {
+                const delay = 4000 + Math.random() * 2000; // 4-6 seconds
+                setTimeout(() => {
+                    changeMessage();
+                    scheduleNext();
+                }, delay);
+            }
+            scheduleNext();
+        }
+
+        // About Us Modal
+        const aboutUsBtn = document.getElementById('about-us-btn');
+        const aboutUsModal = document.getElementById('about-us-modal');
+        
+        function openAboutModal() {
+            aboutUsModal.classList.remove('hidden');
+        }
+        
+        function closeAboutModal() {
+            aboutUsModal.classList.add('hidden');
+        }
+        
+        if (aboutUsBtn) {
+            aboutUsBtn.addEventListener('click', openAboutModal);
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !aboutUsModal.classList.contains('hidden')) {
+                closeAboutModal();
+            }
+        });
+
+        // Initialize
+        updateCartUI();
+        rotateShopSubtitle();
+        rotateMarketingMessage();
+    </script>
+</body>
+</html>

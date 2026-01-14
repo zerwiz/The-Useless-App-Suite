@@ -34,20 +34,37 @@
   - `frontend/typing-speedster.html` - Typing Speedster
   - `frontend/un-calculator.html` - Un-Calculator
   - `frontend/dusting.html` - Digital Dusting
+  - `frontend/bureaucracy-snake.html` - Bureaucracy Snake
+  - `frontend/minesweeper.html` - Minesweeper (Bureaucratic)
+  - `frontend/minesweeper-active.html` - Minesweeper (Regular)
+  - `frontend/solitaire.html` - Solitaire Protocol
+  - `frontend/weeb-shop.html` - Weeb Shop
 - **Shared:** `frontend/shared.css` and `frontend/shared.js`
 
 ## Navigation
 
 - Use standard HTML links (`<a>` tags) for navigation
 - Each app page includes a "Back to Hub" button linking to `../index.html`
+- Back button is hidden on mobile (≤768px) - users can use browser back button
 - No JavaScript-based routing (multi-page architecture)
 
 ## Documentation
 
+- **ALWAYS update `CHANGELOG.md` in root directory** when making any changes
+- Changelog format: Use [Keep a Changelog](https://keepachangelog.com/) format
+- Document all changes in appropriate sections: Added, Changed, Fixed, Removed
 - Always update PLANNING.md when making architectural changes
 - Keep README.md files current
-- Document new features in CHANGELOG.md
 - Update ARCHITECTURE.md when structure changes
+
+## Changelog System
+
+- **Root CHANGELOG.md** is the primary changelog file
+- Update it immediately after making any changes
+- Use semantic versioning for version numbers
+- Document changes in reverse chronological order (newest first)
+- Include detailed descriptions of what was added/changed/fixed
+- Be specific about features, UI changes, bug fixes, and improvements
 
 ## Firebase
 
@@ -68,6 +85,7 @@
 - Run `npm run check` for code quality checks
 - Keep app pages modular and independent
 - Each app should be self-contained but can use shared resources
+- **Update CHANGELOG.md after every change**
 
 ## Netlify Deployment
 

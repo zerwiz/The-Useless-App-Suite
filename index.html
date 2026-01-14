@@ -158,9 +158,14 @@
                         Developer: zerwiz • <a href="mailto:justuzfamily@gmail.com" class="hover:text-blue-400 transition-colors">justuzfamily@gmail.com</a>
                     </div>
                 </div>
-                <button id="about-us-btn-top" class="px-6 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-slate-700/50 hover:border-slate-600/50 whitespace-nowrap">
-                    About Us
-                </button>
+                <div class="flex gap-3">
+                    <a href="frontend/weeb-shop.html" class="px-6 py-2 bg-purple-600/50 hover:bg-purple-600/70 text-purple-200 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-purple-500/50 hover:border-purple-400/50 whitespace-nowrap">
+                        Weeb Shop
+                    </a>
+                    <button id="about-us-btn-top" class="px-6 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-slate-700/50 hover:border-slate-600/50 whitespace-nowrap">
+                        About Us
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -335,11 +340,11 @@
             </footer>
             
             <!-- About Us Modal -->
-            <div id="about-us-modal" class="hidden fixed inset-0 z-[2000] flex items-center justify-center p-4">
+            <div id="about-us-modal" class="hidden fixed inset-0 z-[2000] flex items-start md:items-center justify-center p-4 overflow-y-auto">
                 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeAboutModal()"></div>
-                <div class="relative glass max-w-md w-full p-8 rounded-2xl text-center">
-                    <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
-                    <h2 class="text-2xl font-bold mb-4 text-white">About The Useless App Suite</h2>
+                <div class="relative glass max-w-md w-full p-6 md:p-8 rounded-2xl text-center my-4 md:my-0 max-h-[90vh] overflow-y-auto">
+                    <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl leading-none z-10">&times;</button>
+                    <h2 class="text-xl md:text-2xl font-bold mb-4 text-white">About The Useless App Suite</h2>
                     <div class="text-slate-300 text-sm leading-relaxed space-y-3 text-left">
                         <p>The Useless App Suite is a web-based multi-page application featuring <strong>maybe <span id="random-app-count">17</span> interactive experiences</strong> that serve absolutely no practical purpose.</p>
                         <p>This project exists because someone had too much time and not enough sense. It's a collection of digital artifacts that do nothing useful, solve no problems, and contribute zero value to humanity. Perfect for when you want to waste time but don't want to feel productive about it.</p>

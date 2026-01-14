@@ -50,6 +50,13 @@ body {
     transform: translateX(-2px); 
 }
 
+/* Hide back button on mobile devices */
+@media (max-width: 768px) {
+    .back-btn {
+        display: none;
+    }
+}
+
 /* Modal overlay animation */
 #back-to-hub-overlay {
     animation: fadeIn 0.2s ease-out;
