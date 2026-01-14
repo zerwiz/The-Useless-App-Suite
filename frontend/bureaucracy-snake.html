@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bureaucracy Snake - Official Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Serif:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Serif', serif;
+            background-color: #e0e0d1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .font-mono {
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f2f2e6;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #b8b8a8;
+            border-radius: 4px;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1 / 1;
+            border: 0.5px solid #f1f1f1;
+        }
+
+        .snake-head { background-color: #1e293b; color: white; display: flex; align-items: center; justify-content: center; font-size: 8px; z-index: 10; }
+        .snake-body { background-color: #cbd5e1; border: 1px solid #94a3b8; margin: 10%; }
+        .food { animation: bounce 1s infinite; color: #2563eb; display: flex; align-items: center; justify-content: center; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .hidden-screen { display: none !important; }
+    </style>
+</head>
+<body class="text-slate-800">
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <!-- Screen: LOGIN -->
+    <div id="screen-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-[#f2f2e6] border-2 border-[#b8b8a8] shadow-[8px_8px_0px_rgba(0,0,0,0.1)] p-8 max-w-sm w-full">
+            <div class="flex justify-center mb-6">
+                <svg class="w-16 h-16 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h1 class="text-xl font-bold text-center uppercase tracking-widest mb-2">Portal Access</h1>
+            <p class="text-[10px] text-center text-slate-500 mb-4 uppercase">Bureau of Digital Inefficiency</p>
+            
+            <!-- Bureaucratic Text -->
+            <div class="bg-white border border-[#b8b8a8] p-3 mb-6 text-[9px] text-slate-600 leading-tight space-y-2">
+                <p class="font-bold uppercase">Notice of Procedural Requirements:</p>
+                <p>By accessing this portal, you acknowledge that all digital interactions are subject to recursive verification protocols. Each action requires re-certification of previous actions. Failure to comply with verification procedures may result in involuntary termination of your session.</p>
+                <p class="text-[8px] italic">Form 42-B, Section 7, Subsection C: Digital Inefficiency Act of 2026</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-600 mb-1">Employee ID / Name</label>
+                    <input id="input-username" type="text" class="w-full bg-white border border-[#b8b8a8] p-2 text-sm focus:outline-none" placeholder="Enter credentials...">
+                </div>
+                <button id="btn-login" class="w-full bg-slate-800 text-white py-2 text-xs uppercase font-bold hover:bg-slate-700">Request Access</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: TERMS -->
+    <div id="screen-terms" class="min-h-screen flex items-center justify-center p-4 hidden-screen">
+        <div class="bg-[#f2f2e6] border-2 border-[#b8b8a8] shadow-[8px_8px_0px_rgba(0,0,0,0.1)] p-8 max-w-lg w-full">
+            <h2 class="text-sm font-bold uppercase mb-4 border-b-2 border-slate-300 pb-2">Terms of Procedural Engagement</h2>
+            <div class="h-48 overflow-y-scroll bg-white border border-[#b8b8a8] p-4 text-[10px] text-slate-600 space-y-3 leading-relaxed mb-6 custom-scrollbar">
+                <p>1.1 Movement is processed instantly, however, compliance remains mandatory.</p>
+                <p>1.2 <strong>Recertification Clause:</strong> Every time you capture a new asset, all previously captured assets must be re-verified to ensure data integrity.</p>
+                <p>1.3 Verification is performed on the specific Asset IDs captured in your current session.</p>
+                <p>1.4 Failure to re-verify any single document in the chain will prevent the affixing of the Digital Seal.</p>
+            </div>
+            <div class="flex items-center gap-3 mb-6">
+                <input type="checkbox" id="check-terms" class="cursor-pointer">
+                <label for="check-terms" class="text-[10px] uppercase font-bold text-slate-700 cursor-pointer">I accept the recursive paperwork.</label>
+            </div>
+            <button id="btn-enter" disabled class="w-full py-2 text-xs uppercase font-bold bg-slate-300 text-slate-500 cursor-not-allowed">Enter Simulation</button>
+        </div>
+    </div>
+
+    <!-- Screen: GAME -->
+    <div id="screen-game" class="min-h-screen p-4 md:p-8 flex flex-col items-center hidden-screen">
+        <!-- Header -->
+        <div class="w-full max-w-5xl bg-[#f2f2e6] border-2 border-[#b8b8a8] p-4 mb-6 flex flex-wrap justify-between items-center shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="bg-slate-800 p-2">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black uppercase tracking-tighter leading-none">Bureau of Sluggish Operations</h1>
+                    <p class="text-[9px] uppercase text-slate-500">Official Terminal: <span id="display-user"></span> | Session #<span id="display-session"></span></p>
+                </div>
+            </div>
+            <div class="flex gap-8">
+                <div class="text-right">
+                    <span class="text-[9px] block uppercase text-slate-400">Assets Acquired</span>
+                    <span id="score-val" class="text-2xl font-mono font-bold">0</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[9px] block uppercase text-slate-400">Petition Status</span>
+                    <span id="status-badge" class="text-xs font-bold px-2 py-0.5 uppercase bg-green-100 text-green-700">Nominal</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-6xl relative">
+            
+            <!-- Sidebar Left: Backlog -->
+            <div class="lg:col-span-3">
+                <div class="bg-[#f2f2e6] border-2 border-[#b8b8a8] p-4 h-[450px] flex flex-col overflow-hidden">
+                    <h3 id="petition-header" class="text-[10px] font-bold uppercase mb-4 flex items-center gap-2 border-b pb-2 flex-shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Backlog Verification
+                    </h3>
+                    <div id="petition-list" class="flex-1 overflow-y-auto custom-scrollbar" style="min-height: 0; max-height: 100%;">
+                        <!-- Captured assets appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Game Board -->
+            <div class="lg:col-span-6 flex flex-col items-center">
+                <div class="relative">
+                    <div id="game-board" class="bg-white border-8 border-slate-800 grid shadow-2xl overflow-hidden" style="grid-template-columns: repeat(16, 1fr); width: min(90vw, 450px); height: min(90vw, 450px);">
+                        <!-- Grid cells -->
+                    </div>
+
+                    <!-- Audit Modal -->
+                    <div id="modal-audit" class="absolute inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 hidden-screen">
+                        <div class="bg-[#f2f2e6] border-2 border-slate-800 max-w-sm w-full shadow-2xl">
+                            <div class="p-6">
+                                <div class="flex items-center gap-3 mb-4 border-b-2 border-slate-200 pb-2">
+                                    <svg class="w-6 h-6 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                    <h2 class="text-xl font-bold uppercase tracking-tight">Audit Required</h2>
+                                </div>
+                                <p class="text-[11px] leading-relaxed text-slate-700 mb-4 italic text-center">
+                                    "New asset detected. Per Policy 42-B, you must <strong>re-verify your entire registry</strong> in the sidebar to resume."
+                                </p>
+                                
+                                <div class="bg-white border p-4 text-center mb-6">
+                                    <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Recertification Status</div>
+                                    <div class="text-2xl font-mono font-bold text-blue-800"><span id="audit-progress">0/0</span></div>
+                                </div>
+
+                                <button id="btn-audit" disabled class="w-full bg-slate-300 text-slate-500 py-3 text-xs uppercase font-bold cursor-not-allowed flex items-center justify-center gap-2">
+                                    Affix Digital Seal
+                                </button>
+                                <p id="audit-hint" class="text-[9px] text-slate-400 text-center mt-2 uppercase tracking-tighter">Click 'Verify' on all captured items.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Over Modal -->
+                    <div id="modal-gameover" class="absolute inset-0 bg-white/95 flex flex-col items-center justify-center p-8 text-center z-50 hidden-screen">
+                        <svg class="w-20 h-20 text-red-700 mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <h2 class="text-2xl font-black uppercase mb-2">Involuntary Termination</h2>
+                        <p class="text-sm text-slate-600 mb-8 max-w-xs">Compliance failure. Structural integrity compromised.</p>
+                        <button id="btn-restart" class="bg-slate-800 text-white px-8 py-3 uppercase text-xs font-bold tracking-widest hover:bg-slate-700 shadow-lg">File Appeal Form</button>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="mt-8 grid grid-cols-3 gap-3">
+                    <div />
+                    <button data-dir="up" class="control-btn w-14 h-14 bg-white border-2 border-slate-800 flex flex-col items-center justify-center hover:bg-slate-100 active:translate-y-1 transition-all">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+                    </button>
+                    <div />
+                    <button data-dir="left" class="control-btn w-14 h-14 bg-white border-2 border-slate-800 flex flex-col items-center justify-center hover:bg-slate-100 active:translate-y-1 transition-all">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <button data-dir="down" class="control-btn w-14 h-14 bg-white border-2 border-slate-800 flex flex-col items-center justify-center hover:bg-slate-100 active:translate-y-1 transition-all">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <button data-dir="right" class="control-btn w-14 h-14 bg-white border-2 border-slate-800 flex flex-col items-center justify-center hover:bg-slate-100 active:translate-y-1 transition-all">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Right: Terminal -->
+            <div class="lg:col-span-3">
+                <div class="bg-slate-800 p-4 h-[450px] flex flex-col text-green-400 font-mono shadow-inner border-4 border-slate-700">
+                    <h3 class="text-[10px] uppercase mb-4 flex items-center gap-2 border-b border-green-900 pb-2 text-green-600">Terminal Output</h3>
+                    <div id="terminal-logs" class="flex-1 text-[9px] space-y-2 overflow-y-auto custom-scrollbar">
+                        <!-- Logs here -->
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-green-900 flex items-center justify-between text-[10px]">
+                        <span class="animate-pulse">_PROCEDURAL_LOCK</span>
+                        <div class="flex gap-2 text-green-600">
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span class="text-[8px]">RE-CERT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const GRID_SIZE = 16;
+        const MOVE_SPEED = 200;
+
+        let state = {
+            screen: 'LOGIN',
+            username: '',
+            snake: [{ x: 8, y: 8 }],
+            direction: { x: 1, y: 0 },
+            food: { x: 4, y: 4 },
+            score: 0,
+            showAudit: false,
+            capturedAssets: [],
+            logs: ["Ready for user authentication."]
+        };
+
+        const screens = {
+            login: document.getElementById('screen-login'),
+            terms: document.getElementById('screen-terms'),
+            game: document.getElementById('screen-game')
+        };
+
+        const auditModal = document.getElementById('modal-audit');
+        const petitionList = document.getElementById('petition-list');
+        const petitionHeader = document.getElementById('petition-header');
+        const auditProgress = document.getElementById('audit-progress');
+        const btnAudit = document.getElementById('btn-audit');
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            state.logs.unshift(`[${time}] ${msg}`);
+            if (state.logs.length > 20) state.logs.pop();
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('terminal-logs');
+            container.innerHTML = state.logs.map((log, i) => `
+                <div class="${i === 0 ? 'text-green-200' : 'opacity-50'}">${log}</div>
+            `).join('');
+        }
+
+        function renderQueue() {
+            if (state.showAudit || state.capturedAssets.length > 0) {
+                renderBacklog();
+                return;
+            }
+            petitionHeader.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Backlog`;
+            petitionList.innerHTML = `<div class="text-[10px] text-slate-400 italic text-center mt-10">No assets in registry.</div>`;
+        }
+
+        function spawnFood() {
+            let newFood;
+            let isValid = false;
+            while (!isValid) {
+                newFood = {
+                    x: Math.floor(Math.random() * GRID_SIZE),
+                    y: Math.floor(Math.random() * GRID_SIZE)
+                };
+                // Ensure food doesn't spawn on snake body
+                isValid = !state.snake.some(s => s.x === newFood.x && s.y === newFood.y);
+            }
+            state.food = newFood;
+        }
+
+        function startAudit() {
+            state.capturedAssets.forEach(a => a.verified = false);
+            const newId = `CAPT-${Math.floor(Math.random()*8999)+1000}`;
+            state.capturedAssets.push({
+                id: newId,
+                verified: false,
+                timestamp: new Date().toLocaleTimeString()
+            });
+            updateAuditUI();
+            renderBacklog();
+        }
+
+        function updateAuditUI() {
+            const verifiedCount = state.capturedAssets.filter(a => a.verified).length;
+            const totalCount = state.capturedAssets.length;
+            auditProgress.innerText = `${verifiedCount}/${totalCount}`;
+
+            if (verifiedCount === totalCount && totalCount > 0) {
+                btnAudit.disabled = false;
+                btnAudit.className = "w-full bg-blue-700 text-white py-3 text-xs uppercase font-bold hover:bg-blue-800 flex items-center justify-center gap-2 cursor-pointer";
+                document.getElementById('audit-hint').innerText = "Registry recertified. Affix seal.";
+                document.getElementById('audit-hint').className = "text-[9px] text-green-600 font-bold text-center mt-2 uppercase";
+            } else {
+                btnAudit.disabled = true;
+                btnAudit.className = "w-full bg-slate-300 text-slate-500 py-3 text-xs uppercase font-bold cursor-not-allowed";
+                document.getElementById('audit-hint').innerText = "All registry items must be re-verified.";
+                document.getElementById('audit-hint').className = "text-[9px] text-slate-400 text-center mt-2 uppercase";
+            }
+        }
+
+        window.verifyAsset = function(assetId) {
+            const asset = state.capturedAssets.find(a => a.id === assetId);
+            if (asset && !asset.verified) {
+                asset.verified = true;
+                renderBacklog();
+                updateAuditUI();
+            }
+        };
+
+        function renderBacklog() {
+            petitionHeader.innerHTML = `<svg class="w-4 h-4 text-amber-600 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Asset Registry (${state.capturedAssets.length})`;
+            if (state.capturedAssets.length === 0) {
+                petitionList.innerHTML = `<div class="text-[10px] text-slate-400 italic text-center mt-10">Empty Registry.</div>`;
+                return;
+            }
+            // Reverse to show newest first, then render ALL items
+            const assetsToRender = [...state.capturedAssets].reverse();
+            petitionList.innerHTML = assetsToRender.map((asset, index) => `
+                <div class="flex items-center justify-between p-2 border border-slate-200 ${asset.verified ? 'bg-green-50' : 'bg-white shadow-sm ring-1 ring-amber-100'} transition-colors mb-1 flex-shrink-0">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-mono leading-none ${asset.verified ? 'text-green-700 line-through' : 'text-slate-800 font-bold'}">${asset.id}</span>
+                        <span class="text-[7px] text-slate-400 uppercase mt-0.5">${asset.timestamp}</span>
+                    </div>
+                    ${asset.verified ? 
+                        `<svg class="w-3 h-3 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>` : 
+                        `<button onclick="verifyAsset('${asset.id}')" class="text-[8px] uppercase font-bold bg-amber-600 text-white px-1.5 py-0.5 hover:bg-amber-700 flex-shrink-0">Verify</button>`
+                    }
+                </div>
+            `).join('');
+            
+            // Scroll to top to show newest items
+            petitionList.scrollTop = 0;
+            
+            // Debug: log to console
+            console.log(`Rendered ${assetsToRender.length} assets out of ${state.capturedAssets.length} total`);
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    const isHead = state.snake[0].x === x && state.snake[0].y === y;
+                    const isBody = state.snake.slice(1).some(s => s.x === x && s.y === y);
+                    const isFood = state.food.x === x && state.food.y === y;
+                    
+                    if (isHead) { 
+                        cell.classList.add('snake-head'); 
+                        cell.innerText = '💼'; 
+                    } else if (isBody) { 
+                        const b = document.createElement('div'); 
+                        b.className = 'snake-body w-full h-full'; 
+                        cell.appendChild(b); 
+                    } else if (isFood) { 
+                        cell.innerHTML = '<div class="food w-full h-full"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>'; 
+                    }
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        function submitPetition(dir, label) {
+            if (state.screen !== 'PLAYING' || state.showAudit) return;
+            if (dir.x === -state.direction.x && dir.y === -state.direction.y) return;
+            state.direction = dir; 
+            addLog(`HEADING: ${label}`);
+        }
+
+        function move() {
+            if (state.screen !== 'PLAYING' || state.showAudit) return;
+            const head = state.snake[0];
+            const newHead = {
+                x: (head.x + state.direction.x + GRID_SIZE) % GRID_SIZE,
+                y: (head.y + state.direction.y + GRID_SIZE) % GRID_SIZE
+            };
+            
+            if (state.snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                state.screen = 'GAMEOVER';
+                document.getElementById('modal-gameover').classList.remove('hidden-screen');
+                addLog("TERMINATION: Structural failure.");
+                return;
+            }
+            
+            state.snake.unshift(newHead);
+            
+            if (newHead.x === state.food.x && newHead.y === state.food.y) {
+                state.showAudit = true;
+                state.score++;
+                document.getElementById('score-val').innerText = state.score;
+                auditModal.classList.remove('hidden-screen');
+                startAudit();
+                spawnFood(); // Spawns the NEXT food item
+                addLog(`AUDIT TRIGGERED: Asset recertification required.`);
+            } else { 
+                state.snake.pop(); 
+            }
+            renderBoard();
+        }
+
+        document.getElementById('btn-login').addEventListener('click', () => {
+            const v = document.getElementById('input-username').value;
+            if (v.length < 3) return;
+            state.username = v; state.screen = 'TERMS';
+            screens.login.classList.add('hidden-screen');
+            screens.terms.classList.remove('hidden-screen');
+            addLog(`ID [${state.username}] authenticated.`);
+        });
+
+        document.getElementById('check-terms').addEventListener('change', (e) => {
+            const b = document.getElementById('btn-enter');
+            b.disabled = !e.target.checked;
+            b.className = e.target.checked 
+                ? "w-full py-2 text-xs uppercase font-bold bg-slate-800 text-white hover:bg-slate-700 cursor-pointer"
+                : "w-full py-2 text-xs uppercase font-bold bg-slate-300 text-slate-500 cursor-not-allowed";
+        });
+
+        document.getElementById('btn-enter').addEventListener('click', () => {
+            state.screen = 'PLAYING';
+            screens.terms.classList.add('hidden-screen');
+            screens.game.classList.remove('hidden-screen');
+            document.getElementById('display-user').innerText = state.username.toUpperCase();
+            document.getElementById('display-session').innerText = Math.floor(Math.random() * 900) + 100;
+            renderBoard(); 
+            renderQueue(); 
+            addLog("SESSION INITIALIZED.");
+        });
+
+        btnAudit.addEventListener('click', () => {
+            state.showAudit = false;
+            auditModal.classList.add('hidden-screen');
+            addLog(`AUDIT CLOSED: Registry status verified.`);
+            renderBoard(); // Force board refresh to show new food immediately
+            renderBacklog();
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            state.snake = [{ x: 8, y: 8 }]; 
+            state.direction = { x: 1, y: 0 }; 
+            state.score = 0;
+            state.screen = 'PLAYING'; 
+            state.showAudit = false; 
+            state.capturedAssets = [];
+            state.food = { x: 4, y: 4 };
+            document.getElementById('score-val').innerText = '0';
+            document.getElementById('modal-gameover').classList.add('hidden-screen');
+            renderBoard(); 
+            renderQueue();
+        });
+
+        document.querySelectorAll('.control-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                const d = b.dataset.dir;
+                const v = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
+                submitPetition(v[d], d.toUpperCase());
+            });
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT') return;
+            const m = { 
+                'ArrowUp': { v: { x: 0, y: -1 }, l: 'NORTH' }, 'w': { v: { x: 0, y: -1 }, l: 'NORTH' }, 
+                'ArrowDown': { v: { x: 0, y: 1 }, l: 'SOUTH' }, 's': { v: { x: 0, y: 1 }, l: 'SOUTH' }, 
+                'ArrowLeft': { v: { x: -1, y: 0 }, l: 'WEST' }, 'a': { v: { x: -1, y: 0 }, l: 'WEST' }, 
+                'ArrowRight': { v: { x: 1, y: 0 }, l: 'EAST' }, 'd': { v: { x: 1, y: 0 }, l: 'EAST' } 
+            };
+            if (m[e.key]) { e.preventDefault(); submitPetition(m[e.key].v, m[e.key].l); }
+        });
+
+        setInterval(move, MOVE_SPEED);
+    </script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Solitaire: Operation Time-Waste - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg-dark: #020617;
+            --card-width: clamp(40px, 12vw, 85px);
+            --card-height: calc(var(--card-width) * 1.4);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .font-mono { font-family: 'Space Grotesk', monospace; }
+
+        .bg-grid {
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+
+        /* Card Styles */
+        .card {
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            background: white;
+            color: black;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            pointer-events: auto;
+            transform-origin: center center;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            border: 2px solid rgba(255,255,255,0.15);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .card-red { color: #ef4444; }
+        .card-black { color: #0f172a; }
+
+        .slot {
+            width: var(--card-width);
+            height: var(--card-height);
+            border: 2px dashed rgba(59, 130, 246, 0.15);
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.2);
+        }
+
+        .tableau-column {
+            position: relative;
+            width: var(--card-width);
+            min-height: 50vh;
+        }
+
+        .card-stacked {
+            position: absolute;
+            left: 0;
+        }
+
+        /* Dragging Classes */
+        .dragging {
+            z-index: 1000 !important;
+            pointer-events: none !important;
+            opacity: 0.9;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        #drag-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Messaging */
+        #message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10000;
+            text-align: center;
+        }
+        #message-box.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="bg-grid">
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+
+    <header class="p-4 flex flex-col items-center text-center gap-4">
+        <div class="flex flex-col items-center">
+            <h1 class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500 mb-1">Solitaire: Protocol</h1>
+            <div class="flex items-center gap-2 justify-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <span id="status-text" class="text-[9px] text-slate-400 font-mono font-bold tracking-widest uppercase">System Nominal</span>
+            </div>
+        </div>
+        <button id="reset-btn" class="text-[9px] font-bold px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-all uppercase tracking-widest">Re-Initialize</button>
+    </header>
+
+    <!-- HUD -->
+    <div class="px-6 grid grid-cols-3 gap-2 max-w-lg mx-auto w-full mb-6">
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Moves Filed</p>
+            <p id="move-count" class="text-xl font-mono font-light text-blue-400">000</p>
+        </div>
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Stock Left</p>
+            <p id="deck-count" class="text-xl font-mono font-light">24</p>
+        </div>
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Elapsed</p>
+            <p id="timer" class="text-xl font-mono font-light">0:00</p>
+        </div>
+    </div>
+
+    <!-- Gameplay Area -->
+    <main id="game-area" class="flex-grow flex flex-col items-center px-4 overflow-hidden relative">
+        
+        <!-- Stock & Foundations -->
+        <div class="flex justify-between w-full max-w-4xl mb-6 relative z-10">
+            <div class="flex gap-2">
+                <div id="stock" class="card card-back"></div>
+                <div id="waste" class="slot drop-target" data-target="waste"></div>
+            </div>
+            
+            <div class="flex gap-2">
+                <div data-suit="H" class="foundation slot drop-target flex items-center justify-center text-red-500/20 text-2xl font-bold" data-target="foundation" data-suit="H">♥</div>
+                <div data-suit="D" class="foundation slot drop-target flex items-center justify-center text-red-500/20 text-2xl font-bold" data-target="foundation" data-suit="D">♦</div>
+                <div data-suit="C" class="foundation slot drop-target flex items-center justify-center text-slate-500/10 text-2xl font-bold" data-target="foundation" data-suit="C">♣</div>
+                <div data-suit="S" class="foundation slot drop-target flex items-center justify-center text-slate-500/10 text-2xl font-bold" data-target="foundation" data-suit="S">♠</div>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div id="tableau" class="flex justify-between w-full max-w-4xl gap-1 pb-20">
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="0"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="1"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="2"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="3"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="4"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="5"></div>
+            <div class="tableau-column slot drop-target" data-target="tableau" data-index="6"></div>
+        </div>
+
+        <!-- Floating Drag Container -->
+        <div id="drag-container"></div>
+    </main>
+
+    <div id="message-box">
+        <div id="message-content"></div>
+        <button id="msg-close" class="mt-6 w-full py-3 bg-blue-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-colors">Start New Audit</button>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        // Constants & Setup
+        const suits = ['H', 'D', 'C', 'S'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const suitSymbols = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
+        
+        let deck = [];
+        let stock = [];
+        let waste = [];
+        let foundations = { 'H': [], 'D': [], 'C': [], 'S': [] };
+        let tableau = [[], [], [], [], [], [], []];
+        
+        let moves = 0;
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        // Drag State
+        let dragInfo = null;
+
+        function createDeck() {
+            let d = [];
+            for (let s of suits) {
+                for (let v of values) {
+                    d.push({ suit: s, value: v, faceUp: false, id: `${s}${v}` });
+                }
+            }
+            return d.sort(() => Math.random() - 0.5);
+        }
+
+        function getCardValue(val) {
+            if (val === 'A') return 1;
+            if (val === 'J') return 11;
+            if (val === 'Q') return 12;
+            if (val === 'K') return 13;
+            return parseInt(val);
+        }
+
+        function isRed(suit) { return suit === 'H' || suit === 'D'; }
+
+        function initGame() {
+            deck = createDeck();
+            stock = [];
+            waste = [];
+            foundations = { 'H': [], 'D': [], 'C': [], 'S': [] };
+            tableau = [[], [], [], [], [], [], []];
+            moves = 0;
+            timerSeconds = 0;
+            dragInfo = null;
+            
+            document.getElementById('move-count').textContent = "000";
+            document.getElementById('timer').textContent = "0:00";
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const m = Math.floor(timerSeconds / 60);
+                const s = timerSeconds % 60;
+                document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+
+            // Deal
+            for (let i = 0; i < 7; i++) {
+                for (let j = 0; j <= i; j++) {
+                    let card = deck.pop();
+                    if (j === i) card.faceUp = true;
+                    tableau[i].push(card);
+                }
+            }
+            stock = deck;
+            render();
+        }
+
+        function render() {
+            // Stock
+            const stockEl = document.getElementById('stock');
+            stockEl.className = stock.length > 0 ? 'card card-back' : 'slot flex items-center justify-center text-blue-500/20 text-xs';
+            stockEl.innerHTML = stock.length > 0 ? '' : '↺';
+            document.getElementById('deck-count').textContent = stock.length;
+
+            // Waste
+            const wasteEl = document.getElementById('waste');
+            wasteEl.innerHTML = '';
+            if (waste.length > 0) {
+                const card = waste[waste.length - 1];
+                wasteEl.appendChild(createCardEl(card, 'waste', 0, waste.length - 1));
+            }
+
+            // Foundations
+            suits.forEach(s => {
+                const fEl = document.querySelector(`.foundation[data-suit="${s}"]`);
+                fEl.innerHTML = foundations[s].length > 0 ? '' : suitSymbols[s];
+                if (foundations[s].length > 0) {
+                    const card = foundations[s][foundations[s].length - 1];
+                    fEl.appendChild(createCardEl(card, 'foundation', s, foundations[s].length - 1));
+                }
+            });
+
+            // Tableau
+            for (let i = 0; i < 7; i++) {
+                const colEl = document.querySelector(`.tableau-column[data-index="${i}"]`);
+                colEl.innerHTML = '';
+                tableau[i].forEach((card, j) => {
+                    const cardEl = createCardEl(card, 'tableau', i, j);
+                    cardEl.style.top = (j * (window.innerWidth < 640 ? 16 : 24)) + 'px';
+                    cardEl.classList.add('card-stacked');
+                    colEl.appendChild(cardEl);
+                });
+            }
+
+            document.getElementById('move-count').textContent = moves.toString().padStart(3, '0');
+            checkWin();
+        }
+
+        function createCardEl(card, type, colIdx, rowIdx) {
+            const el = document.createElement('div');
+            el.dataset.id = card.id;
+            el.dataset.type = type;
+            el.dataset.col = colIdx;
+            el.dataset.row = rowIdx;
+
+            if (!card.faceUp) {
+                el.className = 'card card-back';
+            } else {
+                el.className = `card flex flex-col p-1.5 sm:p-2 justify-between ${isRed(card.suit) ? 'card-red' : 'card-black'}`;
+                el.innerHTML = `
+                    <div class="flex flex-col leading-none">
+                        <span class="text-[10px] sm:text-xs font-bold">${card.value}</span>
+                        <span class="text-[8px] sm:text-[10px]">${suitSymbols[card.suit]}</span>
+                    </div>
+                    <div class="text-lg sm:text-2xl self-center">${suitSymbols[card.suit]}</div>
+                    <div class="flex flex-col leading-none items-end rotate-180">
+                        <span class="text-[10px] sm:text-xs font-bold">${card.value}</span>
+                        <span class="text-[8px] sm:text-[10px]">${suitSymbols[card.suit]}</span>
+                    </div>
+                `;
+                el.onmousedown = (e) => startDrag(e, card, type, colIdx, rowIdx);
+                el.ontouchstart = (e) => startDrag(e, card, type, colIdx, rowIdx);
+            }
+            return el;
+        }
+
+        // Interaction Logic
+        function startDrag(e, card, type, colIdx, rowIdx) {
+            if (!card.faceUp || isGameOver()) return;
+            
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            // Get all cards in stack if it's tableau
+            let cardsToMove = [];
+            if (type === 'tableau') {
+                cardsToMove = tableau[colIdx].slice(rowIdx);
+            } else if (type === 'waste') {
+                cardsToMove = [waste[waste.length - 1]];
+            } else if (type === 'foundation') {
+                cardsToMove = [foundations[colIdx][foundations[colIdx].length - 1]];
+            }
+
+            const rect = e.target.closest('.card').getBoundingClientRect();
+            
+            dragInfo = {
+                cards: cardsToMove,
+                sourceType: type,
+                sourceCol: colIdx,
+                sourceRow: rowIdx,
+                offsetX: clientX - rect.left,
+                offsetY: clientY - rect.top,
+                elements: []
+            };
+
+            const container = document.getElementById('drag-container');
+            container.innerHTML = '';
+            
+            cardsToMove.forEach((c, i) => {
+                const ghost = createCardEl(c, 'ghost', 0, 0);
+                ghost.classList.add('dragging', 'card-stacked');
+                ghost.style.top = (i * (window.innerWidth < 640 ? 16 : 24)) + 'px';
+                ghost.style.left = '0px';
+                container.appendChild(ghost);
+                dragInfo.elements.push(ghost);
+                
+                // Hide original
+                if (type === 'tableau') {
+                    tableau[colIdx][rowIdx + i].hidden = true;
+                } else if (type === 'waste') {
+                    waste[waste.length - 1].hidden = true;
+                } else if (type === 'foundation') {
+                    foundations[colIdx][foundations[colIdx].length - 1].hidden = true;
+                }
+            });
+
+            moveDrag(e);
+            render(); // Refresh to hide original cards
+        }
+
+        function moveDrag(e) {
+            if (!dragInfo) return;
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            const container = document.getElementById('drag-container');
+            container.style.transform = `translate(${clientX - dragInfo.offsetX}px, ${clientY - dragInfo.offsetY}px)`;
+        }
+
+        function endDrag(e) {
+            if (!dragInfo) return;
+
+            const clientX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
+            const clientY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
+
+            // Determine drop target
+            const elementsAtPoint = document.elementsFromPoint(clientX, clientY);
+            const target = elementsAtPoint.find(el => el.classList.contains('drop-target'));
+
+            let success = false;
+            if (target) {
+                const targetType = target.dataset.target;
+                if (targetType === 'tableau') {
+                    const colIdx = parseInt(target.dataset.index);
+                    success = tryMoveToTableau(dragInfo, colIdx);
+                } else if (targetType === 'foundation') {
+                    const suit = target.dataset.suit;
+                    success = tryMoveToFoundation(dragInfo, suit);
+                }
+            }
+
+            // Cleanup
+            if (!success) {
+                // Revert visibility
+                if (dragInfo.sourceType === 'tableau') {
+                    dragInfo.cards.forEach((c, i) => tableau[dragInfo.sourceCol][dragInfo.sourceRow + i].hidden = false);
+                } else if (dragInfo.sourceType === 'waste') {
+                    waste[waste.length - 1].hidden = false;
+                } else if (dragInfo.sourceType === 'foundation') {
+                    foundations[dragInfo.sourceCol][foundations[dragInfo.sourceCol].length - 1].hidden = false;
+                }
+            }
+
+            dragInfo = null;
+            document.getElementById('drag-container').innerHTML = '';
+            render();
+        }
+
+        function tryMoveToTableau(info, targetIdx) {
+            const targetCol = tableau[targetIdx];
+            const bottomCard = targetCol[targetCol.length - 1];
+            const movingCard = info.cards[0];
+
+            let valid = false;
+            if (!bottomCard) {
+                if (movingCard.value === 'K') valid = true;
+            } else {
+                if (isRed(movingCard.suit) !== isRed(bottomCard.suit) && 
+                    getCardValue(movingCard.value) === getCardValue(bottomCard.value) - 1) {
+                    valid = true;
+                }
+            }
+
+            if (valid) {
+                // Remove from source
+                if (info.sourceType === 'tableau') {
+                    tableau[info.sourceCol].splice(info.sourceRow);
+                    if (tableau[info.sourceCol].length > 0) {
+                        tableau[info.sourceCol][tableau[info.sourceCol].length - 1].faceUp = true;
+                    }
+                } else if (info.sourceType === 'waste') {
+                    waste.pop();
+                } else if (info.sourceType === 'foundation') {
+                    foundations[info.sourceCol].pop();
+                }
+                
+                // Add to target
+                info.cards.forEach(c => {
+                    c.hidden = false;
+                    tableau[targetIdx].push(c);
+                });
+                moves++;
+                return true;
+            }
+            return false;
+        }
+
+        function tryMoveToFoundation(info, targetSuit) {
+            if (info.cards.length > 1) return false;
+            const movingCard = info.cards[0];
+            if (movingCard.suit !== targetSuit) return false;
+
+            const targetStack = foundations[targetSuit];
+            const topCard = targetStack[targetStack.length - 1];
+
+            let valid = false;
+            if (!topCard) {
+                if (movingCard.value === 'A') valid = true;
+            } else {
+                if (getCardValue(movingCard.value) === getCardValue(topCard.value) + 1) {
+                    valid = true;
+                }
+            }
+
+            if (valid) {
+                if (info.sourceType === 'tableau') {
+                    tableau[info.sourceCol].pop();
+                    if (tableau[info.sourceCol].length > 0) {
+                        tableau[info.sourceCol][tableau[info.sourceCol].length - 1].faceUp = true;
+                    }
+                } else if (info.sourceType === 'waste') {
+                    waste.pop();
+                } else if (info.sourceType === 'foundation') {
+                    foundations[info.sourceCol].pop();
+                }
+
+                movingCard.hidden = false;
+                foundations[targetSuit].push(movingCard);
+                moves++;
+                return true;
+            }
+            return false;
+        }
+
+        function isGameOver() {
+            return Object.values(foundations).every(f => f.length === 13);
+        }
+
+        function checkWin() {
+            if (isGameOver()) {
+                clearInterval(timerInterval);
+                document.getElementById('message-content').innerHTML = `
+                    <h3 class="text-emerald-400 font-black uppercase text-xs tracking-widest mb-2">Protocol Complete</h3>
+                    <p class="text-slate-400 text-[10px]">Audit finished in ${timerSeconds}s. Your time has been utilized with maximum inefficiency.</p>
+                `;
+                document.getElementById('message-box').classList.add('show');
+            }
+        }
+
+        // Global Listeners
+        window.onmousemove = moveDrag;
+        window.ontouchmove = moveDrag;
+        window.onmouseup = endDrag;
+        window.ontouchend = endDrag;
+
+        document.getElementById('stock').onclick = () => {
+            if (dragInfo) return;
+            if (stock.length > 0) {
+                let card = stock.pop();
+                card.faceUp = true;
+                waste.push(card);
+            } else {
+                stock = waste.map(c => { c.faceUp = false; return c; }).reverse();
+                waste = [];
+            }
+            moves++;
+            render();
+        };
+
+        document.getElementById('reset-btn').onclick = initGame;
+        document.getElementById('msg-close').onclick = () => {
+            document.getElementById('message-box').classList.remove('show');
+            initGame();
+        };
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

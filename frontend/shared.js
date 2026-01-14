@@ -178,7 +178,7 @@ function initBackToHubModal() {
     backBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            playClickSound('click');
+            playClickSound('random'); // Random sound for back button
             
             const modalText = document.getElementById('back-modal-text');
             const hubUrl = btn.getAttribute('href') || '../index.html';

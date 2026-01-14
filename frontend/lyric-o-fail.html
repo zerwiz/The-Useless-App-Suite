@@ -27,6 +27,7 @@
             background-image: radial-gradient(#d1d5db 1px, transparent 1px);
             background-size: 20px 20px;
             box-shadow: 10px 10px 0px #fbbf24;
+            transition: background-color 0.5s ease;
         }
 
         .btn-useless {
@@ -67,7 +68,7 @@
 
     <header class="text-center mb-10 max-w-2xl">
         <h1 class="text-5xl font-bold text-yellow-400 mb-2 italic">LYRIC-O-FAIL 3000</h1>
-        <p class="text-slate-400">The only app that guarantees a #1 hit in your own bathroom. [v2026.1]</p>
+        <p id="subtitle-text" class="text-slate-400">The only app that guarantees a #1 hit in your own bathroom. [v2026.1]</p>
     </header>
 
     <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mb-12">
@@ -81,7 +82,7 @@
             <!-- Genre -->
             <div>
                 <label class="block text-xs uppercase tracking-widest mb-2 text-slate-500 font-bold">Musical Genre</label>
-                <select id="genre" class="w-full bg-slate-900 border border-slate-600 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none text-slate-200">
+                <select id="genre" onchange="handleGenreChange()" class="w-full bg-slate-900 border border-slate-600 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none text-slate-200">
                     <option value="polka">Aggressive Polka</option>
                     <option value="jazz">Elevator Jazz (Screamo Version)</option>
                     <option value="country">Country Song About a Toaster</option>
@@ -104,7 +105,7 @@
 
             <!-- Strategy Buttons Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <button onclick="generateLine()" class="btn-useless bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
+                <button onclick="generateLine(); initAudio();" class="btn-useless bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-2 rounded-lg flex flex-col items-center justify-center">
                     <span class="text-xl">✨</span>
                     <span class="text-[10px] mt-1 text-center leading-tight">Random Nonsense</span>
                 </button>
@@ -168,7 +169,7 @@
 
             <!-- Advanced "Useless" Features -->
             <div class="pt-4 border-t border-slate-700">
-                <button onclick="triggerWriterBlock()" class="w-full bg-slate-700 hover:bg-red-900 text-slate-300 font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <button onclick="triggerWriterBlock(); initAudio();" class="w-full bg-slate-700 hover:bg-red-900 text-slate-300 font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
                     <span>🛑</span> Simulate Writer's Block
                 </button>
             </div>
@@ -198,10 +199,10 @@
 
             <!-- Floating Tools -->
             <div class="absolute bottom-4 right-4 flex gap-2">
-                <button onclick="clearLyrics()" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Burn the evidence">
+                <button onclick="clearLyrics(); initAudio();" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Burn the evidence">
                     🗑️
                 </button>
-                <button onclick="copyLyrics()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Share your shame">
+                <button onclick="copyLyrics(); initAudio();" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110" title="Share your shame">
                     📋
                 </button>
             </div>
@@ -209,8 +210,9 @@
     </main>
 
     <footer class="mt-auto py-8 text-center text-slate-500 text-sm">
-        <div class="mb-2 opacity-40 italic">This footer contains no useful information and was added with minimum enthusiasm.</div>
-        Inspired by <a href="https://www.youtube.com/watch?v=nSOMOXcviZc&t=120s" target="_blank" class="text-yellow-400 hover:text-yellow-300 underline underline-offset-4 decoration-slate-700 transition-colors">Natan Verkhovsky</a>.
+        <p class="text-[8px] text-slate-600 italic mb-1">This footer contains no useful information and was added with minimum enthusiasm.</p>
+        <p class="text-[8px] text-slate-600">Inspired by <span class="select-none" style="user-select: none; pointer-events: none;">Natan Verkhovsky</span>.</p>
+        <p class="text-[7px] text-slate-700 mt-1">Don't click his name.</p>
     </footer>
 
     <div id="toast" class="toast">Writer's block detected. Please wait 45 years for inspiration.</div>
@@ -221,15 +223,83 @@
             <button onclick="closeBurnModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors text-2xl leading-none">&times;</button>
             <h2 class="text-2xl font-bold mb-4 text-white">Burn the evidence?</h2>
             <p class="text-slate-300 text-sm leading-relaxed mb-6">Are you sure you want to delete all your lyrical masterpieces? This action cannot be undone. Your creative genius will be lost forever.</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="closeBurnModal()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-bold transition-all">Cancel</button>
-                <button onclick="confirmBurn()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all">Burn It All</button>
+            <div class="space-y-3">
+                <button onclick="confirmBurn()" class="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all">Burn It All</button>
+                <button onclick="burnHalf()" class="w-full px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-bold transition-all">Burn Half (Random Selection)</button>
+                <button onclick="burnSlowly()" class="w-full px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-bold transition-all">Burn Slowly (One Line at a Time)</button>
+                <button onclick="burnWithRegret()" class="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-bold transition-all">Burn With Maximum Regret</button>
+                <button onclick="burnAndReplace()" class="w-full px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-sm font-bold transition-all">Burn & Replace With Errors</button>
+                <button onclick="closeBurnModal()" class="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-bold transition-all">Actually, Keep It</button>
             </div>
         </div>
     </div>
 
     <script src="shared.js"></script>
     <script>
+        // --- AUDIO SETUP ---
+        let audioCtx = null;
+        let isAudioInitialized = false;
+
+        function initAudio() {
+            if (isAudioInitialized && audioCtx && audioCtx.state !== 'closed') return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioInitialized = true;
+            } catch (e) {
+                console.log('Audio context not available:', e);
+                return;
+            }
+        }
+
+        function playSound(freq, type = 'sine', duration = 0.1, gainValue = 0.1) {
+            initAudio();
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(gainValue, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function playButtonClick() {
+            playSound(600, 'sine', 0.08, 0.12);
+        }
+
+        function playAddLyric() {
+            playSound(500, 'sine', 0.1, 0.1);
+        }
+
+        function playCowbell() {
+            playSound(800, 'square', 0.15, 0.15);
+            setTimeout(() => playSound(600, 'square', 0.1, 0.1), 50);
+        }
+
+        function playWriterBlock() {
+            playSound(200, 'sawtooth', 0.3, 0.2);
+            setTimeout(() => playSound(150, 'sawtooth', 0.3, 0.15), 100);
+        }
+
+        function playClear() {
+            playSound(300, 'sawtooth', 0.2, 0.15);
+        }
+
+        function playCopy() {
+            playSound(700, 'sine', 0.1, 0.1);
+            setTimeout(() => playSound(800, 'sine', 0.1, 0.08), 100);
+        }
+
         // --- DATA DICTIONARIES (Min 10 per category) ---
         
         const subjects = [
@@ -379,22 +449,55 @@
 
         const vibes = ["Slightly Annoyed", "Mild Confusion", "Aggressive Indifference", "Vaguely Suspicious", "Total Existential Dread"];
 
+        const genreStyles = {
+            polka: { color: "#fefce8", msg: "Updating to Polka. Accordion noises intensified." },
+            jazz: { color: "#f5f5f5", msg: "Jazz mode. Pretending to understand the notes I'm not playing." },
+            country: { color: "#fff7ed", msg: "Country vibe active. My toaster left me for a better kitchen." },
+            lofi: { color: "#fdf2f8", msg: "Lo-fi beats started. Productivity at 0%." },
+            prog: { color: "#f0fdf4", msg: "Prog Rock selected. Calculating the 13/8 time signature of a wet sandwich." },
+            corporate: { color: "#f1f5f9", msg: "Corporate mode. Synergizing with the abyss." },
+            whale: { color: "#f0f9ff", msg: "Whale ASMR. Listening to the deep blue sorrow." },
+            dentist: { color: "#ffffff", msg: "Dentist Radio. This will only hurt a little bit." }
+        };
+
         // --- CORE LOGIC ---
 
         const vibeSlider = document.getElementById('vibe');
         const vibeText = document.getElementById('vibeValue');
         const lyricContainer = document.getElementById('lyricContainer');
         const toast = document.getElementById('toast');
+        const paper = document.getElementById('paper');
+        const genreSelect = document.getElementById('genre');
 
         vibeSlider.addEventListener('input', () => {
+            initAudio();
+            playButtonClick();
             vibeText.innerText = vibes[vibeSlider.value];
         });
+
+        function handleGenreChange() {
+            initAudio();
+            playButtonClick();
+            const style = genreStyles[genreSelect.value];
+            if (style && paper) {
+                paper.style.backgroundColor = style.color;
+                
+                // Randomize vibe because genres are stressful
+                const randomVibe = Math.floor(Math.random() * vibes.length);
+                vibeSlider.value = randomVibe;
+                vibeText.innerText = vibes[randomVibe];
+
+                appendLyric(`[GENRE SWITCH: ${style.msg}]`);
+                showToast("Genre updated. Still doesn't help.");
+            }
+        }
 
         function getRandom(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
         function generateLine() {
+            playAddLyric();
             const vibeLevel = parseInt(vibeSlider.value);
             let line = `${getRandom(subjects)} ${getRandom(verbs)} ${getRandom(objects)}.`;
             if (vibeLevel === 4) line = line.toUpperCase() + "!!!";
@@ -402,24 +505,28 @@
             appendLyric(line);
         }
 
-        function addMetaphor() { appendLyric(getRandom(metaphors)); }
-        function addAdlib() { appendLyric(getRandom(adlibs)); }
-        function addHallucination() { appendLyric(getRandom(hallucinations)); }
-        function addPositivity() { appendLyric(getRandom(positivity)); }
-        function addError() { appendLyric(getRandom(errors)); }
-        function addSilence() { appendLyric(getRandom(silences)); }
+        function addMetaphor() { playAddLyric(); appendLyric(getRandom(metaphors)); }
+        function addAdlib() { playAddLyric(); appendLyric(getRandom(adlibs)); }
+        function addHallucination() { playAddLyric(); appendLyric(getRandom(hallucinations)); }
+        function addPositivity() { playAddLyric(); appendLyric(getRandom(positivity)); }
+        function addError() { playAddLyric(); appendLyric(getRandom(errors)); }
+        function addSilence() { playAddLyric(); appendLyric(getRandom(silences)); }
         
         function rhymeCheese() {
+            playAddLyric();
             appendLyric(`My soul is made of melted cheese, I'm drifting through the ${getRandom(cheeseRhymes)}.`);
         }
         function rhymeVeggie() {
+            playAddLyric();
             appendLyric(`The broccoli is watching me ${getRandom(veggieRhymes)}.`);
         }
         function rhymeSock() {
+            playAddLyric();
             appendLyric(`I lost my favorite yellow sock, it's hidden in a ${getRandom(sockRhymes)}.`);
         }
 
         function addCowbell() {
+            playCowbell();
             const div = document.createElement('div');
             div.className = "text-orange-600 animate-pulse border-2 border-orange-200 p-2 my-2 rounded text-center font-bold";
             div.innerText = getRandom(cowbells);
@@ -428,11 +535,13 @@
         }
 
         function addRapIntro() {
+            playAddLyric();
             const intro = getRandom(rapIntros);
             appendLyric(intro);
         }
 
         function addEcho() {
+            playAddLyric();
             const firstLine = lyricContainer.firstElementChild?.innerText;
             if (firstLine && !firstLine.includes("echo:")) {
                 const echo = document.createElement('div');
@@ -447,6 +556,7 @@
         }
 
         function addLegal() {
+            playAddLyric();
             const div = document.createElement('div');
             div.className = "text-[10px] uppercase font-sans text-slate-400 mt-4 italic border-l-2 border-slate-300 pl-2";
             div.innerText = "NOTICE: " + getRandom(legals);
@@ -455,6 +565,7 @@
         }
 
         function rhymeBanana() {
+            playAddLyric();
             const rhymes = ["Cabana", "Savannah", "Grammar", "Pajama", "Sultana", "Indiana", "Data-ana", "Poly-ana", "Hosanna", "Montana", "Copacabana"];
             appendLyric(`I'm eating a banana in ${getRandom(rhymes)}.`);
         }
@@ -469,6 +580,7 @@
         }
 
         function triggerWriterBlock() {
+            playWriterBlock();
             const messages = [
                 "Writer's block detected. Wait 45 years.",
                 "Inspiration.exe has stopped working.",
@@ -487,6 +599,7 @@
         }
 
         function clearLyrics() {
+            playButtonClick();
             const modal = document.getElementById('burn-modal');
             modal.classList.remove('hidden');
             if (typeof playClickSound === 'function') {
@@ -495,6 +608,7 @@
         }
 
         function closeBurnModal() {
+            playButtonClick();
             const modal = document.getElementById('burn-modal');
             modal.classList.add('hidden');
             if (typeof playClickSound === 'function') {
@@ -503,6 +617,7 @@
         }
 
         function confirmBurn() {
+            playClear();
             lyricContainer.innerHTML = "";
             document.getElementById('songTitle').value = "";
             closeBurnModal();
@@ -510,6 +625,84 @@
             if (typeof playClickSound === 'function') {
                 playClickSound('confirm');
             }
+        }
+
+        function burnHalf() {
+            playClear();
+            const children = Array.from(lyricContainer.children);
+            if (children.length === 0) {
+                closeBurnModal();
+                showToast("Nothing to burn. The void is already empty.");
+                return;
+            }
+            // Randomly remove half
+            const toRemove = Math.floor(children.length / 2);
+            for (let i = 0; i < toRemove; i++) {
+                const randomIndex = Math.floor(Math.random() * lyricContainer.children.length);
+                if (lyricContainer.children[randomIndex]) {
+                    lyricContainer.children[randomIndex].remove();
+                }
+            }
+            closeBurnModal();
+            showToast(`Burned ${toRemove} random lines. Chaos achieved.`);
+        }
+
+        function burnSlowly() {
+            playClear();
+            const children = Array.from(lyricContainer.children);
+            if (children.length === 0) {
+                closeBurnModal();
+                showToast("Nothing to burn slowly. Try burning something first.");
+                return;
+            }
+            closeBurnModal();
+            let index = 0;
+            const burnInterval = setInterval(() => {
+                if (index < children.length && lyricContainer.children.length > 0) {
+                    if (lyricContainer.children[0]) {
+                        lyricContainer.children[0].style.opacity = '0';
+                        lyricContainer.children[0].style.transition = 'opacity 0.5s';
+                        setTimeout(() => {
+                            if (lyricContainer.children[0]) {
+                                lyricContainer.children[0].remove();
+                            }
+                        }, 500);
+                    }
+                    index++;
+                } else {
+                    clearInterval(burnInterval);
+                    showToast("Slow burn complete. Maximum suffering achieved.");
+                }
+            }, 600);
+        }
+
+        function burnWithRegret() {
+            playClear();
+            lyricContainer.innerHTML = "";
+            document.getElementById('songTitle').value = "";
+            closeBurnModal();
+            showToast("Burned with maximum regret. You'll miss those lyrics at 3 AM.");
+            // Add regret message
+            setTimeout(() => {
+                appendLyric("[REGRET INTENSIFIES]");
+                appendLyric("I shouldn't have deleted that...");
+                appendLyric("Those were actually kind of good...");
+            }, 1000);
+        }
+
+        function burnAndReplace() {
+            playClear();
+            lyricContainer.innerHTML = "";
+            document.getElementById('songTitle').value = "";
+            closeBurnModal();
+            showToast("Burned and replaced with errors. System malfunction achieved.");
+            // Add error messages
+            setTimeout(() => {
+                appendLyric("[SYSTEM ERROR: CREATIVITY_DELETED]");
+                appendLyric("[FATAL EXCEPTION: LYRICS_NOT_FOUND]");
+                appendLyric("[WARNING: ALL_YOUR_LYRICS_ARE_BELONG_TO_US]");
+                appendLyric("[ERROR 404: TALENT_NOT_FOUND]");
+            }, 500);
         }
 
         // Close modal on Escape key
@@ -543,6 +736,7 @@
         ];
 
         function copyLyrics() {
+            playCopy();
             const title = document.getElementById('songTitle').value || "Untitled Disgrace";
             const lyrics = Array.from(lyricContainer.children).map(child => child.innerText).join('\n');
             const fullText = `${title}\n\n${lyrics}`;
@@ -569,8 +763,77 @@
             paper.scrollTop = 0;
         }
 
+        // Random subtitle texts
+        const uselessSubtitles = [
+            "The only app that guarantees a #1 hit in your own bathroom. [v2026.1]",
+            "Where musical talent goes to die. Voluntarily. [v2026.1]",
+            "The world's worst lyric writer. Guaranteed. [v2026.1]",
+            "Making bad lyrics since never. [v2026.1]",
+            "Your bathroom's #1 hit generator. [v2026.1]",
+            "Because good lyrics are overrated. [v2026.1]",
+            "The only app that makes your shower singing worse. [v2026.1]",
+            "Where rhymes go to commit crimes. [v2026.1]",
+            "Guaranteed to make your neighbors question your sanity. [v2026.1]",
+            "The app that turns poetry into tragedy. [v2026.1]",
+            "Making terrible music since 2026. [v2026.1]",
+            "Your one-way ticket to lyrical disaster. [v2026.1]",
+            "Where creativity meets catastrophe. [v2026.1]",
+            "The app that proves anyone can write bad lyrics. [v2026.1]",
+            "Because sometimes you need to fail spectacularly. [v2026.1]",
+            "Making cringe-worthy content since yesterday. [v2026.1]",
+            "The only app that makes Auto-Tune cry. [v2026.1]",
+            "Where good taste goes to die. [v2026.1]",
+            "Your personal lyrical train wreck generator. [v2026.1]",
+            "The app that turns words into weapons of mass cringe. [v2026.1]",
+            "Making bad music great again. [v2026.1]",
+            "Where talent is optional and failure is guaranteed. [v2026.1]",
+            "The only app that makes you question your life choices. [v2026.1]",
+            "Because why write good lyrics when you can write these? [v2026.1]",
+            "Making your ears bleed, one line at a time. [v2026.1]",
+            "The app that proves you don't need talent to make music. [v2026.1]",
+            "Where inspiration meets desperation. [v2026.1]",
+            "Your gateway to lyrical mediocrity. [v2026.1]",
+            "Making terrible songs since the beginning of time. [v2026.1]",
+            "The only app that makes you miss silence. [v2026.1]"
+        ];
+        
+        // Rotate subtitle text
+        function rotateSubtitle() {
+            const subtitleEl = document.getElementById('subtitle-text');
+            if (!subtitleEl) return;
+            
+            let currentIndex = 0;
+            
+            function changeSubtitle() {
+                currentIndex = (currentIndex + 1) % uselessSubtitles.length;
+                subtitleEl.style.opacity = '0';
+                subtitleEl.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    subtitleEl.textContent = uselessSubtitles[currentIndex];
+                    subtitleEl.style.opacity = '1';
+                }, 500);
+            }
+            
+            // Change every 4-6 seconds
+            function scheduleNext() {
+                const delay = 4000 + Math.random() * 2000; // 4-6 seconds
+                setTimeout(() => {
+                    changeSubtitle();
+                    scheduleNext();
+                }, delay);
+            }
+            
+            // Start after initial delay
+            setTimeout(() => {
+                scheduleNext();
+            }, 5000);
+        }
+
         window.onload = () => {
             appendLyric("Welcome to your creative nightmare.");
+            // Start subtitle rotation
+            rotateSubtitle();
         };
     </script>
 </body>

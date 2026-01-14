@@ -8,233 +8,285 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --bg-dark: #0f172a;
+        }
+
         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
+            overflow: hidden;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
         }
+
+        .font-mono {
+            font-family: 'Space Grotesk', monospace;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150vw;
+            height: 150vw;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(15, 23, 42, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
         .hold-button {
-            transition: transform 0.1s ease, background-color 0.2s ease;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1);
         }
+
         .hold-button:active {
-            transform: scale(0.92);
-            background-color: #1d4ed8;
-            box-shadow: 0 0 50px rgba(59, 130, 246, 0.7);
+            transform: scale(0.9);
+            background-color: var(--primary-dark);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.2);
         }
-        .pulsate { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+
+        .holding-glow {
+            animation: breathe 2s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 80px rgba(59, 130, 246, 0.7); }
+        }
+
+        .pulsate { 
+            animation: pulse-idle 2.5s infinite ease-in-out; 
+        }
+
+        @keyframes pulse-idle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        #message-box {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(255, 255, 255, 0.95);
+            color: #0f172a;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+        #message-box.show {
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
-<body class="p-6">
+<body class="safe-area-inset">
     <div class="bg-glow"></div>
     <a href="../index.html" class="back-btn">← Back to Hub</a>
 
-    <div class="text-center mt-12 mb-12">
-        <h1 class="text-7xl font-mono font-extrabold tracking-tighter tabular-nums" id="hold-timer">000000</h1>
-        <p class="text-slate-500 mt-4 uppercase tracking-[0.3em] text-[10px] font-bold">Milliseconds Clocked</p>
-    </div>
-    <div class="flex-grow flex items-center justify-center w-full">
-        <button id="mainHoldButton" class="hold-button w-60 h-60 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-black uppercase tracking-widest pulsate border-8 border-white/10">
-            Hold
-        </button>
-    </div>
-    <div class="mt-12 text-center h-10">
-        <p id="hold-status" class="text-xl font-bold text-slate-500 uppercase tracking-widest">Ready for input</p>
-    </div>
-    <div class="mt-12 w-full max-w-sm bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 mb-16 border border-white/10 shadow-2xl mx-auto">
-        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">The Hall of Fame</h2>
-            <span id="user-id-tag" class="text-[10px] text-slate-500 font-mono font-bold">Connecting...</span>
+    <!-- Header -->
+    <header class="p-6 flex justify-between items-center">
+        <div class="flex flex-col">
+            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 mb-1">Session</span>
+            <div class="flex items-center gap-2">
+                <div id="connection-indicator" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                <span id="user-id-tag" class="text-[10px] text-slate-400 font-mono font-bold tracking-wider uppercase">Local Mode</span>
+            </div>
         </div>
-        <div id="leaderboard" class="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scroll">
-            <div class="text-center text-slate-500 py-4 italic text-sm">Synchronizing ranks...</div>
+        <div class="text-right">
+            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1">Data Storage</span>
+            <div class="text-[10px] font-bold text-white uppercase tracking-widest">Browser Memory</div>
         </div>
-    </div>
+    </header>
+
+    <!-- Timer Section -->
+    <main class="flex-grow flex flex-col items-center justify-center px-6">
+        <div class="text-center mb-12">
+            <h1 class="text-7xl sm:text-8xl font-mono font-extrabold tracking-tighter tabular-nums mb-2" id="hold-timer">000000</h1>
+            <p id="timer-label" class="text-slate-500 uppercase tracking-[0.4em] text-[10px] font-bold">Milliseconds</p>
+        </div>
+
+        <!-- The Button -->
+        <div class="relative group">
+            <div id="ring-container" class="absolute -inset-8 rounded-full border border-blue-500/20 opacity-0 transition-opacity duration-500"></div>
+            <button id="mainHoldButton" class="hold-button w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-black uppercase tracking-[0.2em] pulsate border-8 border-white/10 relative z-10" style="touch-action: none; -webkit-tap-highlight-color: transparent;">
+                Hold
+            </button>
+        </div>
+
+        <div class="mt-12 text-center h-8">
+            <p id="hold-status" class="text-sm font-bold text-slate-500 uppercase tracking-[0.3em]">Ready for input</p>
+        </div>
+    </main>
+
+    <!-- Leaderboard Section -->
+    <section class="w-full max-w-sm mx-auto px-6 pb-8">
+        <div class="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] p-6 border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
+                <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Personal Best</h2>
+                <span id="leaderboard-status" class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Local</span>
+            </div>
+            
+            <div id="leaderboard" class="max-h-44 overflow-y-auto space-y-2 pr-1 custom-scroll">
+                <div class="text-center text-slate-500 py-4 italic text-xs">No records saved yet.</div>
+            </div>
+        </div>
+    </section>
+
+    <div id="message-box">Record Saved!</div>
 
     <script src="shared.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hold-on-global-suite-v2';
-        let db, auth, currentUser = null;
-
-        try {
-            const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-            if (firebaseConfigStr) {
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
-                onAuthStateChanged(auth, u => {
-                    currentUser = u;
-                    if (u) {
-                        const tag = document.getElementById('user-id-tag');
-                        if (tag) tag.textContent = `UID: ${u.uid.slice(0, 8)}`;
-                        setupLeaderboard();
-                    }
-                });
-            } else {
-                const tag = document.getElementById('user-id-tag');
-                if (tag) tag.textContent = "Offline Mode";
-                showLocalLeaderboard();
-            }
-        } catch (e) {
-            const tag = document.getElementById('user-id-tag');
-            if (tag) tag.textContent = "Offline Mode";
-            showLocalLeaderboard();
-        }
-
+    <script>
+        // State
         let isHolding = false;
         let holdStartTime = null;
         let holdFrame = null;
 
-        const holdTimer = document.getElementById('hold-timer');
+        const timerEl = document.getElementById('hold-timer');
         const holdBtn = document.getElementById('mainHoldButton');
-        const holdStatus = document.getElementById('hold-status');
-        const leaderboard = document.getElementById('leaderboard');
+        const statusEl = document.getElementById('hold-status');
+        const leaderboardEl = document.getElementById('leaderboard');
+        const ring = document.getElementById('ring-container');
+        const msgBox = document.getElementById('message-box');
 
-        function showLocalLeaderboard() {
-            const localScores = Storage.get('holdLocalScores', []);
-            if (localScores.length === 0) {
-                if (leaderboard) {
-                    leaderboard.innerHTML = '<div class="text-center text-slate-500 py-4 italic text-sm">No local scores yet. Hold the button to create a record!</div>';
-                }
+        // Utils
+        const showMsg = (text) => {
+            msgBox.textContent = text;
+            msgBox.classList.add('show');
+            setTimeout(() => msgBox.classList.remove('show'), 2000);
+        };
+
+        const getLocalScores = () => {
+            try {
+                return JSON.parse(localStorage.getItem('hold_local_v3') || '[]');
+            } catch (e) {
+                return [];
+            }
+        };
+
+        const renderLeaderboard = () => {
+            const scores = getLocalScores();
+            scores.sort((a, b) => b.score - a.score);
+            const top = scores.slice(0, 10);
+
+            if (top.length === 0) {
+                leaderboardEl.innerHTML = '<div class="text-center text-slate-600 py-4 italic text-[10px]">No local records yet. Start holding!</div>';
                 return;
             }
-            localScores.sort((a, b) => b.score - a.score);
-            const top = localScores.slice(0, 10);
-            if (leaderboard) {
-                leaderboard.innerHTML = top.map((s, i) => `
-                    <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5">
-                        <div class="flex items-center gap-3">
-                            <span class="text-slate-500 font-bold text-[10px]">${i+1}</span>
-                            <span class="font-mono text-[10px] text-slate-200 font-bold">LOCAL</span>
-                        </div>
-                        <span class="font-black text-blue-400 font-mono text-xs">${s.score.toLocaleString()}ms</span>
+
+            leaderboardEl.innerHTML = top.map((s, i) => `
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5 transition-all">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-500 font-bold text-[10px] w-4">${i+1}</span>
+                        <span class="font-mono text-[10px] text-slate-200 font-bold tracking-tight uppercase">${new Date(s.timestamp).toLocaleDateString()}</span>
                     </div>
-                `).join('');
-            }
-        }
+                    <span class="font-black text-blue-400 font-mono text-xs">${s.score.toLocaleString()}ms</span>
+                </div>
+            `).join('');
+        };
 
-        function updateHoldLoop() {
-            if (!isHolding) return;
-            const elap = Date.now() - holdStartTime;
-            if (holdTimer) holdTimer.textContent = Math.floor(elap).toString().padStart(6, '0');
+        // Game Loop
+        const updateHoldLoop = () => {
+            if (!isHolding || !holdStartTime) return;
+            
+            const elapsed = Date.now() - holdStartTime;
+            timerEl.textContent = elapsed.toString().padStart(6, '0');
             holdFrame = requestAnimationFrame(updateHoldLoop);
-        }
+        };
 
-        async function saveHoldScore(s) {
-            if (s < 100) return;
-            
-            // Always save to local storage
-            const localScores = Storage.get('holdLocalScores', []);
-            localScores.push({ score: s, timestamp: Date.now() });
-            Storage.set('holdLocalScores', localScores);
-            showLocalLeaderboard();
-            
-            // Try to save to Firebase if available
-            if (currentUser && db) {
-                try {
-                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                    await addDoc(col, { userId: currentUser.uid, score: s, timestamp: Date.now() });
-                } catch (e) {
-                    console.log("Firebase save failed, using local storage only");
-                }
-            }
-        }
-
-        function setupLeaderboard() {
-            if (!db) {
-                // Offline mode - show local scores
-                showLocalLeaderboard();
-                return;
-            }
-            const col = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-            onSnapshot(col, snap => {
-                const scores = [];
-                snap.forEach(d => scores.push(d.data()));
-                scores.sort((a,b) => b.score - a.score);
-                const top = scores.slice(0, 10);
-                if (top.length === 0) {
-                    if (leaderboard) leaderboard.innerHTML = '<div class="text-center text-slate-500 py-4 italic">No scores yet.</div>';
-                    return;
-                }
-                if (leaderboard) {
-                    leaderboard.innerHTML = top.map((s, i) => `
-                        <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5 ${currentUser && s.userId === currentUser.uid ? 'border-blue-500 bg-blue-500/10' : ''}">
-                            <div class="flex items-center gap-3">
-                                <span class="text-slate-500 font-bold text-[10px]">${i+1}</span>
-                                <span class="font-mono text-[10px] text-slate-200 font-bold">${s.userId ? s.userId.slice(0, 6).toUpperCase() : 'ANON'}</span>
-                            </div>
-                            <span class="font-black text-blue-400 font-mono text-xs">${s.score.toLocaleString()}ms</span>
-                        </div>
-                    `).join('');
-                }
-            }, (err) => {
-                console.log("LB error:", err);
-                showLocalLeaderboard();
-            });
-        }
-
-        function startHold(e) {
+        const startHold = (e) => {
             if (e) e.preventDefault();
             if (isHolding) return;
+
             isHolding = true;
             holdStartTime = Date.now();
-            if (holdStatus) {
-                holdStatus.textContent = "HOLDING STEADY";
-                holdStatus.className = "text-xl font-black text-blue-400 italic tracking-[0.2em]";
-            }
-            if (holdBtn) holdBtn.classList.remove('pulsate');
-            updateHoldLoop();
-        }
-
-        function stopHold() {
-            if (!isHolding) return;
-            isHolding = false;
-            cancelAnimationFrame(holdFrame);
-            const total = Date.now() - holdStartTime;
-            if (holdTimer) holdTimer.textContent = total.toString().padStart(6, '0');
-            if (holdStatus) {
-                holdStatus.textContent = "RELEASED";
-                holdStatus.className = "text-xl font-black text-rose-500 italic tracking-[0.2em]";
-            }
-            if (holdBtn) holdBtn.classList.add('pulsate');
-            saveHoldScore(total);
             
-            const personalBest = Storage.get('holdPersonalBest', 0);
-            if (total > personalBest) {
-                Storage.set('holdPersonalBest', total);
-            }
-        }
+            statusEl.textContent = "HOLDING STEADY";
+            statusEl.className = "text-sm font-black text-blue-400 italic tracking-[0.4em] animate-pulse";
+            
+            holdBtn.classList.remove('pulsate');
+            holdBtn.classList.add('holding-glow');
+            ring.classList.add('opacity-100');
+            
+            updateHoldLoop();
+        };
 
-        if (holdBtn) {
-            holdBtn.addEventListener('mousedown', startHold);
-            window.addEventListener('mouseup', stopHold);
-            holdBtn.addEventListener('touchstart', startHold, { passive: false });
-            window.addEventListener('touchend', stopHold, { passive: false });
-        }
+        const stopHold = (e) => {
+            if (e) e.preventDefault();
+            if (!isHolding || !holdStartTime) return;
+
+            isHolding = false;
+            if (holdFrame) cancelAnimationFrame(holdFrame);
+            
+            const total = Date.now() - holdStartTime;
+            holdStartTime = null;
+
+            statusEl.textContent = "RELEASED";
+            statusEl.className = "text-sm font-black text-rose-500 italic tracking-[0.4em]";
+            
+            holdBtn.classList.add('pulsate');
+            holdBtn.classList.remove('holding-glow');
+            ring.classList.remove('opacity-100');
+
+            if (total > 100) {
+                saveScore(total);
+            } else {
+                statusEl.textContent = "TOO SHORT";
+            }
+        };
+
+        const saveScore = (score) => {
+            const scores = getLocalScores();
+            scores.push({ score, timestamp: Date.now() });
+            localStorage.setItem('hold_local_v3', JSON.stringify(scores));
+            
+            renderLeaderboard();
+            showMsg("Record Saved Locally!");
+        };
+
+        // Event Listeners
+        window.onload = () => {
+            renderLeaderboard();
+
+            // Input handlers
+            const events = {
+                start: ['mousedown', 'touchstart'],
+                stop: ['mouseup', 'mouseleave', 'touchend', 'touchcancel']
+            };
+
+            events.start.forEach(type => {
+                holdBtn.addEventListener(type, startHold, { passive: false });
+            });
+
+            events.stop.forEach(type => {
+                holdBtn.addEventListener(type, stopHold, { passive: false });
+            });
+
+            window.addEventListener('contextmenu', e => e.preventDefault());
+        };
     </script>
 </body>
 </html>

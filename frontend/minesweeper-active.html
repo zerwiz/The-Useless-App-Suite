@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Minesweeper: Active Threat Protocol - The Useless App Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg-dark: #020617;
+            --cell-bg: rgba(30, 41, 59, 0.5);
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .font-mono { font-family: 'Space Grotesk', monospace; }
+
+        .bg-grid {
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(59, 130, 246, 0.05);
+            position: fixed;
+            top: 0;
+            z-index: 10;
+            animation: scan 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .cell-hidden {
+            background: var(--cell-bg);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 4px;
+        }
+
+        .cell-hidden:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .cell-revealed {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: default;
+        }
+
+        .cell-mine {
+            background: var(--danger) !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            border: none;
+        }
+
+        .num-1 { color: #60a5fa; }
+        .num-2 { color: #34d399; }
+        .num-3 { color: #f87171; }
+        .num-4 { color: #818cf8; }
+        .num-5 { color: #fbbf24; }
+
+        #message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            text-align: center;
+        }
+        #message-box.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 4px;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-grid">
+    <div class="bg-glow"></div>
+    <a href="../index.html" class="back-btn">← Back to Hub</a>
+    <div class="scanline"></div>
+
+    <!-- Tactical Header -->
+    <header class="p-6 flex flex-col items-center text-center gap-4">
+        <div class="flex flex-col items-center">
+            <h1 class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500 mb-1">Threat Assessment Protocol</h1>
+            <div class="flex items-center gap-2 justify-center">
+                <span id="status-dot" class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <span id="status-text" class="text-[9px] text-slate-400 font-mono font-bold tracking-widest uppercase">System nominal</span>
+            </div>
+        </div>
+        <button id="reset-btn" class="text-[9px] font-bold px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-all uppercase tracking-widest">Re-Initialize</button>
+    </header>
+
+    <!-- Tactical HUD -->
+    <div class="px-8 grid grid-cols-3 gap-4 max-w-lg mx-auto w-full mb-8">
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Active Threats</p>
+            <p id="mine-count" class="text-xl font-mono font-light text-blue-400">15</p>
+        </div>
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Cleared</p>
+            <p id="safe-percent" class="text-xl font-mono font-light">00%</p>
+        </div>
+        <div class="border-l border-slate-800 pl-4">
+            <p class="text-[8px] text-slate-500 uppercase font-bold tracking-tighter mb-1">Elapsed</p>
+            <p id="timer" class="text-xl font-mono font-light">000</p>
+        </div>
+    </div>
+
+    <!-- Tactical Grid -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4">
+        <div id="grid" class="grid-container select-none">
+            <!-- Grid generated by script -->
+        </div>
+        
+        <div class="mt-8 flex flex-col items-center gap-2">
+            <div id="instruction" class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] h-4">Tap to probe • Long-press to flag</div>
+            <div class="w-48 h-1 bg-slate-900 rounded-full overflow-hidden">
+                <div id="global-progress" class="w-0 h-full bg-blue-600 transition-all duration-500"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Audit Footer -->
+    <section class="w-full max-w-sm mx-auto px-6 pb-8 mt-4">
+        <div class="bg-slate-900/40 backdrop-blur-xl rounded-2xl p-4 border border-white/5 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Operation History</h2>
+                <div class="h-px flex-grow mx-4 bg-slate-800"></div>
+            </div>
+            <div id="leaderboard" class="space-y-2 max-h-24 overflow-y-auto custom-scroll">
+                <!-- Log Entry -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Overlay Popups -->
+    <div id="message-box">
+        <div id="message-content">
+            <!-- Dynamic Content -->
+        </div>
+        <button id="msg-close" class="mt-6 w-full py-3 bg-blue-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-colors">Return to Base</button>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const GRID_SIZE = 10;
+        const TOTAL_MINES = 15;
+        
+        let grid = [];
+        let revealedCount = 0;
+        let flags = 0;
+        let isGameOver = false;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let firstClick = true;
+
+        const gridEl = document.getElementById('grid');
+        const timerEl = document.getElementById('timer');
+        const mineCountEl = document.getElementById('mine-count');
+        const safePercentEl = document.getElementById('safe-percent');
+        const globalProgress = document.getElementById('global-progress');
+        const leaderboardEl = document.getElementById('leaderboard');
+        const msgBox = document.getElementById('message-box');
+        const msgContent = document.getElementById('message-content');
+        const msgClose = document.getElementById('msg-close');
+        const resetBtn = document.getElementById('reset-btn');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+
+        function initGame() {
+            grid = [];
+            revealedCount = 0;
+            flags = 0;
+            isGameOver = false;
+            timerSeconds = 0;
+            firstClick = true;
+            
+            clearInterval(timerInterval);
+            timerInterval = null;
+            
+            timerEl.textContent = "000";
+            mineCountEl.textContent = TOTAL_MINES;
+            safePercentEl.textContent = "00%";
+            globalProgress.style.width = "0%";
+            statusText.textContent = "System nominal";
+            statusDot.className = "w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse";
+
+            gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+            gridEl.innerHTML = '';
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                grid[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = {
+                        x, y,
+                        isMine: false,
+                        revealed: false,
+                        flagged: false,
+                        neighborCount: 0,
+                        el: null
+                    };
+
+                    const cellEl = document.createElement('div');
+                    cellEl.className = 'cell cell-hidden';
+                    
+                    // Click handlers
+                    cellEl.addEventListener('click', () => handleCellClick(x, y));
+                    cellEl.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        toggleFlag(x, y);
+                    });
+
+                    // Mobile long press for flagging
+                    let touchTimer;
+                    cellEl.addEventListener('touchstart', (e) => {
+                        touchTimer = setTimeout(() => toggleFlag(x, y), 500);
+                    }, { passive: true });
+                    cellEl.addEventListener('touchend', () => clearTimeout(touchTimer));
+
+                    cell.el = cellEl;
+                    grid[y][x] = cell;
+                    gridEl.appendChild(cellEl);
+                }
+            }
+            renderAuditLogs();
+        }
+
+        function placeMines(startX, startY) {
+            let placed = 0;
+            while (placed < TOTAL_MINES) {
+                const rx = Math.floor(Math.random() * GRID_SIZE);
+                const ry = Math.floor(Math.random() * GRID_SIZE);
+                
+                // Ensure safe zone around first click
+                if (!grid[ry][rx].isMine && (Math.abs(rx - startX) > 1 || Math.abs(ry - startY) > 1)) {
+                    grid[ry][rx].isMine = true;
+                    placed++;
+                }
+            }
+
+            // Calculate numbers
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (grid[y][x].isMine) continue;
+                    let count = 0;
+                    getNeighbors(x, y).forEach(n => {
+                        if (n.isMine) count++;
+                    });
+                    grid[y][x].neighborCount = count;
+                }
+            }
+        }
+
+        function getNeighbors(x, y) {
+            const neighbors = [];
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                        neighbors.push(grid[ny][nx]);
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        function handleCellClick(x, y) {
+            if (isGameOver) return;
+            const cell = grid[y][x];
+            if (cell.flagged || cell.revealed) return;
+
+            if (firstClick) {
+                firstClick = false;
+                placeMines(x, y);
+                startTimer();
+                statusText.textContent = "Operation Active";
+            }
+
+            if (cell.isMine) {
+                endGame(false);
+                return;
+            }
+
+            revealCell(x, y);
+
+            if (revealedCount === (GRID_SIZE * GRID_SIZE) - TOTAL_MINES) {
+                endGame(true);
+            }
+        }
+
+        function toggleFlag(x, y) {
+            if (isGameOver) return;
+            const cell = grid[y][x];
+            if (cell.revealed) return;
+
+            cell.flagged = !cell.flagged;
+            if (cell.flagged) {
+                flags++;
+                cell.el.innerHTML = '<svg class="w-3 h-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3a1 1 0 011-1h12a1 1 0 011 1 1 1 0 01-1 1H4v12a1 1 0 11-2 0V4a1 1 0 011-1z"/></svg>';
+            } else {
+                flags--;
+                cell.el.innerHTML = '';
+            }
+            mineCountEl.textContent = TOTAL_MINES - flags;
+        }
+
+        function revealCell(x, y) {
+            const cell = grid[y][x];
+            if (cell.revealed || cell.flagged) return;
+
+            cell.revealed = true;
+            cell.el.classList.replace('cell-hidden', 'cell-revealed');
+            revealedCount++;
+
+            if (cell.neighborCount > 0) {
+                cell.el.textContent = cell.neighborCount;
+                cell.el.classList.add(`num-${cell.neighborCount}`);
+            } else {
+                getNeighbors(x, y).forEach(n => revealCell(n.x, n.y));
+            }
+
+            const percent = Math.floor((revealedCount / (GRID_SIZE * GRID_SIZE - TOTAL_MINES)) * 100);
+            safePercentEl.textContent = `${percent}%`.padStart(3, '0');
+            globalProgress.style.width = `${percent}%`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                timerEl.textContent = timerSeconds.toString().padStart(3, '0');
+            }, 1000);
+        }
+
+        function endGame(won) {
+            isGameOver = true;
+            clearInterval(timerInterval);
+
+            if (won) {
+                statusText.textContent = "Operation Success";
+                statusDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]";
+                msgContent.innerHTML = `
+                    <h3 class="text-emerald-400 font-black uppercase text-sm tracking-widest mb-2">Threat Neutralized</h3>
+                    <p class="text-slate-400 text-[10px] leading-relaxed">Compliance achieved in ${timerSeconds} seconds. Zone is cleared for civilian occupation.</p>
+                `;
+            } else {
+                statusText.textContent = "Protocol Breach";
+                statusDot.className = "w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_10px_#ef4444]";
+                msgContent.innerHTML = `
+                    <h3 class="text-rose-500 font-black uppercase text-sm tracking-widest mb-2">System Failure</h3>
+                    <p class="text-slate-400 text-[10px] leading-relaxed">Lethal threat encountered. Compliance team has been dispatched to your location.</p>
+                `;
+                // Show all mines
+                grid.flat().forEach(c => {
+                    if (c.isMine) {
+                        c.el.classList.add('cell-mine');
+                        c.el.innerHTML = '<svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 2.172a1 1 0 11-1.564 1.25L14.762 8.51l-1.24.413a1 1 0 01-1.213-.414l-.223-.333-2.086.696V11a1 1 0 01-2 0V8.872l-2.086-.696-.223.333a1 1 0 01-1.213.414l-1.24-.413-1.627 2.438a1 1 0 11-1.564-1.25l1.738-2.172-1.233-.616a1 1 0 01.894-1.79l1.599.8L9 4.323V3a1 1 0 011-1z" clip-rule="evenodd"/></svg>';
+                    }
+                });
+            }
+
+            saveLog(won, timerSeconds);
+            setTimeout(() => msgBox.classList.add('show'), 800);
+        }
+
+        function saveLog(won, time) {
+            let logs = JSON.parse(localStorage.getItem('audit_logs_real') || '[]');
+            logs.unshift({ won, time, date: new Date().toISOString() });
+            localStorage.setItem('audit_logs_real', JSON.stringify(logs.slice(0, 15)));
+            renderAuditLogs();
+        }
+
+        function renderAuditLogs() {
+            const logs = JSON.parse(localStorage.getItem('audit_logs_real') || '[]');
+            if (logs.length === 0) {
+                leaderboardEl.innerHTML = '<p class="text-[9px] text-slate-600 italic">No historical data available.</p>';
+                return;
+            }
+
+            leaderboardEl.innerHTML = logs.map(l => `
+                <div class="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg border border-white/5">
+                    <span class="text-[8px] font-mono ${l.won ? 'text-emerald-500' : 'text-rose-500'} uppercase">${l.won ? 'Success' : 'Breach'}</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">${l.time}s Duration</span>
+                </div>
+            `).join('');
+        }
+
+        resetBtn.addEventListener('click', initGame);
+        msgClose.addEventListener('click', () => {
+            msgBox.classList.remove('show');
+            initGame();
+        });
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
